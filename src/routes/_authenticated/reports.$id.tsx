@@ -5,6 +5,8 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ReportView } from "@/components/report-view";
 import { getReport } from "@/lib/reports.functions";
+import type { SolutionReport } from "@/lib/report-schema";
+
 
 export const Route = createFileRoute("/_authenticated/reports/$id")({
   head: () => ({
