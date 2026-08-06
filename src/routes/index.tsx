@@ -122,7 +122,7 @@ function Index() {
                     <label className="label-mono text-muted-foreground">Budget level</label>
                     <Select value={budget} onValueChange={setBudget}>
                       <SelectTrigger className="mt-2 w-full">
-                        <SelectValue />
+                        <SelectValue>{budget}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="tight (under $20/mo)">Tight (under $20/mo)</SelectItem>
