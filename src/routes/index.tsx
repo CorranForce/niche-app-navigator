@@ -108,7 +108,8 @@ function Index() {
                     <label className="label-mono text-muted-foreground">Audience</label>
                     <Select value={audience} onValueChange={setAudience}>
                       <SelectTrigger className="mt-2 w-full">
-                        <SelectValue />
+                        <SelectValue>{audience}</SelectValue>
+
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="solo operators">Solo operators</SelectItem>
