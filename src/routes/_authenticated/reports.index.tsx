@@ -72,8 +72,10 @@ function ReportsPage() {
                     {r.niche}
                   </Link>
                   <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
-                    {new Date(r.created_at).toLocaleDateString()} · {r.recommended_concept}
+                    {new Date(r.created_at).toLocaleDateString()}
+                    {r.audience ? ` · ${r.audience}` : ""}
                   </p>
+
                 </div>
                 <Button
                   variant="ghost"
