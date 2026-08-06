@@ -34,6 +34,17 @@ export const Route = createFileRoute("/")({
 
 const EXAMPLES = ["Independent dental clinics", "Boutique fitness studios", "Freelance wedding photographers"];
 
+const QUICK_IDEAS = [
+  "Mobile dog groomers",
+  "Indie ceramics sellers",
+  "Small-town law firms",
+  "Food truck operators",
+  "Music teachers",
+  "Local moving companies",
+  "Boutique travel agents",
+  "Auto detailing shops",
+];
+
 function Index() {
   const { user, loading } = useSession();
   const navigate = useNavigate();
@@ -50,15 +61,17 @@ function Index() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (niche.trim().length < 2) {
-      toast.error("Describe a niche first");
-      return;
+    let target = niche.trim();
+    if (target.length < 2) {
+      target = QUICK_IDEAS[Math.floor(Math.random() * QUICK_IDEAS.length)];
+      setNiche(target);
+      toast.info(`Feeling lucky — trying "${target}"`);
     }
     if (!user) {
       navigate({ to: "/auth", search: { redirect: "/" } });
       return;
     }
-    mutation.mutate({ niche: niche.trim(), audience, budget });
+    mutation.mutate({ niche: target, audience, budget });
   }
 
   return (
