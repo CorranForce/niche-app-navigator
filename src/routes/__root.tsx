@@ -132,8 +132,14 @@ function RootComponent() {
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+
+      // Supabase holds its auth client lock while this callback runs. Route
+      // invalidation can enter a protected beforeLoad that calls getUser(), so
+      // defer all auth-dependent work until the callback and lock have cleared.
+      window.setTimeout(() => {
+        void router.invalidate();
+        if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
+      }, 0);
     });
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
