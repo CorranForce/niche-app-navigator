@@ -74,22 +74,29 @@ function AuthPage() {
 
   async function handleGoogle() {
     setBusy(true);
+    // Safety valve: if the provider popup is closed or blocked, never leave the
+    // button permanently disabled.
+    const release = window.setTimeout(() => setBusy(false), 20000);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
         toast.error("Google sign-in failed");
-        setBusy(false);
         return;
       }
-      if (result.redirected) return;
-      navigate({ to: next, replace: true });
+      if (result.redirected) return; // browser leaves this page
+      // Session is set; the effect above navigates once useSession updates.
+      const { data } = await supabase.auth.getSession();
+      if (data.session) navigate({ to: next, replace: true });
     } catch {
       toast.error("Google sign-in failed");
+    } finally {
+      window.clearTimeout(release);
       setBusy(false);
     }
   }
+
 
   return (
     <div className="grid-canvas flex min-h-screen items-center justify-center px-4 py-16">
