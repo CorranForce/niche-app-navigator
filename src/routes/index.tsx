@@ -63,7 +63,7 @@ function Index() {
     e.preventDefault();
     let target = niche.trim();
     if (target.length < 2) {
-      target = QUICK_IDEAS[Math.floor(Math.random() * QUICK_IDEAS.length)];
+      target = QUICK_IDEAS[Math.floor(Math.random() * QUICK_IDEAS.length)] ?? "Mobile dog groomers";
       setNiche(target);
       toast.info(`Feeling lucky — trying "${target}"`);
     }
@@ -93,10 +93,27 @@ function Index() {
             <Card className="mx-auto mt-10 max-w-3xl border-border bg-surface p-5 text-left">
               <form onSubmit={onSubmit} className="space-y-4">
                 <div>
+                  <p className="label-mono text-muted-foreground">Quick ideas</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {QUICK_IDEAS.slice(0, 6).map((idea) => (
+                      <button
+                        key={idea}
+                        type="button"
+                        onClick={() => setNiche(idea)}
+                        className="rounded-md border border-border bg-background px-3 py-1.5 font-mono text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                      >
+                        {idea}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
                   <label htmlFor="niche" className="label-mono text-muted-foreground">
                     Niche
                   </label>
                   <div className="mt-2 flex gap-2">
+
                     <Input
                       id="niche"
                       value={niche}
