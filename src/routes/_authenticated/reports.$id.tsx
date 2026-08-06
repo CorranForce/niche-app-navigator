@@ -52,7 +52,7 @@ function ReportPage() {
           ) : error || !data ? (
             <p className="text-sm text-destructive">This report couldn't be loaded.</p>
           ) : (
-            <ReportView niche={data.niche} report={data.report} />
+            <ReportView niche={data.niche} report={data.payload as unknown as SolutionReport} />
           )}
         </div>
       </main>
