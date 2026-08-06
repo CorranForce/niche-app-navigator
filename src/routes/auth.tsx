@@ -119,8 +119,9 @@ function AuthPage() {
           </div>
 
           <Button variant="outline" onClick={handleGoogle} disabled={busy}>
-            Continue with Google
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue with Google"}
           </Button>
+
 
           <div className="flex items-center gap-3">
             <span className="h-px flex-1 bg-border" />
