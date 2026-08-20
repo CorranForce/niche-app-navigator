@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      auth_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          provider: string
+          reason: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          provider: string
+          reason?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          provider?: string
+          reason?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
