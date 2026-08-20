@@ -54,6 +54,17 @@ export function SiteHeader() {
               My reports
             </Link>
           ) : null}
+          {isAdmin ? (
+            <Link
+              to="/admin/oauth"
+              className={`label-mono transition-colors hover:text-foreground ${
+                pathname.startsWith("/admin") ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              OAuth health
+            </Link>
+          ) : null}
+
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
