@@ -31,6 +31,20 @@ function safePath(value: string | undefined) {
   return value && value.startsWith("/") && !value.startsWith("//") ? value : "/";
 }
 
+type AuthEvent = "start" | "success" | "error" | "timeout" | "redirected";
+
+/** Fire-and-forget OAuth telemetry; never blocks or breaks the sign-in flow. */
+function track(event: AuthEvent, reason?: string) {
+  void logAuthEvent({
+    data: {
+      provider: "google" as const,
+      event,
+      ...(reason ? { reason: reason.slice(0, 300) } : {}),
+      userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 400) : undefined,
+    },
+  }).catch(() => {});
+}
+
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
