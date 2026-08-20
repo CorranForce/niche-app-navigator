@@ -7,21 +7,48 @@ const authEventInput = z.object({
   reason: z.string().max(300).optional(),
 });
 
+/** Only same-origin browser clients may write telemetry. */
+function isSameOrigin(request: Request) {
+  const host = request.headers.get("host");
+  const source = request.headers.get("origin") ?? request.headers.get("referer");
+  if (!host || !source) return false;
+  try {
+    return new URL(source).host === host;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Public telemetry sink for sign-in outcomes. Sign-in failures happen before a
  * session exists, so this endpoint is unauthenticated by necessity; it accepts
- * only a bounded, non-PII payload and never reads data back.
+ * only a bounded, non-PII payload from same-origin clients and never reads data back.
  */
 export const Route = createFileRoute("/api/public/auth-event")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        if (!isSameOrigin(request)) {
+          return new Response("Forbidden", { status: 403 });
+        }
+
+        // Reject oversized bodies before parsing.
+        const declared = Number(request.headers.get("content-length") ?? "0");
+        if (declared > 2048) {
+          return new Response("Payload too large", { status: 413 });
+        }
+
         let parsed;
         try {
-          parsed = authEventInput.parse(await request.json());
+          const raw = await request.text();
+          if (raw.length > 2048) {
+            return new Response("Payload too large", { status: 413 });
+          }
+          parsed = authEventInput.parse(JSON.parse(raw));
         } catch {
           return new Response("Invalid payload", { status: 400 });
         }
+
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { error } = await supabaseAdmin.from("auth_events").insert({
