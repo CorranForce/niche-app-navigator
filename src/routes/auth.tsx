@@ -34,15 +34,29 @@ function safePath(value: string | undefined) {
 
 type AuthEvent = "start" | "success" | "error" | "timeout" | "redirected";
 
-/** Fire-and-forget OAuth telemetry; never blocks or breaks the sign-in flow. */
+/**
+ * Fire-and-forget OAuth telemetry. Uses sendBeacon so events emitted right
+ * before the OAuth redirect still reach the server; falls back to keepalive fetch.
+ */
 function track(event: AuthEvent, reason?: string) {
-  void logAuthEvent({
-    data: {
-      provider: "google" as const,
-      event,
-      ...(reason ? { reason: reason.slice(0, 300) } : {}),
-      userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 400) : undefined,
-    },
+  if (typeof window === "undefined") return;
+  const payload = JSON.stringify({
+    provider: "google",
+    event,
+    ...(reason ? { reason: reason.slice(0, 300) } : {}),
+  });
+  const url = "/api/public/auth-event";
+  try {
+    const blob = new Blob([payload], { type: "application/json" });
+    if (navigator.sendBeacon?.(url, blob)) return;
+  } catch {
+    /* fall through */
+  }
+  void fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true,
   }).catch(() => {});
 }
 
