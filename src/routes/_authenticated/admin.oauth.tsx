@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/admin/oauth")({
   component: OAuthDashboard,
 });
 
-function Stat({ label, value, tone }: { label: string; value: string; tone?: "bad" | "good" }) {
+function Stat({ label, value, tone }: { label: string; value: string; tone?: "bad" | "good" | undefined }) {
   return (
     <Card className="gap-1 border-border bg-surface p-4">
       <p className="label-mono text-muted-foreground">{label}</p>

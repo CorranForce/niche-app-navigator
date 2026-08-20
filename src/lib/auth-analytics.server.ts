@@ -137,12 +137,12 @@ export function aggregate(rows: AuthEventRow[], days: number): AuthAnalytics {
     { step: "Callback resolved", count: resolved },
     { step: "Signed in", count: totals.success },
   ];
-  const base = steps[0].count || 1;
+  const base = steps[0]!.count || 1;
   const funnel = steps.map((s, i) => ({
     step: s.step,
     count: s.count,
     pctOfStart: Math.round((s.count / base) * 1000) / 10,
-    dropOff: i === 0 ? 0 : Math.max(0, steps[i - 1].count - s.count),
+    dropOff: i === 0 ? 0 : Math.max(0, steps[i - 1]!.count - s.count),
   }));
 
   return {
