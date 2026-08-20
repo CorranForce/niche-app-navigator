@@ -1,7 +1,9 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { getIsAdmin } from "@/lib/auth-analytics.functions";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
@@ -14,6 +16,15 @@ export function SiteHeader() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const checkAdmin = useServerFn(getIsAdmin);
+  const { data: admin } = useQuery({
+    queryKey: ["is-admin", user?.id],
+    queryFn: () => checkAdmin(),
+    enabled: Boolean(user),
+    retry: false,
+  });
+  const isAdmin = Boolean(admin?.isAdmin);
+
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -54,6 +65,17 @@ export function SiteHeader() {
               My reports
             </Link>
           ) : null}
+          {isAdmin ? (
+            <Link
+              to="/admin/oauth"
+              className={`label-mono transition-colors hover:text-foreground ${
+                pathname.startsWith("/admin") ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              OAuth health
+            </Link>
+          ) : null}
+
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
