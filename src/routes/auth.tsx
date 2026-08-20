@@ -109,7 +109,7 @@ function AuthPage() {
       toast.error(message);
     } finally {
       window.clearTimeout(releaseBusy);
-      if (!(await Promise.resolve(false))) setBusy(false);
+      setBusy(false);
     }
   }
 
@@ -136,8 +136,23 @@ function AuthPage() {
           </div>
 
           <Button variant="outline" onClick={handleGoogle} disabled={busy}>
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue with Google"}
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : oauthError ? (
+              "Retry with Google"
+            ) : (
+              "Continue with Google"
+            )}
           </Button>
+
+          {oauthError ? (
+            <p
+              role="alert"
+              className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-foreground"
+            >
+              {oauthError}
+            </p>
+          ) : null}
 
 
           <div className="flex items-center gap-3">
