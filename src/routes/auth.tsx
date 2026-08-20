@@ -76,6 +76,7 @@ function AuthPage() {
   async function handleGoogle() {
     setBusy(true);
     setOauthError(null);
+    track("start");
     // Fallback: if the popup/callback never returns, re-enable the button and
     // tell the user what happened instead of leaving a dead spinner.
     const releaseBusy = window.setTimeout(() => {
@@ -84,6 +85,7 @@ function AuthPage() {
         "Google sign-in timed out. The popup may have been closed or blocked — try again, or use email and password below.",
       );
       toast.error("Google sign-in timed out");
+      track("timeout", "no callback within 45s");
     }, 45000);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -94,10 +96,15 @@ function AuthPage() {
         const message = result.error.message || "Google sign-in failed. Please try again.";
         setOauthError(message);
         toast.error(message);
+        track("error", message);
         return;
       }
-      if (result.redirected) return; // browser leaves this page
+      if (result.redirected) {
+        track("redirected");
+        return; // browser leaves this page
+      }
 
+      track("success");
       // The Lovable auth wrapper has already persisted the returned session.
       // Navigate directly instead of making another auth call while the
       // SIGNED_IN listener is still completing.
@@ -107,11 +114,13 @@ function AuthPage() {
         error instanceof Error ? error.message : "Google sign-in failed. Please try again.";
       setOauthError(message);
       toast.error(message);
+      track("error", message);
     } finally {
       window.clearTimeout(releaseBusy);
       setBusy(false);
     }
   }
+
 
 
 
