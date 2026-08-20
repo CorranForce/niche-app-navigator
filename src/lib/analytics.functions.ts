@@ -20,6 +20,7 @@ export const logAuthEvent = createServerFn({ method: "POST" })
       provider: data.provider,
       event: data.event,
       reason: data.reason ?? null,
+      user_agent: data.userAgent ?? null,
     });
     if (error) console.error("auth_events insert failed", error.message);
     return { ok: !error };
