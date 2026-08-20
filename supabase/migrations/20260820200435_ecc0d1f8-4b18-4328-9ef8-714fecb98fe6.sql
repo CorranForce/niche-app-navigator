@@ -1,0 +1,1 @@
+DELETE FROM public.auth_events WHERE ip_prefix = '203.0.113.0/24';
