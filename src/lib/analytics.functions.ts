@@ -5,6 +5,7 @@ const authEventInput = z.object({
   provider: z.literal("google"),
   event: z.enum(["start", "success", "error", "timeout", "redirected"]),
   reason: z.string().max(300).optional(),
+  userAgent: z.string().max(400).optional(),
 });
 
 /**
