@@ -1,0 +1,1 @@
+DELETE FROM public.auth_events WHERE reason IN ('probe','beacon probe');

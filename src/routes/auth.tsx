@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+
 import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,34 @@ export const Route = createFileRoute("/auth")({
 
 function safePath(value: string | undefined) {
   return value && value.startsWith("/") && !value.startsWith("//") ? value : "/";
+}
+
+type AuthEvent = "start" | "success" | "error" | "timeout" | "redirected";
+
+/**
+ * Fire-and-forget OAuth telemetry. Uses sendBeacon so events emitted right
+ * before the OAuth redirect still reach the server; falls back to keepalive fetch.
+ */
+function track(event: AuthEvent, reason?: string) {
+  if (typeof window === "undefined") return;
+  const payload = JSON.stringify({
+    provider: "google",
+    event,
+    ...(reason ? { reason: reason.slice(0, 300) } : {}),
+  });
+  const url = "/api/public/auth-event";
+  try {
+    const blob = new Blob([payload], { type: "application/json" });
+    if (navigator.sendBeacon?.(url, blob)) return;
+  } catch {
+    /* fall through */
+  }
+  void fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
+    keepalive: true,
+  }).catch(() => {});
 }
 
 function AuthPage() {
@@ -76,6 +105,7 @@ function AuthPage() {
   async function handleGoogle() {
     setBusy(true);
     setOauthError(null);
+    track("start");
     // Fallback: if the popup/callback never returns, re-enable the button and
     // tell the user what happened instead of leaving a dead spinner.
     const releaseBusy = window.setTimeout(() => {
@@ -84,6 +114,7 @@ function AuthPage() {
         "Google sign-in timed out. The popup may have been closed or blocked — try again, or use email and password below.",
       );
       toast.error("Google sign-in timed out");
+      track("timeout", "no callback within 45s");
     }, 45000);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -94,10 +125,15 @@ function AuthPage() {
         const message = result.error.message || "Google sign-in failed. Please try again.";
         setOauthError(message);
         toast.error(message);
+        track("error", message);
         return;
       }
-      if (result.redirected) return; // browser leaves this page
+      if (result.redirected) {
+        track("redirected");
+        return; // browser leaves this page
+      }
 
+      track("success");
       // The Lovable auth wrapper has already persisted the returned session.
       // Navigate directly instead of making another auth call while the
       // SIGNED_IN listener is still completing.
@@ -107,11 +143,13 @@ function AuthPage() {
         error instanceof Error ? error.message : "Google sign-in failed. Please try again.";
       setOauthError(message);
       toast.error(message);
+      track("error", message);
     } finally {
       window.clearTimeout(releaseBusy);
       setBusy(false);
     }
   }
+
 
 
 
