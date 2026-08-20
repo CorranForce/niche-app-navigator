@@ -39,6 +39,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   const next = safePath(search.redirect);
 
@@ -74,14 +75,25 @@ function AuthPage() {
 
   async function handleGoogle() {
     setBusy(true);
-    const releaseBusy = window.setTimeout(() => setBusy(false), 60000);
+    setOauthError(null);
+    // Fallback: if the popup/callback never returns, re-enable the button and
+    // tell the user what happened instead of leaving a dead spinner.
+    const releaseBusy = window.setTimeout(() => {
+      setBusy(false);
+      setOauthError(
+        "Google sign-in timed out. The popup may have been closed or blocked — try again, or use email and password below.",
+      );
+      toast.error("Google sign-in timed out");
+    }, 45000);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
         extraParams: { prompt: "select_account" },
       });
       if (result.error) {
-        toast.error(result.error.message || "Google sign-in failed");
+        const message = result.error.message || "Google sign-in failed. Please try again.";
+        setOauthError(message);
+        toast.error(message);
         return;
       }
       if (result.redirected) return; // browser leaves this page
@@ -91,12 +103,16 @@ function AuthPage() {
       // SIGNED_IN listener is still completing.
       await navigate({ to: next, replace: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Google sign-in failed");
+      const message =
+        error instanceof Error ? error.message : "Google sign-in failed. Please try again.";
+      setOauthError(message);
+      toast.error(message);
     } finally {
       window.clearTimeout(releaseBusy);
-      setBusy(false);
+      if (!(await Promise.resolve(false))) setBusy(false);
     }
   }
+
 
 
   return (
