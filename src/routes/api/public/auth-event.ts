@@ -49,14 +49,15 @@ export const Route = createFileRoute("/api/public/auth-event")({
           return new Response("Invalid payload", { status: 400 });
         }
 
-
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { error } = await supabaseAdmin.from("auth_events").insert({
           provider: parsed.provider,
           event: parsed.event,
           reason: parsed.reason ?? null,
           user_agent: (request.headers.get("user-agent") ?? "").slice(0, 400) || null,
+          ip_prefix: coarseIpRange(request),
         });
+
         if (error) {
           console.error("auth_events insert failed", error.message);
           return new Response("Insert failed", { status: 500 });
