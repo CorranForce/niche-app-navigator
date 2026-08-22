@@ -118,8 +118,10 @@ function AuthPage() {
       track("timeout", "no callback within 45s");
     }, 45000);
     try {
+      // Remember where to land, then return to a real public route we own.
+      sessionStorage.setItem("post_auth_redirect", next);
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/auth/callback`,
         extraParams: { prompt: "select_account" },
       });
       if (result.error) {
