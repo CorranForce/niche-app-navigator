@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as AuthenticatedAdminOauthRouteImport } from './routes/_authenticated/admin.oauth'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
@@ -43,6 +44,11 @@ const PricingRoute = PricingRouteImport.update({
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/billing': typeof AuthenticatedBillingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
+  '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/_authenticated/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/account'
+    | '/billing'
     | '/auth/callback'
     | '/admin/oauth'
     | '/reports/$id'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/account'
+    | '/billing'
     | '/auth/callback'
     | '/admin/oauth'
     | '/reports/$id'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/_authenticated/account'
+    | '/_authenticated/billing'
     | '/auth_/callback'
     | '/_authenticated/admin/oauth'
     | '/_authenticated/reports/$id'
@@ -203,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/billing': {
+      id: '/_authenticated/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AuthenticatedBillingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/auth_/callback': {
       id: '/auth_/callback'
       path: '/auth/callback'
@@ -250,6 +269,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedAdminOauthRoute: typeof AuthenticatedAdminOauthRoute
   AuthenticatedReportsIdRoute: typeof AuthenticatedReportsIdRoute
   AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
@@ -257,6 +277,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedAdminOauthRoute: AuthenticatedAdminOauthRoute,
   AuthenticatedReportsIdRoute: AuthenticatedReportsIdRoute,
   AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
