@@ -44,6 +44,37 @@ jobs:
             node -e "const c=require('./coverage/coverage-summary.json').total;console.log('| Metric | % |\n| --- | --- |\n| Lines | '+c.lines.pct+' |\n| Statements | '+c.statements.pct+' |\n| Functions | '+c.functions.pct+' |\n| Branches | '+c.branches.pct+' |')" >> $GITHUB_STEP_SUMMARY
           fi
 
+      - name: Download base branch coverage (for trend)
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: ci.yml
+          branch: ${{ github.event.pull_request.base.ref }}
+          name_is_regexp: true
+          name: coverage-
+          path: coverage-base
+          if_no_artifact_found: warn
+
+      - name: Normalize base coverage path
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: |
+          BASE=$(find coverage-base -name coverage-summary.json | head -n 1 || true)
+          if [ -n "$BASE" ]; then
+            mkdir -p coverage-base-normalized
+            cp "$BASE" coverage-base-normalized/coverage-summary.json
+          fi
+
+      - name: Coverage report comment
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          json-summary-path: coverage/coverage-summary.json
+          json-summary-compare-path: coverage-base-normalized/coverage-summary.json
+          file-coverage-mode: changes
+          comment-on: pr
+
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -51,6 +82,7 @@ jobs:
           name: coverage-${{ github.run_id }}
           path: coverage/
           retention-days: 14
+
 
       - name: Upload coverage to Codecov
         if: always() && env.CODECOV_TOKEN != ''
