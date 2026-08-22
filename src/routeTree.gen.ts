@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as AuthenticatedAdminOauthRouteImport } from './routes/_authenticated/admin.oauth'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedReportsIdRouteImport } from './routes/_authenticated/reports.$id'
@@ -35,6 +36,11 @@ const AuthRoute = AuthRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth_/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminOauthRoute = AuthenticatedAdminOauthRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/auth_/callback': typeof AuthCallbackRoute
   '/_authenticated/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/pricing'
+    | '/auth/callback'
     | '/admin/oauth'
     | '/reports/$id'
     | '/api/public/auth-event'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/pricing'
+    | '/auth/callback'
     | '/admin/oauth'
     | '/reports/$id'
     | '/api/public/auth-event'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/pricing'
+    | '/auth_/callback'
     | '/_authenticated/admin/oauth'
     | '/_authenticated/reports/$id'
     | '/api/public/auth-event'
@@ -124,6 +136,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PricingRoute: typeof PricingRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   ApiPublicAuthEventRoute: typeof ApiPublicAuthEventRoute
 }
 
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth_/callback': {
+      id: '/auth_/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/oauth': {
@@ -208,6 +228,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PricingRoute: PricingRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   ApiPublicAuthEventRoute: ApiPublicAuthEventRoute,
 }
 export const routeTree = rootRouteImport
