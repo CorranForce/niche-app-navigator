@@ -1,0 +1,39 @@
+name: Rollback Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: "Vercel deployment URL to promote back to production (e.g. my-app-abc123.vercel.app)"
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    name: Promote previous deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Vercel CLI
+        run: bun add -g vercel@latest
+
+      - name: Promote deployment
+        run: |
+          vercel promote "${{ inputs.deployment_url }}" --token=${{ secrets.VERCEL_TOKEN }} --scope="$VERCEL_ORG_ID" || \
+          vercel promote "${{ inputs.deployment_url }}" --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Rolled production back to ${{ inputs.deployment_url }}" >> $GITHUB_STEP_SUMMARY
