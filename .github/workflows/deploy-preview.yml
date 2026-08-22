@@ -24,6 +24,8 @@ jobs:
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
     steps:
       - uses: actions/checkout@v4
 
@@ -66,7 +68,7 @@ jobs:
         run: node scripts/smoke-test.mjs "${{ steps.deploy.outputs.url }}"
 
       - name: Notify Slack
-        if: always() && secrets.SLACK_WEBHOOK_URL != ''
+        if: always() && env.SLACK_WEBHOOK_URL != ''
         continue-on-error: true
         uses: slackapi/slack-github-action@v2
         with:
@@ -76,7 +78,7 @@ jobs:
             text: "*Staging deploy ${{ job.status }}* — ${{ github.repository }} (PR #${{ github.event.pull_request.number }})\nURL: ${{ steps.deploy.outputs.url }}\nSmoke tests: ${{ steps.smoke.outcome }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Notify by email
-        if: always() && secrets.SMTP_SERVER != ''
+        if: always() && env.SMTP_SERVER != ''
         continue-on-error: true
         uses: dawidd6/action-send-mail@v3
         with:
