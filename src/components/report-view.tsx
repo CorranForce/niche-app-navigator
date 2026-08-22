@@ -56,7 +56,9 @@ export function ReportView({ niche, report }: { niche: string; report: SolutionR
       </section>
 
       <section>
-        <SectionTitle icon={<AlertTriangle className="h-4 w-4 text-primary" />}>Pain points</SectionTitle>
+        <SectionTitle icon={<AlertTriangle className="h-4 w-4 text-primary" />}>
+          Pain points
+        </SectionTitle>
         <div className="grid gap-3 md:grid-cols-2">
           {report.pain_points.map((p, i) => (
             <Card key={i} className="gap-3 border-border bg-surface p-5">
@@ -183,7 +185,9 @@ export function ReportView({ niche, report }: { niche: string; report: SolutionR
       </section>
 
       <section>
-        <SectionTitle icon={<Timer className="h-4 w-4 text-primary" />}>72-hour build plan</SectionTitle>
+        <SectionTitle icon={<Timer className="h-4 w-4 text-primary" />}>
+          72-hour build plan
+        </SectionTitle>
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {report.seventy_two_hour_plan.map((b, i) => (
             <Card key={i} className="gap-2 border-border bg-surface p-5">

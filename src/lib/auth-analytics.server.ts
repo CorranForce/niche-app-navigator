@@ -20,12 +20,25 @@ export type AuthAnalytics = {
   days: number;
   totals: { starts: number; redirected: number; success: number; error: number; timeout: number };
   failureRate: number;
-  daily: Array<{ day: string; starts: number; success: number; error: number; timeout: number; failureRate: number }>;
+  daily: Array<{
+    day: string;
+    starts: number;
+    success: number;
+    error: number;
+    timeout: number;
+    failureRate: number;
+  }>;
   reasons: Array<{ reason: string; count: number }>;
   funnel: Array<{ step: string; count: number; pctOfStart: number; dropOff: number }>;
   userAgents: Bucket[];
   ipRanges: Bucket[];
-  recent: Array<{ created_at: string; event: AuthEventName; reason: string | null; browser: string; ip_prefix: string | null }>;
+  recent: Array<{
+    created_at: string;
+    event: AuthEventName;
+    reason: string | null;
+    browser: string;
+    ip_prefix: string | null;
+  }>;
 };
 
 const FAILURES: AuthEventName[] = ["error", "timeout"];
@@ -74,7 +87,12 @@ function bucketize(rows: AuthEventRow[], keyOf: (r: AuthEventRow) => string, lim
     map.set(key, entry);
   }
   return [...map.entries()]
-    .map(([key, v]) => ({ key, total: v.total, failures: v.failures, failureRate: rate(v.failures, v.total) }))
+    .map(([key, v]) => ({
+      key,
+      total: v.total,
+      failures: v.failures,
+      failureRate: rate(v.failures, v.total),
+    }))
     .sort((a, b) => b.failures - a.failures || b.total - a.total)
     .slice(0, limit);
 }

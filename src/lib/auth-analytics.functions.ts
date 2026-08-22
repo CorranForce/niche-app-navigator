@@ -2,7 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const rangeInput = z.object({ days: z.union([z.literal(7), z.literal(14), z.literal(30)]).default(14) });
+const rangeInput = z.object({
+  days: z.union([z.literal(7), z.literal(14), z.literal(30)]).default(14),
+});
 
 /**
  * Admin-only OAuth telemetry. The caller is authenticated by middleware, the
@@ -44,6 +46,9 @@ export const getIsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    const { data } = await supabaseAdmin.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
     return { isAdmin: Boolean(data) };
   });

@@ -15,7 +15,11 @@ export const Route = createFileRoute("/_authenticated/admin/oauth")({
   head: () => ({
     meta: [
       { title: "OAuth health — internal dashboard" },
-      { name: "description", content: "Internal Google sign-in reliability dashboard: failure rates, drop-off funnel, and client breakdowns." },
+      {
+        name: "description",
+        content:
+          "Internal Google sign-in reliability dashboard: failure rates, drop-off funnel, and client breakdowns.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "OAuth health — internal dashboard" },
       { property: "og:description", content: "Internal Google sign-in reliability metrics." },
@@ -24,7 +28,15 @@ export const Route = createFileRoute("/_authenticated/admin/oauth")({
   component: OAuthDashboard,
 });
 
-function Stat({ label, value, tone }: { label: string; value: string; tone?: "bad" | "good" | undefined }) {
+function Stat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "bad" | "good" | undefined;
+}) {
   return (
     <Card className="gap-1 border-border bg-surface p-4">
       <p className="label-mono text-muted-foreground">{label}</p>
@@ -107,9 +119,21 @@ function OAuthDashboard() {
             <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <Stat label="Attempts" value={String(data.totals.starts)} />
               <Stat label="Signed in" value={String(data.totals.success)} tone="good" />
-              <Stat label="Errors" value={String(data.totals.error)} tone={data.totals.error ? "bad" : undefined} />
-              <Stat label="Timeouts" value={String(data.totals.timeout)} tone={data.totals.timeout ? "bad" : undefined} />
-              <Stat label="Failure rate" value={`${data.failureRate}%`} tone={data.failureRate > 10 ? "bad" : undefined} />
+              <Stat
+                label="Errors"
+                value={String(data.totals.error)}
+                tone={data.totals.error ? "bad" : undefined}
+              />
+              <Stat
+                label="Timeouts"
+                value={String(data.totals.timeout)}
+                tone={data.totals.timeout ? "bad" : undefined}
+              />
+              <Stat
+                label="Failure rate"
+                value={`${data.failureRate}%`}
+                tone={data.failureRate > 10 ? "bad" : undefined}
+              />
             </section>
 
             <section className="mt-10 grid gap-6 lg:grid-cols-2">
@@ -118,11 +142,15 @@ function OAuthDashboard() {
                 <div className="space-y-2">
                   {data.daily.map((d) => (
                     <div key={d.day} className="grid grid-cols-[80px_1fr_auto] items-center gap-3">
-                      <span className="font-mono text-xs text-muted-foreground">{d.day.slice(5)}</span>
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {d.day.slice(5)}
+                      </span>
                       <div className="flex items-center gap-2">
                         <Bar pct={(d.starts / maxDaily) * 100} />
                         {d.error + d.timeout > 0 ? (
-                          <span className="font-mono text-xs text-destructive">{d.failureRate}%</span>
+                          <span className="font-mono text-xs text-destructive">
+                            {d.failureRate}%
+                          </span>
                         ) : null}
                       </div>
                       <span className="font-mono text-xs text-muted-foreground">
@@ -209,7 +237,9 @@ function OAuthDashboard() {
                             </td>
                             <td
                               className={`py-2 pr-4 font-mono text-xs ${
-                                r.event === "error" || r.event === "timeout" ? "text-destructive" : ""
+                                r.event === "error" || r.event === "timeout"
+                                  ? "text-destructive"
+                                  : ""
                               }`}
                             >
                               {r.event}

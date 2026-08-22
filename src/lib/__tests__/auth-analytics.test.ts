@@ -57,7 +57,11 @@ describe("aggregate", () => {
 
   it("ranks failure reasons", () => {
     const out = aggregate(
-      [row("error", { reason: "blocked" }), row("error", { reason: "blocked" }), row("timeout", { reason: "slow" })],
+      [
+        row("error", { reason: "blocked" }),
+        row("error", { reason: "blocked" }),
+        row("timeout", { reason: "slow" }),
+      ],
       7,
     );
     expect(out.reasons[0]?.reason).toBe("blocked");
