@@ -30,7 +30,24 @@ export const generateReport = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .gte("created_at", monthStart.toISOString());
 
-    if ((count ?? 0) >= FREE_MONTHLY_LIMIT) {
+    const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
+    const { data: sub } = await context.supabase
+      .from("subscriptions")
+      .select("status, current_period_end")
+      .eq("user_id", context.userId)
+      .eq("environment", paymentsEnv)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const periodEnd = sub?.current_period_end ? new Date(sub.current_period_end) : null;
+    const hasPaidPlan = Boolean(
+      sub &&
+        ((["active", "trialing", "past_due"].includes(sub.status) &&
+          (!periodEnd || periodEnd > new Date())) ||
+          (sub.status === "canceled" && periodEnd && periodEnd > new Date())),
+    );
+
+    if (!hasPaidPlan && (count ?? 0) >= FREE_MONTHLY_LIMIT) {
       throw new Error(
         `You've used all ${FREE_MONTHLY_LIMIT} free reports this month. Upgrade to Pro for unlimited reports.`,
       );
