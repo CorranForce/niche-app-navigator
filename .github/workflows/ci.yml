@@ -68,6 +68,7 @@ jobs:
 
       - name: Coverage report comment
         if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           json-summary-path: coverage/coverage-summary.json
