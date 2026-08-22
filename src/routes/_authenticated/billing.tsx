@@ -68,7 +68,7 @@ function BillingPage() {
       } else {
         await openCheckout({
           priceId,
-          customerEmail: user?.email ?? undefined,
+          ...(user?.email ? { customerEmail: user.email } : {}),
           customData: { userId: user?.id ?? "" },
         });
       }
