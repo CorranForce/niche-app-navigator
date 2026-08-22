@@ -8,12 +8,18 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
 jobs:
   verify:
     name: Lint, typecheck, test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
 
       - uses: oven-sh/setup-bun@v2
         with:
