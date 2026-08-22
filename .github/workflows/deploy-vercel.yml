@@ -70,3 +70,35 @@ jobs:
           url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> $GITHUB_OUTPUT
           echo "Deployed to $url" >> $GITHUB_STEP_SUMMARY
+
+      - name: Smoke tests
+        id: smoke
+        run: node scripts/smoke-test.mjs "${{ steps.deploy.outputs.url }}"
+
+      - name: Notify Slack
+        if: always() && secrets.SLACK_WEBHOOK_URL != ''
+        continue-on-error: true
+        uses: slackapi/slack-github-action@v2
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Production deploy ${{ job.status }}* — ${{ github.repository }}@${{ github.sha }}\nURL: ${{ steps.deploy.outputs.url }}\nSmoke tests: ${{ steps.smoke.outcome }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Notify by email
+        if: always() && secrets.SMTP_SERVER != ''
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Production deploy ${{ job.status }} — ${{ github.repository }}"
+          to: ${{ secrets.DEPLOY_NOTIFY_EMAIL }}
+          from: GitHub Actions <${{ secrets.SMTP_USERNAME }}>
+          body: |
+            Production deploy ${{ job.status }}
+            URL: ${{ steps.deploy.outputs.url }}
+            Smoke tests: ${{ steps.smoke.outcome }}
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
