@@ -25,7 +25,6 @@ function coarseIpRange(request: Request): string | null {
   return `${octets[0]}.${octets[1]}.${octets[2]}.0/24`;
 }
 
-
 /** Only same-origin browser clients may write telemetry. */
 function isSameOrigin(request: Request) {
   const host = request.headers.get("host");

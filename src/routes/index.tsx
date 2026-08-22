@@ -8,7 +8,13 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useSession } from "@/hooks/use-session";
 import { generateReport } from "@/lib/reports.functions";
 
@@ -32,7 +38,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const EXAMPLES = ["Independent dental clinics", "Boutique fitness studios", "Freelance wedding photographers"];
+const EXAMPLES = [
+  "Independent dental clinics",
+  "Boutique fitness studios",
+  "Freelance wedding photographers",
+];
 
 const QUICK_IDEAS = [
   "Mobile dog groomers",
@@ -54,7 +64,8 @@ function Index() {
 
   const generate = useServerFn(generateReport);
   const mutation = useMutation({
-    mutationFn: (input: { niche: string; audience: string; budget: string }) => generate({ data: input }),
+    mutationFn: (input: { niche: string; audience: string; budget: string }) =>
+      generate({ data: input }),
     onSuccess: ({ id }) => navigate({ to: "/reports/$id", params: { id } }),
     onError: (error: Error) => toast.error(error.message),
   });
@@ -86,8 +97,9 @@ function Index() {
               Find the pain worth building for — then ship it in 72 hours.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-muted-foreground">
-              Name a niche. Get its most common operational pain points, three narrow app concepts that fix
-              them, a pricing tier structure and a feature breakdown scoped to a three-day first release.
+              Name a niche. Get its most common operational pain points, three narrow app concepts
+              that fix them, a pricing tier structure and a feature breakdown scoped to a three-day
+              first release.
             </p>
 
             <Card className="mx-auto mt-10 max-w-3xl border-border bg-surface p-5 text-left">
@@ -113,7 +125,6 @@ function Index() {
                     Niche
                   </label>
                   <div className="mt-2 flex gap-2">
-
                     <Input
                       id="niche"
                       value={niche}
@@ -139,12 +150,15 @@ function Index() {
                     <Select value={audience} onValueChange={setAudience}>
                       <SelectTrigger className="mt-2 w-full">
                         <SelectValue>{audience}</SelectValue>
-
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="solo operators">Solo operators</SelectItem>
-                        <SelectItem value="small businesses (1-20 staff)">Small businesses (1–20)</SelectItem>
-                        <SelectItem value="mid-market (20-200 staff)">Mid-market (20–200)</SelectItem>
+                        <SelectItem value="small businesses (1-20 staff)">
+                          Small businesses (1–20)
+                        </SelectItem>
+                        <SelectItem value="mid-market (20-200 staff)">
+                          Mid-market (20–200)
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

@@ -19,7 +19,8 @@ export const Route = createFileRoute("/auth")({
       { title: "Sign in — MicroSaaS Solution Finder" },
       {
         name: "description",
-        content: "Sign in to generate niche pain-point reports and keep your saved micro-SaaS research.",
+        content:
+          "Sign in to generate niche pain-point reports and keep your saved micro-SaaS research.",
       },
       { property: "og:title", content: "Sign in — MicroSaaS Solution Finder" },
       { property: "og:description", content: "Access your saved micro-SaaS niche reports." },
@@ -150,9 +151,6 @@ function AuthPage() {
     }
   }
 
-
-
-
   return (
     <div className="grid-canvas flex min-h-screen items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm">
@@ -192,7 +190,6 @@ function AuthPage() {
             </p>
           ) : null}
 
-
           <div className="flex items-center gap-3">
             <span className="h-px flex-1 bg-border" />
             <span className="label-mono text-muted-foreground">or</span>
@@ -218,7 +215,13 @@ function AuthPage() {
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
             />
             <Button type="submit" className="w-full" disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signin" ? "Sign in" : "Sign up"}
+              {busy ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : mode === "signin" ? (
+                "Sign in"
+              ) : (
+                "Sign up"
+              )}
             </Button>
           </form>
 

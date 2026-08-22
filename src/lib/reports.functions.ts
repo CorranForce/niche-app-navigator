@@ -15,9 +15,8 @@ export const generateReport = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { streamText, Output, NoObjectGeneratedError } = await import("ai");
     const { createLovableResponsesProvider } = await import("@/lib/ai-gateway.server");
-    const { SYSTEM_PROMPT, buildUserPrompt, FREE_MONTHLY_LIMIT } = await import(
-      "@/lib/report-prompt.server"
-    );
+    const { SYSTEM_PROMPT, buildUserPrompt, FREE_MONTHLY_LIMIT } =
+      await import("@/lib/report-prompt.server");
 
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured for this project yet.");
@@ -61,9 +60,12 @@ export const generateReport = createServerFn({ method: "POST" })
         throw new Error("The model returned an unusable report. Please try again.");
       }
       const message = error instanceof Error ? error.message : String(error);
-      if (message.includes("429")) throw new Error("Too many requests right now — try again in a moment.");
+      if (message.includes("429"))
+        throw new Error("Too many requests right now — try again in a moment.");
       if (message.includes("402"))
-        throw new Error("AI credits are exhausted. Add credits in your workspace settings to continue.");
+        throw new Error(
+          "AI credits are exhausted. Add credits in your workspace settings to continue.",
+        );
       throw new Error(`Report generation failed: ${message}`);
     }
 

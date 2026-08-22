@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_authenticated/reports/")({
   head: () => ({
     meta: [
       { title: "My reports — MicroSaaS Solution Finder" },
-      { name: "description", content: "Your saved micro-SaaS niche pain-point reports and build plans." },
+      {
+        name: "description",
+        content: "Your saved micro-SaaS niche pain-point reports and build plans.",
+      },
       { property: "og:title", content: "My reports — MicroSaaS Solution Finder" },
       { property: "og:description", content: "Your saved micro-SaaS niche research." },
     ],
@@ -75,7 +78,6 @@ function ReportsPage() {
                     {new Date(r.created_at).toLocaleDateString()}
                     {r.audience ? ` · ${r.audience}` : ""}
                   </p>
-
                 </div>
                 <Button
                   variant="ghost"

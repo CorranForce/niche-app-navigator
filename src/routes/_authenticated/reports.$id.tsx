@@ -7,14 +7,14 @@ import { ReportView } from "@/components/report-view";
 import { getReport } from "@/lib/reports.functions";
 import type { SolutionReport } from "@/lib/report-schema";
 
-
 export const Route = createFileRoute("/_authenticated/reports/$id")({
   head: () => ({
     meta: [
       { title: "Niche report — MicroSaaS Solution Finder" },
       {
         name: "description",
-        content: "Pain points, app concepts, pricing tiers and a 72-hour build plan for your niche.",
+        content:
+          "Pain points, app concepts, pricing tiers and a 72-hour build plan for your niche.",
       },
       { property: "og:title", content: "Niche report — MicroSaaS Solution Finder" },
       {

@@ -25,7 +25,6 @@ export function SiteHeader() {
   });
   const isAdmin = Boolean(admin?.isAdmin);
 
-
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -75,13 +74,14 @@ export function SiteHeader() {
               OAuth health
             </Link>
           ) : null}
-
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
           {loading ? null : user ? (
             <>
-              <span className="hidden font-mono text-xs text-muted-foreground md:inline">{user.email}</span>
+              <span className="hidden font-mono text-xs text-muted-foreground md:inline">
+                {user.email}
+              </span>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 Sign out
               </Button>

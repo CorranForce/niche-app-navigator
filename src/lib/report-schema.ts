@@ -89,7 +89,9 @@ export function reportToMarkdown(niche: string, r: SolutionReport): string {
     lines.push(`### ${c.name} — ${c.tagline}`);
     lines.push(`- For: ${c.who_its_for}`);
     lines.push(`- Solves: ${c.solves.join(", ")}`);
-    lines.push(`- Complexity: ${c.complexity} | 72h feasible: ${c.buildable_in_72h ? "yes" : "no"}`);
+    lines.push(
+      `- Complexity: ${c.complexity} | 72h feasible: ${c.buildable_in_72h ? "yes" : "no"}`,
+    );
     lines.push(`- Why: ${c.why}`, "");
   });
   lines.push(`**Recommended:** ${r.recommended_concept}`, "", "## Pricing tiers", "");
@@ -108,7 +110,9 @@ export function reportToMarkdown(niche: string, r: SolutionReport): string {
     lines.push(`- ${f.feature} (${f.tier}, ~${f.effort_hours}h) — ${f.rationale}`),
   );
   lines.push("", "## 72-hour plan", "");
-  r.seventy_two_hour_plan.forEach((b) => lines.push(`- **${b.block}** — ${b.focus} → ${b.deliverable}`));
+  r.seventy_two_hour_plan.forEach((b) =>
+    lines.push(`- **${b.block}** — ${b.focus} → ${b.deliverable}`),
+  );
   lines.push("", "## Risks", "");
   r.risks.forEach((x) => lines.push(`- ${x}`));
   return lines.join("\n");

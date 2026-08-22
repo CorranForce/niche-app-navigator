@@ -16,7 +16,8 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: "Pricing — MicroSaaS Solution Finder" },
       {
         property: "og:description",
-        content: "Start free with five niche reports a month. Upgrade for unlimited research and exports.",
+        content:
+          "Start free with five niche reports a month. Upgrade for unlimited research and exports.",
       },
     ],
   }),
@@ -74,10 +75,12 @@ function PricingPage() {
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-4 py-16">
         <p className="label-mono text-primary">Plans</p>
-        <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Priced like the tools you're planning</h1>
+        <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">
+          Priced like the tools you're planning
+        </h1>
         <p className="mt-4 max-w-2xl text-muted-foreground">
-          Every plan returns the same depth of report. Paid plans lift the monthly limit and add export and
-          collaboration.
+          Every plan returns the same depth of report. Paid plans lift the monthly limit and add
+          export and collaboration.
         </p>
 
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
@@ -90,7 +93,9 @@ function PricingPage() {
             >
               <div className="flex items-center justify-between">
                 <p className="label-mono text-muted-foreground">{t.name}</p>
-                {t.highlighted ? <span className="label-mono text-primary">Most picked</span> : null}
+                {t.highlighted ? (
+                  <span className="label-mono text-primary">Most picked</span>
+                ) : null}
               </div>
               <p className="font-mono text-4xl font-semibold">
                 {t.price}
