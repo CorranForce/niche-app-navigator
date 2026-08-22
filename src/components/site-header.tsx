@@ -64,6 +64,17 @@ export function SiteHeader() {
               My reports
             </Link>
           ) : null}
+          {user ? (
+            <Link
+              to="/account"
+              className={`label-mono transition-colors hover:text-foreground ${
+                pathname.startsWith("/account") ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              Account
+            </Link>
+          ) : null}
+
           {isAdmin ? (
             <Link
               to="/admin/oauth"
