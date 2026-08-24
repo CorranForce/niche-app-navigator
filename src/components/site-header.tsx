@@ -88,14 +88,24 @@ export function SiteHeader() {
           ) : null}
 
           {isAdmin ? (
-            <Link
-              to="/admin/oauth"
-              className={`label-mono transition-colors hover:text-foreground ${
-                pathname.startsWith("/admin") ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              OAuth health
-            </Link>
+            <>
+              <Link
+                to="/admin/oauth"
+                className={`label-mono transition-colors hover:text-foreground ${
+                  pathname.startsWith("/admin/oauth") ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                OAuth health
+              </Link>
+              <Link
+                to="/admin/users"
+                className={`label-mono transition-colors hover:text-foreground ${
+                  pathname.startsWith("/admin/users") ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                Customers
+              </Link>
+            </>
           ) : null}
         </nav>
 
