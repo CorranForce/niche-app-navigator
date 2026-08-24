@@ -18,6 +18,7 @@ import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticate
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedAdminOauthRouteImport } from './routes/_authenticated/admin.oauth'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedReportsIdRouteImport } from './routes/_authenticated/reports.$id'
 import { Route as ApiPublicAuthEventRouteImport } from './routes/api/public/auth-event'
@@ -67,6 +68,11 @@ const AuthenticatedAdminOauthRoute = AuthenticatedAdminOauthRouteImport.update({
   path: '/admin/oauth',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedReportsIndexRoute =
   AuthenticatedReportsIndexRouteImport.update({
     id: '/reports/',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/auth_/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/_authenticated/admin/oauth': typeof AuthenticatedAdminOauthRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/checkout/success'
     | '/admin/oauth'
+    | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
     | '/reports/'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/checkout/success'
     | '/admin/oauth'
+    | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
     | '/reports'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/auth_/callback'
     | '/checkout/success'
     | '/_authenticated/admin/oauth'
+    | '/_authenticated/admin/users'
     | '/_authenticated/reports/$id'
     | '/api/public/auth-event'
     | '/_authenticated/reports/'
@@ -256,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOauthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reports/': {
       id: '/_authenticated/reports/'
       path: '/reports'
@@ -291,6 +310,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedAdminOauthRoute: typeof AuthenticatedAdminOauthRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedReportsIdRoute: typeof AuthenticatedReportsIdRoute
   AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
 }
@@ -299,6 +319,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedAdminOauthRoute: AuthenticatedAdminOauthRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedReportsIdRoute: AuthenticatedReportsIdRoute,
   AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
 }
