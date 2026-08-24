@@ -39,6 +39,9 @@ export async function getPaddlePriceId(priceId: string): Promise<string> {
   return resolvePaddlePrice({ data: { priceId, environment: getPaddleEnvironment() } });
 }
 
+export { planForProductId, PLAN_LIMITS, limitForPlan, entitledPlan, isPastDue } from "@/lib/plan-limits";
+export type { PlanId } from "@/lib/plan-limits";
+
 export const PLANS = [
   {
     id: "free",
@@ -63,7 +66,7 @@ export const PLANS = [
     yearly: { amount: "$190", priceId: "pro_yearly" as string | null },
     productId: "pro_plan" as string | null,
     features: [
-      "Unlimited reports",
+      "50 reports per month",
       "Everything in Free",
       "Markdown export",
       "Deeper 72-hour build plans",
@@ -78,6 +81,7 @@ export const PLANS = [
     yearly: { amount: "$490", priceId: "studio_yearly" as string | null },
     productId: "studio_plan" as string | null,
     features: [
+      "Unlimited reports",
       "Everything in Pro",
       "5 seats included",
       "Shared report library",
@@ -87,9 +91,3 @@ export const PLANS = [
   },
 ] as const;
 
-export type PlanId = (typeof PLANS)[number]["id"];
-
-export function planForProductId(productId: string | null | undefined): PlanId {
-  const match = PLANS.find((p) => p.productId && p.productId === productId);
-  return match?.id ?? "free";
-}

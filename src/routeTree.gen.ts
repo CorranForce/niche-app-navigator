@@ -16,6 +16,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedAdminOauthRouteImport } from './routes/_authenticated/admin.oauth'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedReportsIdRouteImport } from './routes/_authenticated/reports.$id'
@@ -56,6 +57,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
+  id: '/checkout/success',
+  path: '/checkout/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminOauthRoute = AuthenticatedAdminOauthRouteImport.update({
   id: '/admin/oauth',
   path: '/admin/oauth',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AuthenticatedAccountRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/billing': typeof AuthenticatedBillingRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/auth_/callback': typeof AuthCallbackRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/_authenticated/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/billing'
     | '/auth/callback'
+    | '/checkout/success'
     | '/admin/oauth'
     | '/reports/$id'
     | '/api/public/auth-event'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/billing'
     | '/auth/callback'
+    | '/checkout/success'
     | '/admin/oauth'
     | '/reports/$id'
     | '/api/public/auth-event'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account'
     | '/_authenticated/billing'
     | '/auth_/callback'
+    | '/checkout/success'
     | '/_authenticated/admin/oauth'
     | '/_authenticated/reports/$id'
     | '/api/public/auth-event'
@@ -174,6 +186,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   PricingRoute: typeof PricingRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ApiPublicAuthEventRoute: typeof ApiPublicAuthEventRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -227,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/callback'
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/success': {
+      id: '/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/oauth': {
@@ -292,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   PricingRoute: PricingRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
   ApiPublicAuthEventRoute: ApiPublicAuthEventRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }

@@ -15,8 +15,8 @@ export const generateReport = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { streamText, Output, NoObjectGeneratedError } = await import("ai");
     const { createLovableResponsesProvider } = await import("@/lib/ai-gateway.server");
-    const { SYSTEM_PROMPT, buildUserPrompt, FREE_MONTHLY_LIMIT } =
-      await import("@/lib/report-prompt.server");
+    const { SYSTEM_PROMPT, buildUserPrompt } = await import("@/lib/report-prompt.server");
+    const { entitledPlan, limitForPlan, PLAN_LABELS } = await import("@/lib/plan-limits");
 
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured for this project yet.");
@@ -33,23 +33,23 @@ export const generateReport = createServerFn({ method: "POST" })
     const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
     const { data: sub } = await context.supabase
       .from("subscriptions")
-      .select("status, current_period_end")
+      .select("status, product_id, current_period_end")
       .eq("user_id", context.userId)
       .eq("environment", paymentsEnv)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    const periodEnd = sub?.current_period_end ? new Date(sub.current_period_end) : null;
-    const hasPaidPlan = Boolean(
-      sub &&
-        ((["active", "trialing", "past_due"].includes(sub.status) &&
-          (!periodEnd || periodEnd > new Date())) ||
-          (sub.status === "canceled" && periodEnd && periodEnd > new Date())),
-    );
 
-    if (!hasPaidPlan && (count ?? 0) >= FREE_MONTHLY_LIMIT) {
+    const plan = entitledPlan(sub);
+    const limit = limitForPlan(plan);
+
+    if (limit !== null && (count ?? 0) >= limit) {
       throw new Error(
-        `You've used all ${FREE_MONTHLY_LIMIT} free reports this month. Upgrade to Pro for unlimited reports.`,
+        sub?.status === "past_due"
+          ? `Your last payment failed, so you're limited to ${limit} reports this month. Update your payment method on the billing page to restore your plan.`
+          : plan === "free"
+            ? `You've used all ${limit} free reports this month. Upgrade to Pro for ${limitForPlan("pro")} reports a month, or Studio for unlimited.`
+            : `You've used all ${limit} reports on the ${PLAN_LABELS[plan]} plan this month. Upgrade to Studio for unlimited reports.`,
       );
     }
 
@@ -139,7 +139,7 @@ export const deleteReport = createServerFn({ method: "POST" })
 export const getUsage = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { FREE_MONTHLY_LIMIT } = await import("@/lib/report-prompt.server");
+    const { entitledPlan, limitForPlan } = await import("@/lib/plan-limits");
     const monthStart = new Date();
     monthStart.setUTCDate(1);
     monthStart.setUTCHours(0, 0, 0, 0);
@@ -148,5 +148,15 @@ export const getUsage = createServerFn({ method: "GET" })
       .select("id", { count: "exact", head: true })
       .eq("user_id", context.userId)
       .gte("created_at", monthStart.toISOString());
-    return { used: count ?? 0, limit: FREE_MONTHLY_LIMIT };
+    const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
+    const { data: sub } = await context.supabase
+      .from("subscriptions")
+      .select("status, product_id, current_period_end")
+      .eq("user_id", context.userId)
+      .eq("environment", paymentsEnv)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const plan = entitledPlan(sub);
+    return { used: count ?? 0, limit: limitForPlan(plan), plan };
   });
