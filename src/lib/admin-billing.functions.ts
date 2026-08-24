@@ -69,7 +69,8 @@ export const searchBillingUsers = createServerFn({ method: "POST" })
       )
       .order("created_at", { ascending: false });
 
-    const latest = new Map<string, (typeof subs extends (infer T)[] ? T : never) | undefined>();
+    type SubRow = NonNullable<typeof subs>[number];
+    const latest = new Map<string, SubRow>();
     for (const s of subs ?? []) {
       if (!latest.has(s.user_id)) latest.set(s.user_id, s);
     }
