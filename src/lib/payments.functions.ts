@@ -51,7 +51,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
     };
   });
 
-/** Switches the active subscription to a different price, pro-rated immediately. */
+/** Switches the active subscription to a different price, effective at the next renewal. */
 export const changePlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ priceId: z.string().min(1).max(80) }).parse(data))
@@ -83,7 +83,7 @@ export const changePlan = createServerFn({ method: "POST" })
     const paddle = getPaddleClient(env);
     await paddle.subscriptions.update(sub.paddle_subscription_id, {
       items: [{ priceId: paddlePriceId, quantity: 1 }],
-      prorationBillingMode: "prorated_immediately",
+      prorationBillingMode: "full_next_billing_period",
     });
 
     return { ok: true };

@@ -63,7 +63,7 @@ function BillingPage() {
     try {
       if (isActive && subscription) {
         await doChangePlan({ data: { priceId } });
-        toast.success("Plan updated. The change is billed pro-rata.");
+        toast.success("Plan change scheduled — it takes effect at your next renewal.");
         await refetch();
       } else {
         await openCheckout({
@@ -140,7 +140,8 @@ function BillingPage() {
 
               {subscription?.status === "past_due" ? (
                 <p className="rounded-sm border border-destructive/40 bg-destructive/10 p-3 text-sm">
-                  Your last payment failed. Update your payment method to keep your plan active.
+                  Your last payment failed, so paid features are limited to the Free plan until
+                  it's resolved. Update your payment method to restore your plan.
                 </p>
               ) : null}
 
@@ -163,8 +164,8 @@ function BillingPage() {
                 </div>
               ) : (
                 <p className="border-t border-border pt-4 text-sm text-muted-foreground">
-                  You're on the Free plan — 5 reports per month. Pick a paid plan below for
-                  unlimited research.
+                  You're on the Free plan — 5 reports per month. Pick a paid plan below for more
+                  research capacity.
                 </p>
               )}
             </>
