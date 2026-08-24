@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { getIsAdmin } from "@/lib/auth-analytics.functions";
 import { Button } from "@/components/ui/button";
+import { PastDueBanner } from "@/components/past-due-banner";
 
 const NAV = [
   { to: "/", label: "Finder" },
@@ -34,6 +35,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur">
+      <PastDueBanner />
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
         <Link to="/" className="flex items-center gap-2">
           <span className="grid h-6 w-6 place-items-center rounded-sm bg-primary font-mono text-[11px] font-bold text-primary-foreground">
