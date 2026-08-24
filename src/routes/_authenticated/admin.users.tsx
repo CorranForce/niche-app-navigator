@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -163,8 +163,8 @@ function AdminUsersPage() {
               </thead>
               <tbody>
                 {data.map((u) => (
-                  <>
-                    <tr key={u.userId} className="border-t border-border/60">
+                  <Fragment key={u.userId}>
+                    <tr className="border-t border-border/60">
                       <td className="px-4 py-3">
                         <span className="font-mono text-xs">{u.email ?? u.userId}</span>
                         <span className="block text-[11px] text-muted-foreground">
@@ -190,13 +190,13 @@ function AdminUsersPage() {
                       </td>
                     </tr>
                     {openUser === u.userId ? (
-                      <tr key={`${u.userId}-history`} className="border-t border-border/60 bg-background/40">
+                      <tr className="border-t border-border/60 bg-background/40">
                         <td colSpan={5} className="p-0">
                           <BillingHistory userId={u.userId} />
                         </td>
                       </tr>
                     ) : null}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>
