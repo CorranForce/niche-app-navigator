@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
-import { getPaddleEnvironment, planForProductId, type PlanId } from "@/lib/paddle";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { entitledPlan, isPastDue, limitForPlan, type PlanId } from "@/lib/plan-limits";
 
 export type SubscriptionRow = {
   id: string;
@@ -37,20 +38,17 @@ export function useSubscription() {
   });
 
   const sub = query.data ?? null;
-  const periodEnd = sub?.current_period_end ? new Date(sub.current_period_end) : null;
-  const isActive = Boolean(
-    sub &&
-      ((["active", "trialing", "past_due"].includes(sub.status) &&
-        (!periodEnd || periodEnd > new Date())) ||
-        (sub.status === "canceled" && periodEnd && periodEnd > new Date())),
-  );
-
-  const plan: PlanId = isActive ? planForProductId(sub?.product_id) : "free";
+  const plan: PlanId = entitledPlan(sub);
+  const pastDue = isPastDue(sub?.status);
 
   return {
     subscription: sub,
     plan,
-    isActive,
+    /** True when the account currently has paid entitlements (past_due is restricted to Free). */
+    isActive: plan !== "free",
+    /** True when the subscription exists in Paddle but is not currently granting access. */
+    isPastDue: pastDue,
+    monthlyLimit: limitForPlan(plan),
     loading: loading || query.isLoading,
     refetch: query.refetch,
   };
