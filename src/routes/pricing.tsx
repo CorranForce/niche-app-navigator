@@ -15,13 +15,13 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Free, Pro and Studio plans for the MicroSaaS Solution Finder. Start with five niche reports a month, upgrade for unlimited research.",
+          "Free, Pro and Studio plans for the MicroSaaS Solution Finder. Start with five niche reports a month, upgrade for 50 a month or unlimited.",
       },
       { property: "og:title", content: "Pricing — MicroSaaS Solution Finder" },
       {
         property: "og:description",
         content:
-          "Start free with five niche reports a month. Upgrade for unlimited research and exports.",
+          "Start free with five niche reports a month. Upgrade for more capacity and exports.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
