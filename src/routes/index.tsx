@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useSession } from "@/hooks/use-session";
 import { generateReport } from "@/lib/reports.functions";
+import { USE_CASES } from "@/lib/use-cases";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -300,14 +301,61 @@ function Index() {
             </Button>
           </div>
         </section>
+
+        <section className="border-t border-border bg-surface/40">
+          <div className="mx-auto max-w-6xl px-4 py-20">
+            <p className="label-mono text-primary">Use cases</p>
+            <h2 className="mt-3 text-2xl font-semibold">
+              Explore by pain-point type before you pick a niche
+            </h2>
+            <p className="mt-3 max-w-2xl text-muted-foreground">
+              Six pains cover almost every small-business vertical. Each page shows the signals, the
+              app shapes that remove them, and where they bite hardest.
+            </p>
+            <div className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {USE_CASES.map((u) => (
+                <Link
+                  key={u.slug}
+                  to="/use-cases/$slug"
+                  params={{ slug: u.slug }}
+                  className="rounded-md border border-border bg-background p-5 text-left transition-colors hover:border-primary"
+                >
+                  <p className="label-mono text-primary">{u.painType}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{u.tagline}</p>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button asChild variant="outline">
+                <Link to="/use-cases">
+                  All use cases <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="ghost">
+                <Link to="/faq">Pricing &amp; billing FAQ</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-8">
           <p className="font-mono text-xs text-muted-foreground">µ solutionfinder</p>
-          <Link to="/pricing" className="label-mono text-muted-foreground hover:text-foreground">
-            Pricing
-          </Link>
+          <nav className="flex flex-wrap gap-4">
+            <Link
+              to="/use-cases"
+              className="label-mono text-muted-foreground hover:text-foreground"
+            >
+              Use cases
+            </Link>
+            <Link to="/pricing" className="label-mono text-muted-foreground hover:text-foreground">
+              Pricing
+            </Link>
+            <Link to="/faq" className="label-mono text-muted-foreground hover:text-foreground">
+              FAQ
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>
