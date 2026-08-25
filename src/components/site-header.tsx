@@ -105,6 +105,14 @@ export function SiteHeader() {
               >
                 Customers
               </Link>
+              <Link
+                to="/admin/emails"
+                className={`label-mono transition-colors hover:text-foreground ${
+                  pathname.startsWith("/admin/emails") ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                Emails
+              </Link>
             </>
           ) : null}
         </nav>
