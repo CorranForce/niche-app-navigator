@@ -77,6 +77,11 @@ jobs:
         id: smoke
         run: node scripts/smoke-test.mjs "${{ steps.deploy.outputs.url }}"
 
+      - name: Social preview checks (og:image / twitter:image)
+        id: ogcheck
+        run: node scripts/check-og-images.mjs "${{ steps.deploy.outputs.url }}"
+
+
       - name: Notify Slack
         if: always() && env.SLACK_WEBHOOK_URL != ''
         continue-on-error: true
