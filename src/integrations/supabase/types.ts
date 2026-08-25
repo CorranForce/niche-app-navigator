@@ -48,17 +48,32 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
+          onboarded_at: string | null
+          role_title: string | null
+          use_case: string | null
+          workspace_name: string | null
         }
         Insert: {
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id: string
+          onboarded_at?: string | null
+          role_title?: string | null
+          use_case?: string | null
+          workspace_name?: string | null
         }
         Update: {
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
+          onboarded_at?: string | null
+          role_title?: string | null
+          use_case?: string | null
+          workspace_name?: string | null
         }
         Relationships: []
       }
