@@ -21,6 +21,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as UseCasesIndexRouteImport } from './routes/use-cases.index'
 import { Route as UseCasesSlugRouteImport } from './routes/use-cases.$slug'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
 import { Route as AuthenticatedAdminOauthRouteImport } from './routes/_authenticated/admin.oauth'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
@@ -91,6 +92,11 @@ const UseCasesSlugRoute = UseCasesSlugRouteImport.update({
   id: '/use-cases/$slug',
   path: '/use-cases/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminEmailsRoute =
   AuthenticatedAdminEmailsRouteImport.update({
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/reports/$id'
     | '/api/public/auth-event'
     | '/lovable/email/events'
+    | '/admin/'
     | '/reports/'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/reports/$id'
     | '/api/public/auth-event'
     | '/lovable/email/events'
+    | '/admin'
     | '/reports'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -295,6 +306,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/$id'
     | '/api/public/auth-event'
     | '/lovable/email/events'
+    | '/_authenticated/admin/'
     | '/_authenticated/reports/'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -406,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UseCasesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/emails': {
       id: '/_authenticated/admin/emails'
       path: '/admin/emails'
@@ -494,6 +513,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminOauthRoute: typeof AuthenticatedAdminOauthRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedReportsIdRoute: typeof AuthenticatedReportsIdRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
 }
 
@@ -505,6 +525,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminOauthRoute: AuthenticatedAdminOauthRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedReportsIdRoute: AuthenticatedReportsIdRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
 }
 

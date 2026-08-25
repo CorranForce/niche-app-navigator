@@ -92,6 +92,14 @@ export function SiteHeader() {
           {isAdmin ? (
             <>
               <Link
+                to="/admin"
+                className={`label-mono transition-colors hover:text-foreground ${
+                  pathname === "/admin" ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                Owner
+              </Link>
+              <Link
                 to="/admin/oauth"
                 className={`label-mono transition-colors hover:text-foreground ${
                   pathname.startsWith("/admin/oauth") ? "text-primary" : "text-muted-foreground"
