@@ -19,6 +19,9 @@ export const Route = createFileRoute("/use-cases/$slug")({
     const u = loaderData.useCase;
     const url = `${BASE}/use-cases/${params.slug}`;
     const description = `${u.tagline} ${u.description}`.slice(0, 155);
+    const image = `${BASE}${u.ogImage}`;
+    const ratings = u.caseStudies.map((c) => c.rating);
+    const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
     return {
       meta: [
         { title: `${u.title} — MicroSaaS Solution Finder` },
@@ -27,9 +30,9 @@ export const Route = createFileRoute("/use-cases/$slug")({
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { property: "og:url", content: url },
-        { property: "og:image", content: `${BASE}/og-image.jpg` },
+        { property: "og:image", content: image },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:image", content: `${BASE}/og-image.jpg` },
+        { name: "twitter:image", content: image },
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [
@@ -41,7 +44,38 @@ export const Route = createFileRoute("/use-cases/$slug")({
             headline: u.title,
             description,
             url,
-            image: `${BASE}/og-image.jpg`,
+            image,
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: `MicroSaaS Solution Finder — ${u.painType}`,
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            url,
+            image,
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: avg.toFixed(1),
+              reviewCount: ratings.length,
+              bestRating: 5,
+              worstRating: 1,
+            },
+            review: u.caseStudies.map((c) => ({
+              "@type": "Review",
+              name: c.headline,
+              reviewBody: c.quote,
+              author: { "@type": "Person", name: `${c.author}, ${c.role}` },
+              reviewRating: {
+                "@type": "Rating",
+                ratingValue: c.rating,
+                bestRating: 5,
+                worstRating: 1,
+              },
+            })),
           }),
         },
         {
@@ -58,6 +92,7 @@ export const Route = createFileRoute("/use-cases/$slug")({
         },
       ],
     };
+
   },
   component: UseCaseDetail,
   notFoundComponent: UseCaseNotFound,
