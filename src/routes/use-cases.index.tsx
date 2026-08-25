@@ -6,7 +6,7 @@ import { USE_CASES } from "@/lib/use-cases";
 
 const URL = "https://idea-spark-fast.lovable.app/use-cases";
 
-export const Route = createFileRoute("/use-cases")({
+export const Route = createFileRoute("/use-cases/")({
   head: () => ({
     meta: [
       { title: "Use Cases — Pain-Point Types We Turn Into Apps" },
