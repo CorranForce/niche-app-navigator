@@ -48,11 +48,11 @@ function AuthCallback() {
     }
 
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) finish();
+      if (data.session) void finish();
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) finish();
+      if (session) void finish();
     });
 
     const timer = window.setTimeout(() => {
