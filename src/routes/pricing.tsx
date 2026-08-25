@@ -24,7 +24,53 @@ export const Route = createFileRoute("/pricing")({
           "Start free with five niche reports a month. Upgrade for more capacity and exports.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:url", content: "https://idea-spark-fast.lovable.app/pricing" },
+      { property: "og:image", content: "https://idea-spark-fast.lovable.app/og-image.jpg" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://idea-spark-fast.lovable.app/og-image.jpg" },
+    ],
+    links: [{ rel: "canonical", href: "https://idea-spark-fast.lovable.app/pricing" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "MicroSaaS Solution Finder",
+          description:
+            "AI niche research reports: pain points, app concepts, pricing tiers and a 72-hour build plan.",
+          image: "https://idea-spark-fast.lovable.app/og-image.jpg",
+          offers: {
+            "@type": "AggregateOffer",
+            priceCurrency: "USD",
+            lowPrice: "0",
+            highPrice: "49",
+            offerCount: 3,
+            url: "https://idea-spark-fast.lovable.app/pricing",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Home",
+              item: "https://idea-spark-fast.lovable.app/",
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "Pricing",
+              item: "https://idea-spark-fast.lovable.app/pricing",
+            },
+          ],
+        }),
+      },
     ],
   }),
   component: PricingPage,

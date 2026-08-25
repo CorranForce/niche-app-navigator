@@ -86,7 +86,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Turn a niche into pain points, app concepts, pricing tiers and a 72-hour build plan.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "MicroSaaS Solution Finder" },
+      { property: "og:locale", content: "en_US" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "MicroSaaS Solution Finder",
+          url: "https://idea-spark-fast.lovable.app/",
+          description:
+            "Turn a niche into pain points, app concepts, pricing tiers and a 72-hour build plan.",
+        }),
+      },
     ],
     links: [
       {

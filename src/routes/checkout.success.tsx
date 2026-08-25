@@ -23,6 +23,7 @@ export const Route = createFileRoute("/checkout/success")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: CheckoutSuccessPage,
