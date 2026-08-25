@@ -137,6 +137,12 @@ function AuthPage() {
       }
 
       track("success");
+      // New Google email → provision a free-tier account before landing.
+      try {
+        await ensureAccount();
+      } catch {
+        /* non-blocking */
+      }
       // The Lovable auth wrapper has already persisted the returned session.
       // Navigate directly instead of making another auth call while the
       // SIGNED_IN listener is still completing.
