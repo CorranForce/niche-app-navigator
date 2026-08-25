@@ -138,8 +138,9 @@ function OwnerDashboardPage() {
                     <Link to="/admin/users">Customers</Link>
                   </Button>
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/admin/oauth">OAuth health</Link>
+                    <a href="#oauth-health">OAuth health</a>
                   </Button>
+
                   <Button asChild size="sm" variant="outline">
                     <Link to="/admin/emails">Emails</Link>
                   </Button>
