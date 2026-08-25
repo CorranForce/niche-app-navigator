@@ -41,7 +41,7 @@ function AuthCallback() {
       sessionStorage.removeItem("post_auth_redirect");
       // First Google sign-in for this email → provision a free-tier account,
       // link it to an existing one, or explain why we couldn't.
-      let destination = target;
+      let onboarding = false;
       try {
         const result = await ensureAccount();
         if (result.status === "missing_email" || result.status === "duplicate_email") {
@@ -50,12 +50,16 @@ function AuthCallback() {
           return;
         }
         if (result.needsOnboarding) {
-          destination = `/onboarding?next=${encodeURIComponent(target)}`;
+          onboarding = true;
         }
       } catch {
         /* non-blocking: fall through to the requested destination */
       }
-      void navigate({ to: destination, replace: true });
+      if (onboarding) {
+        void navigate({ to: "/onboarding", search: { next: target }, replace: true });
+      } else {
+        void navigate({ to: target, replace: true });
+      }
     }
 
     void supabase.auth.getSession().then(({ data }) => {

@@ -140,7 +140,7 @@ function AuthPage() {
       track("success");
       // New Google email → provision a free-tier account (or link an existing
       // one) before landing.
-      let destination = next;
+      let onboarding = false;
       try {
         const account = await ensureAccount();
         if (account.status === "missing_email" || account.status === "duplicate_email") {
@@ -152,7 +152,7 @@ function AuthPage() {
           return;
         }
         if (account.needsOnboarding) {
-          destination = `/onboarding?next=${encodeURIComponent(next)}`;
+          onboarding = true;
         }
       } catch {
         /* non-blocking */
@@ -160,7 +160,11 @@ function AuthPage() {
       // The Lovable auth wrapper has already persisted the returned session.
       // Navigate directly instead of making another auth call while the
       // SIGNED_IN listener is still completing.
-      await navigate({ to: next, replace: true });
+      if (onboarding) {
+        await navigate({ to: "/onboarding", search: { next }, replace: true });
+      } else {
+        await navigate({ to: next, replace: true });
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Google sign-in failed. Please try again.";
