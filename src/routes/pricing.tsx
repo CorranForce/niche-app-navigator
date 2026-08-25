@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
@@ -6,6 +6,7 @@ import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PLANS } from "@/lib/paddle";
+import { USE_CASES } from "@/lib/use-cases";
 import { useSession } from "@/hooks/use-session";
 
 export const Route = createFileRoute("/pricing")({
@@ -164,6 +165,36 @@ function PricingPage() {
         <p className="mt-10 font-mono text-xs text-muted-foreground">
           Payments are handled securely by our reseller. Manage or cancel any time from Billing.
         </p>
+
+        <section className="mt-12 border-t border-border pt-10">
+          <p className="label-mono text-primary">Before you pick a plan</p>
+          <h2 className="mt-3 text-2xl font-semibold">See what a report actually solves</h2>
+          <p className="mt-3 max-w-2xl text-muted-foreground">
+            Each use case page shows the signals of a pain-point type, the app shapes that remove
+            it, and an example workflow end to end.
+          </p>
+          <div className="mt-6 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {USE_CASES.map((u) => (
+              <Link
+                key={u.slug}
+                to="/use-cases/$slug"
+                params={{ slug: u.slug }}
+                className="rounded-md border border-border bg-surface p-4 transition-colors hover:border-primary"
+              >
+                <p className="label-mono text-primary">{u.painType}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{u.tagline}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link to="/use-cases" className="label-mono text-primary hover:underline">
+              All use cases
+            </Link>
+            <Link to="/faq" className="label-mono text-primary hover:underline">
+              Pricing, billing &amp; refund FAQ
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );
