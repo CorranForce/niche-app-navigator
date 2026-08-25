@@ -17,11 +17,13 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
 import { Route as AuthenticatedAdminOauthRouteImport } from './routes/_authenticated/admin.oauth'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedReportsIdRouteImport } from './routes/_authenticated/reports.$id'
 import { Route as ApiPublicAuthEventRouteImport } from './routes/api/public/auth-event'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -66,6 +68,12 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/checkout/success',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminEmailsRoute =
+  AuthenticatedAdminEmailsRouteImport.update({
+    id: '/admin/emails',
+    path: '/admin/emails',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminOauthRoute = AuthenticatedAdminOauthRouteImport.update({
   id: '/admin/oauth',
   path: '/admin/oauth',
@@ -90,6 +98,11 @@ const AuthenticatedReportsIdRoute = AuthenticatedReportsIdRouteImport.update({
 const ApiPublicAuthEventRoute = ApiPublicAuthEventRouteImport.update({
   id: '/api/public/auth-event',
   path: '/api/public/auth-event',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPaymentsWebhookRoute =
@@ -123,10 +136,12 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AuthenticatedBillingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -141,10 +156,12 @@ export interface FileRoutesByTo {
   '/billing': typeof AuthenticatedBillingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -161,10 +178,12 @@ export interface FileRoutesById {
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/_authenticated/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -181,10 +200,12 @@ export interface FileRouteTypes {
     | '/billing'
     | '/auth/callback'
     | '/checkout/success'
+    | '/admin/emails'
     | '/admin/oauth'
     | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
+    | '/lovable/email/events'
     | '/reports/'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -199,10 +220,12 @@ export interface FileRouteTypes {
     | '/billing'
     | '/auth/callback'
     | '/checkout/success'
+    | '/admin/emails'
     | '/admin/oauth'
     | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
+    | '/lovable/email/events'
     | '/reports'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -218,10 +241,12 @@ export interface FileRouteTypes {
     | '/_authenticated/billing'
     | '/auth_/callback'
     | '/checkout/success'
+    | '/_authenticated/admin/emails'
     | '/_authenticated/admin/oauth'
     | '/_authenticated/admin/users'
     | '/_authenticated/reports/$id'
     | '/api/public/auth-event'
+    | '/lovable/email/events'
     | '/_authenticated/reports/'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
@@ -237,6 +262,7 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   ApiPublicAuthEventRoute: typeof ApiPublicAuthEventRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -301,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/emails': {
+      id: '/_authenticated/admin/emails'
+      path: '/admin/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AuthenticatedAdminEmailsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/oauth': {
       id: '/_authenticated/admin/oauth'
       path: '/admin/oauth'
@@ -334,6 +367,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/auth-event'
       fullPath: '/api/public/auth-event'
       preLoaderRoute: typeof ApiPublicAuthEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/webhook': {
@@ -370,6 +410,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
+  AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
   AuthenticatedAdminOauthRoute: typeof AuthenticatedAdminOauthRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedReportsIdRoute: typeof AuthenticatedReportsIdRoute
@@ -379,6 +420,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedBillingRoute: AuthenticatedBillingRoute,
+  AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
   AuthenticatedAdminOauthRoute: AuthenticatedAdminOauthRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedReportsIdRoute: AuthenticatedReportsIdRoute,
@@ -396,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   ApiPublicAuthEventRoute: ApiPublicAuthEventRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

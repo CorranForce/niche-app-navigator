@@ -99,6 +99,16 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
       break;
+    case EventName.TransactionCompleted: {
+      const { sendInvoiceEmail } = await import("@/lib/billing-emails.server");
+      await sendInvoiceEmail(event.data, env);
+      break;
+    }
+    case EventName.TransactionPaymentFailed: {
+      const { sendPaymentFailedEmail } = await import("@/lib/billing-emails.server");
+      await sendPaymentFailedEmail(event.data, env);
+      break;
+    }
     default:
       console.log("Unhandled event:", event.eventType);
   }

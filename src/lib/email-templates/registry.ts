@@ -1,12 +1,16 @@
-import type { ComponentType } from 'react'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { ComponentType } from "react";
+
+import { template as paymentFailedTemplate } from "./payment-failed";
+import { template as invoiceReceiptTemplate } from "./invoice-receipt";
 
 export interface TemplateEntry {
-  component: ComponentType<any>
-  subject: string | ((data: Record<string, any>) => string)
-  displayName?: string
-  previewData?: Record<string, any>
+  component: ComponentType<any>;
+  subject: string | ((data: Record<string, any>) => string);
+  displayName?: string;
+  previewData?: Record<string, any>;
   /** Fixed recipient — overrides caller-provided recipientEmail when set. */
-  to?: string
+  to?: string;
 }
 
 /**
@@ -18,6 +22,6 @@ export interface TemplateEntry {
  *   // then add to TEMPLATES: 'welcome': welcomeTemplate
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
-  // Add templates here as they are created, e.g.:
-  // 'welcome': welcomeTemplate,
-}
+  "payment-failed": paymentFailedTemplate,
+  "invoice-receipt": invoiceReceiptTemplate,
+};
