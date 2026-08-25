@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
+import { OAuthHealthSection } from "@/components/oauth-health";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
