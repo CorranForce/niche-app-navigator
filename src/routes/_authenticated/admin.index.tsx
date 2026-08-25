@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
+import { OAuthHealthSection } from "@/components/oauth-health";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -137,8 +138,9 @@ function OwnerDashboardPage() {
                     <Link to="/admin/users">Customers</Link>
                   </Button>
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/admin/oauth">OAuth health</Link>
+                    <a href="#oauth-health">OAuth health</a>
                   </Button>
+
                   <Button asChild size="sm" variant="outline">
                     <Link to="/admin/emails">Emails</Link>
                   </Button>
@@ -189,6 +191,8 @@ function OwnerDashboardPage() {
             </section>
           </>
         ) : null}
+
+        <OAuthHealthSection />
       </main>
     </div>
   );

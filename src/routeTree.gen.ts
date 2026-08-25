@@ -23,7 +23,6 @@ import { Route as UseCasesIndexRouteImport } from './routes/use-cases.index'
 import { Route as UseCasesSlugRouteImport } from './routes/use-cases.$slug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
-import { Route as AuthenticatedAdminOauthRouteImport } from './routes/_authenticated/admin.oauth'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedReportsIdRouteImport } from './routes/_authenticated/reports.$id'
@@ -104,11 +103,6 @@ const AuthenticatedAdminEmailsRoute =
     path: '/admin/emails',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminOauthRoute = AuthenticatedAdminOauthRouteImport.update({
-  id: '/admin/oauth',
-  path: '/admin/oauth',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
@@ -171,7 +165,6 @@ export interface FileRoutesByFullPath {
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases/': typeof UseCasesIndexRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
-  '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -196,7 +189,6 @@ export interface FileRoutesByTo {
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases': typeof UseCasesIndexRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
-  '/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -223,7 +215,6 @@ export interface FileRoutesById {
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases/': typeof UseCasesIndexRoute
   '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
-  '/_authenticated/admin/oauth': typeof AuthenticatedAdminOauthRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
@@ -250,7 +241,6 @@ export interface FileRouteTypes {
     | '/use-cases/$slug'
     | '/use-cases/'
     | '/admin/emails'
-    | '/admin/oauth'
     | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
@@ -275,7 +265,6 @@ export interface FileRouteTypes {
     | '/use-cases/$slug'
     | '/use-cases'
     | '/admin/emails'
-    | '/admin/oauth'
     | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
@@ -301,7 +290,6 @@ export interface FileRouteTypes {
     | '/use-cases/$slug'
     | '/use-cases/'
     | '/_authenticated/admin/emails'
-    | '/_authenticated/admin/oauth'
     | '/_authenticated/admin/users'
     | '/_authenticated/reports/$id'
     | '/api/public/auth-event'
@@ -432,13 +420,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEmailsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin/oauth': {
-      id: '/_authenticated/admin/oauth'
-      path: '/admin/oauth'
-      fullPath: '/admin/oauth'
-      preLoaderRoute: typeof AuthenticatedAdminOauthRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
       path: '/admin/users'
@@ -510,7 +491,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
-  AuthenticatedAdminOauthRoute: typeof AuthenticatedAdminOauthRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedReportsIdRoute: typeof AuthenticatedReportsIdRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -522,7 +502,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBillingRoute: AuthenticatedBillingRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
-  AuthenticatedAdminOauthRoute: AuthenticatedAdminOauthRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedReportsIdRoute: AuthenticatedReportsIdRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
