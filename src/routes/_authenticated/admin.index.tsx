@@ -191,6 +191,8 @@ function OwnerDashboardPage() {
             </section>
           </>
         ) : null}
+
+        <OAuthHealthSection />
       </main>
     </div>
   );
