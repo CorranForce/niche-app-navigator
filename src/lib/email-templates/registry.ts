@@ -1,5 +1,8 @@
 import type { ComponentType } from 'react'
 
+import { template as paymentFailedTemplate } from './payment-failed'
+import { template as invoiceReceiptTemplate } from './invoice-receipt'
+
 export interface TemplateEntry {
   component: ComponentType<any>
   subject: string | ((data: Record<string, any>) => string)
