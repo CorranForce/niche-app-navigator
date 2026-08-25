@@ -167,6 +167,47 @@ function UseCaseDetail() {
         </section>
 
         <section className="mt-12">
+          <h2 className="text-xl font-semibold">Mini case studies</h2>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Composite examples drawn from typical niche builds — what hurt, what shipped, and what
+            moved.
+          </p>
+          <div className="mt-6 space-y-4">
+            {u.caseStudies.map((c) => (
+              <Card key={c.headline} className="gap-3 border-border bg-surface p-6">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="label-mono text-primary">{c.niche}</p>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {"★".repeat(c.rating)}
+                    <span className="opacity-30">{"★".repeat(5 - c.rating)}</span>
+                  </span>
+                </div>
+                <h3 className="text-lg font-medium">{c.headline}</h3>
+                <dl className="grid gap-3 sm:grid-cols-3">
+                  {[
+                    ["Challenge", c.challenge],
+                    ["What shipped", c.build],
+                    ["Result", c.result],
+                  ].map(([k, v]) => (
+                    <div key={k}>
+                      <dt className="label-mono text-muted-foreground">{k}</dt>
+                      <dd className="mt-1 text-sm text-muted-foreground">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <blockquote className="mt-1 border-l-2 border-primary pl-4 text-sm italic">
+                  “{c.quote}”
+                  <footer className="mt-1 font-mono text-xs not-italic text-muted-foreground">
+                    {c.author} — {c.role}
+                  </footer>
+                </blockquote>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+
+        <section className="mt-12">
           <h2 className="text-xl font-semibold">Niches where it bites hardest</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {u.niches.map((n) => (
