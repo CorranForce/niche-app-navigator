@@ -27,6 +27,7 @@ function safePath(value: string | null) {
 function AuthCallback() {
   const navigate = useNavigate();
   const [failed, setFailed] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
 
   useEffect(() => {
     let done = false;
@@ -38,13 +39,27 @@ function AuthCallback() {
       if (done) return;
       done = true;
       sessionStorage.removeItem("post_auth_redirect");
-      // First Google sign-in for this email → provision a free-tier account.
+      // First Google sign-in for this email → provision a free-tier account,
+      // link it to an existing one, or explain why we couldn't.
+      let onboarding = false;
       try {
-        await ensureAccount();
+        const result = await ensureAccount();
+        if (result.status === "missing_email" || result.status === "duplicate_email") {
+          await supabase.auth.signOut();
+          setProblem(result.message ?? "We couldn't complete that sign-in.");
+          return;
+        }
+        if (result.needsOnboarding) {
+          onboarding = true;
+        }
       } catch {
-        /* non-blocking: the signup trigger also provisions the account */
+        /* non-blocking: fall through to the requested destination */
       }
-      void navigate({ to: target, replace: true });
+      if (onboarding) {
+        void navigate({ to: "/onboarding", search: { next: target }, replace: true });
+      } else {
+        void navigate({ to: target, replace: true });
+      }
     }
 
     void supabase.auth.getSession().then(({ data }) => {
@@ -67,7 +82,14 @@ function AuthCallback() {
 
   return (
     <div className="grid-canvas flex min-h-screen flex-col items-center justify-center gap-3 px-4 text-center">
-      {failed ? (
+      {problem ? (
+        <>
+          <p className="max-w-sm text-sm text-muted-foreground">{problem}</p>
+          <a href="/auth" className="label-mono text-primary underline">
+            Back to sign in
+          </a>
+        </>
+      ) : failed ? (
         <>
           <p className="text-sm text-muted-foreground">
             We couldn&apos;t complete that sign-in. Please try again.

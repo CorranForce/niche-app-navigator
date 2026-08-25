@@ -138,16 +138,33 @@ function AuthPage() {
       }
 
       track("success");
-      // New Google email → provision a free-tier account before landing.
+      // New Google email → provision a free-tier account (or link an existing
+      // one) before landing.
+      let onboarding = false;
       try {
-        await ensureAccount();
+        const account = await ensureAccount();
+        if (account.status === "missing_email" || account.status === "duplicate_email") {
+          await supabase.auth.signOut();
+          const message = account.message ?? "We couldn't complete that sign-in.";
+          setOauthError(message);
+          toast.error(message);
+          track("error", account.status);
+          return;
+        }
+        if (account.needsOnboarding) {
+          onboarding = true;
+        }
       } catch {
         /* non-blocking */
       }
       // The Lovable auth wrapper has already persisted the returned session.
       // Navigate directly instead of making another auth call while the
       // SIGNED_IN listener is still completing.
-      await navigate({ to: next, replace: true });
+      if (onboarding) {
+        await navigate({ to: "/onboarding", search: { next }, replace: true });
+      } else {
+        await navigate({ to: next, replace: true });
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Google sign-in failed. Please try again.";

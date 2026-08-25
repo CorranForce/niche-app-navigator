@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticated/billing'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
@@ -56,6 +57,11 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
 const AuthenticatedBillingRoute = AuthenticatedBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/account': typeof AuthenticatedAccountRoute
   '/billing': typeof AuthenticatedBillingRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/account': typeof AuthenticatedAccountRoute
   '/billing': typeof AuthenticatedBillingRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/billing': typeof AuthenticatedBillingRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/account'
     | '/billing'
+    | '/onboarding'
     | '/auth/callback'
     | '/checkout/success'
     | '/admin/emails'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/account'
     | '/billing'
+    | '/onboarding'
     | '/auth/callback'
     | '/checkout/success'
     | '/admin/emails'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/_authenticated/account'
     | '/_authenticated/billing'
+    | '/_authenticated/onboarding'
     | '/auth_/callback'
     | '/checkout/success'
     | '/_authenticated/admin/emails'
@@ -311,6 +323,13 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/billing'
       preLoaderRoute: typeof AuthenticatedBillingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/auth_/callback': {
@@ -410,6 +429,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedBillingRoute: typeof AuthenticatedBillingRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
   AuthenticatedAdminOauthRoute: typeof AuthenticatedAdminOauthRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -420,6 +440,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedBillingRoute: AuthenticatedBillingRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
   AuthenticatedAdminOauthRoute: AuthenticatedAdminOauthRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
