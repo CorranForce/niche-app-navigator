@@ -138,9 +138,22 @@ function AuthPage() {
       }
 
       track("success");
-      // New Google email → provision a free-tier account before landing.
+      // New Google email → provision a free-tier account (or link an existing
+      // one) before landing.
+      let destination = next;
       try {
-        await ensureAccount();
+        const account = await ensureAccount();
+        if (account.status === "missing_email" || account.status === "duplicate_email") {
+          await supabase.auth.signOut();
+          const message = account.message ?? "We couldn't complete that sign-in.";
+          setOauthError(message);
+          toast.error(message);
+          track("error", account.status);
+          return;
+        }
+        if (account.needsOnboarding) {
+          destination = `/onboarding?next=${encodeURIComponent(next)}`;
+        }
       } catch {
         /* non-blocking */
       }
