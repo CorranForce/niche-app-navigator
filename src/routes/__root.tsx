@@ -101,6 +101,55 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           url: "https://idea-spark-fast.lovable.app/",
           description:
             "Turn a niche into pain points, app concepts, pricing tiers and a 72-hour build plan.",
+          publisher: { "@id": "https://idea-spark-fast.lovable.app/#organization" },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "@id": "https://idea-spark-fast.lovable.app/#organization",
+          name: "MicroSaaS Solution Finder",
+          alternateName: "solutionfinder",
+          url: "https://idea-spark-fast.lovable.app/",
+          logo: {
+            "@type": "ImageObject",
+            url: "https://idea-spark-fast.lovable.app/og-image.jpg",
+            width: 1200,
+            height: 630,
+          },
+          image: "https://idea-spark-fast.lovable.app/og-image.jpg",
+          description:
+            "An AI research tool that turns any business niche into ranked pain points, three buildable micro-SaaS concepts, a pricing tier structure and a 72-hour first-release plan.",
+          foundingDate: "2026",
+          knowsAbout: [
+            "Micro-SaaS product research",
+            "Small business operational pain points",
+            "SaaS pricing tiers",
+            "MVP scoping",
+          ],
+          contactPoint: [
+            {
+              "@type": "ContactPoint",
+              contactType: "customer support",
+              email: "support@notify.freedomopsai.dev",
+              url: "https://idea-spark-fast.lovable.app/faq",
+              availableLanguage: ["en"],
+            },
+            {
+              "@type": "ContactPoint",
+              contactType: "billing support",
+              email: "billing@notify.freedomopsai.dev",
+              url: "https://idea-spark-fast.lovable.app/faq",
+              availableLanguage: ["en"],
+            },
+          ],
+          sameAs: [
+            "https://github.com/freedomopsai",
+            "https://x.com/freedomopsai",
+            "https://www.linkedin.com/company/freedomopsai",
+          ],
         }),
       },
     ],

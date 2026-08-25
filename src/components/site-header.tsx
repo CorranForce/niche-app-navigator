@@ -9,7 +9,9 @@ import { PastDueBanner } from "@/components/past-due-banner";
 
 const NAV = [
   { to: "/", label: "Finder" },
+  { to: "/use-cases", label: "Use cases" },
   { to: "/pricing", label: "Pricing" },
+  { to: "/faq", label: "FAQ" },
 ] as const;
 
 export function SiteHeader() {
