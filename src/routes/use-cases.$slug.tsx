@@ -92,7 +92,6 @@ export const Route = createFileRoute("/use-cases/$slug")({
         },
       ],
     };
-
   },
   component: UseCaseDetail,
   notFoundComponent: UseCaseNotFound,
@@ -205,7 +204,6 @@ function UseCaseDetail() {
             ))}
           </div>
         </section>
-
 
         <section className="mt-12">
           <h2 className="text-xl font-semibold">Niches where it bites hardest</h2>
