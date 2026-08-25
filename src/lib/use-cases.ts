@@ -8,6 +8,20 @@ export type UseCase = {
   appShapes: { name: string; blurb: string }[];
   niches: string[];
   workflow: string[];
+  ogImage: string;
+  caseStudies: CaseStudy[];
+};
+
+export type CaseStudy = {
+  niche: string;
+  headline: string;
+  challenge: string;
+  build: string;
+  result: string;
+  quote: string;
+  author: string;
+  role: string;
+  rating: number;
 };
 
 export const USE_CASES: UseCase[] = [
