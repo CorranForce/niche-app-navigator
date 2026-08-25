@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { ensureAccount } from "@/lib/account.functions";
 
 import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
@@ -137,6 +138,12 @@ function AuthPage() {
       }
 
       track("success");
+      // New Google email → provision a free-tier account before landing.
+      try {
+        await ensureAccount();
+      } catch {
+        /* non-blocking */
+      }
       // The Lovable auth wrapper has already persisted the returned session.
       // Navigate directly instead of making another auth call while the
       // SIGNED_IN listener is still completing.

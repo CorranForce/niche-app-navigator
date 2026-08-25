@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAccount } from "@/lib/account.functions";
 
 export const Route = createFileRoute("/auth_/callback")({
   ssr: false,
@@ -33,19 +34,25 @@ function AuthCallback() {
       typeof window === "undefined" ? null : sessionStorage.getItem("post_auth_redirect"),
     );
 
-    function finish() {
+    async function finish() {
       if (done) return;
       done = true;
       sessionStorage.removeItem("post_auth_redirect");
+      // First Google sign-in for this email → provision a free-tier account.
+      try {
+        await ensureAccount();
+      } catch {
+        /* non-blocking: the signup trigger also provisions the account */
+      }
       void navigate({ to: target, replace: true });
     }
 
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) finish();
+      if (data.session) void finish();
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) finish();
+      if (session) void finish();
     });
 
     const timer = window.setTimeout(() => {
