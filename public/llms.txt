@@ -1,0 +1,34 @@
+# MicroSaaS Solution Finder
+
+> An AI research tool that turns any business niche into its most common operational pain points, three narrow micro-SaaS app concepts that solve them, a three-tier pricing structure, and a feature breakdown scoped to a 72-hour first release.
+
+Site: https://idea-spark-fast.lovable.app
+
+## What it does
+
+You enter a niche (for example "independent dental clinics", "mobile dog groomers", "food truck operators") plus an optional audience size and budget level. The tool returns a structured report containing:
+
+- **Pain points** — 5 to 7 specific operational pains, ranked by severity, each with the signal it shows up in and why it hurts.
+- **App concepts** — three narrow product ideas, each with a name, one-liner, target user, the pain points it removes, build complexity, and a 72-hour feasibility flag.
+- **Pricing tiers** — a three-tier structure for the top concept with realistic monthly prices and the limits that separate the tiers.
+- **Feature breakdown** — features mapped to tiers with hour estimates, split into first release versus later.
+- **Markdown export** — the whole report copyable as markdown.
+
+Signed-in users keep a saved history of every report they generate.
+
+## Pages
+
+- [Home / generator](https://idea-spark-fast.lovable.app/): Enter a niche and generate a report.
+- [Pricing](https://idea-spark-fast.lovable.app/pricing): Free, Pro and Studio plans.
+
+## Plans
+
+- **Free** — 5 reports per month.
+- **Pro** — $19/month or $190/year, 50 reports per month.
+- **Studio** — $49/month or $490/year, unlimited reports.
+
+Plan changes apply at the next renewal. Cancellations keep access until the end of the paid period.
+
+## Who it is for
+
+Indie hackers, solo founders, agencies and product teams looking for validated, buildable micro-SaaS opportunities inside a specific vertical, with scope small enough to ship a first release in three days.
