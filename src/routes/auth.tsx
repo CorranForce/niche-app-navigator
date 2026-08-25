@@ -25,6 +25,7 @@ export const Route = createFileRoute("/auth")({
       },
       { property: "og:title", content: "Sign in — MicroSaaS Solution Finder" },
       { property: "og:description", content: "Access your saved micro-SaaS niche reports." },
+      { name: "robots", content: "noindex, follow" },
     ],
   }),
   component: AuthPage,
