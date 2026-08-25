@@ -8,18 +8,57 @@ Site: https://idea-spark-fast.lovable.app
 
 You enter a niche (for example "independent dental clinics", "mobile dog groomers", "food truck operators") plus an optional audience size and budget level. The tool returns a structured report containing:
 
-- **Pain points** — 5 to 7 specific operational pains, ranked by severity, each with the signal it shows up in and why it hurts.
-- **App concepts** — three narrow product ideas, each with a name, one-liner, target user, the pain points it removes, build complexity, and a 72-hour feasibility flag.
-- **Pricing tiers** — a three-tier structure for the top concept with realistic monthly prices and the limits that separate the tiers.
-- **Feature breakdown** — features mapped to tiers with hour estimates, split into first release versus later.
-- **Markdown export** — the whole report copyable as markdown.
+- **Pain points** — 5 to 7 specific operational pains, ranked by severity, each with the signal it shows up in and why it hurts. Severity reflects how directly the pain costs the business money, not how often it is mentioned.
+- **App concepts** — three narrow product ideas, each with a name, one-liner, target user, the pain points it removes, build complexity, and a 72-hour feasibility flag. Concepts are deliberately narrow: one workflow removed completely beats a broad tool that half-solves five things.
+- **Pricing tiers** — a three-tier structure for the top concept with realistic monthly prices and the limits that separate the tiers. The tier limit is chosen from a metric that grows with the customer's own value (jobs, clients, quotes, seats).
+- **Feature breakdown** — features mapped to tiers with hour estimates, split into first release versus later, so the first release fits three days of build time.
+- **Markdown export** — the whole report copyable as markdown for a spec doc, a pitch, or an AI coding agent.
 
-Signed-in users keep a saved history of every report they generate.
+Signed-in users keep a saved history of every report they generate, reopenable and re-exportable at no additional cost against their monthly limit.
+
+### Inputs you can set
+
+- **Niche** — free text, any vertical or customer segment.
+- **Audience size** — solo operators, small businesses (1–20 staff), or mid-market (20–200 staff). This changes who the concept is sold to and how the tiers are shaped.
+- **Budget level** — tight (under $20/mo), moderate ($20–100/mo), or premium ($100+/mo). This anchors the generated price points.
+
+## Ideal customer profiles
+
+- **Indie hackers and solo founders** choosing what to build next. They need a validated pain and a scope small enough to ship alone in a weekend, not a market-size deck.
+- **Agencies and studios** productising repeat client work. They already know a vertical and want the narrow SaaS shape hiding inside the services they keep delivering by hand.
+- **Product teams exploring adjacent verticals** who need a fast, structured read on a segment before committing discovery time.
+- **Vertical operators turning their own workflow into software** — someone inside the niche who feels the pain and needs it framed as a buildable product with defensible pricing.
+- **Technical consultants and fractional CTOs** scoping a first release for a non-technical founder who has a problem but no product definition.
+
+Not a fit for: enterprise market sizing, funding-grade competitive analysis, or teams that need primary customer interviews rather than a synthesized starting hypothesis.
+
+## Pain-point use cases
+
+Nearly every report lands on one of six recurring pain-point types. Each has a dedicated page:
+
+- [Scheduling and no-shows](https://idea-spark-fast.lovable.app/use-cases/scheduling-and-no-shows): empty slots, phone-tag booking, last-minute cancellations. App shapes: reminder and confirm loops, waitlist backfill, deposit-gated booking.
+- [Manual admin and paperwork](https://idea-spark-fast.lovable.app/use-cases/manual-admin-and-paperwork): re-typed data, printed intake forms, spreadsheet reconciliation. App shapes: digital intake, one-click handoff to accounting, template libraries.
+- [Lead follow-up](https://idea-spark-fast.lovable.app/use-cases/lead-follow-up): enquiries spread across inboxes that go cold. App shapes: unified lead inbox, automatic first reply, follow-up cadence.
+- [Quoting and estimates](https://idea-spark-fast.lovable.app/use-cases/quoting-and-estimates): slow, inconsistent quotes rebuilt by hand. App shapes: line-item quote builder, on-site estimator, quote win-rate analytics.
+- [Invoicing and payments](https://idea-spark-fast.lovable.app/use-cases/invoicing-and-payments): late invoices, manual chasing, no cash view. App shapes: job-to-invoice automation, dunning reminders, 30-day cash outlook.
+- [Client communication](https://idea-spark-fast.lovable.app/use-cases/client-communication): repeated status updates across scattered threads. App shapes: per-job client status page, approval requests, broadcast updates.
+
+## Example workflows
+
+**Weekend build for a solo founder.** Enter "mobile dog groomers", audience "solo operators", budget "tight". The report ranks scheduling and no-shows first. Take concept one, build only the reminder-and-confirm loop from the first-release column, and launch to ten groomers before adding waitlist backfill.
+
+**Agency productising retainer work.** Enter "small-town law firms", audience "small businesses", budget "premium". Compare the manual-admin pain against client communication by severity, then use the generated tier table to price the intake tool the agency has already built three times by hand.
+
+**Vertical operator validating a hunch.** Enter "food truck operators", audience "solo operators". Confirm whether quoting or invoicing scores higher, export the report as markdown, and use it directly as the spec for an AI coding agent.
+
+**Comparing two verticals.** Run "boutique fitness studios" and "music teachers" separately, then compare which niche's top pain has the higher severity and the lower build complexity. Choose the one where the 72-hour feasibility flag is green on the top concept.
 
 ## Pages
 
 - [Home / generator](https://idea-spark-fast.lovable.app/): Enter a niche and generate a report.
+- [Use cases](https://idea-spark-fast.lovable.app/use-cases): The six pain-point types, their signals and matching app shapes.
 - [Pricing](https://idea-spark-fast.lovable.app/pricing): Free, Pro and Studio plans.
+- [FAQ](https://idea-spark-fast.lovable.app/faq): Pricing, billing, refunds and payment-failed recovery.
 
 ## Plans
 
@@ -27,7 +66,7 @@ Signed-in users keep a saved history of every report they generate.
 - **Pro** — $19/month or $190/year, 50 reports per month.
 - **Studio** — $49/month or $490/year, unlimited reports.
 
-Plan changes apply at the next renewal. Cancellations keep access until the end of the paid period.
+Every plan returns the same depth of report; paid plans lift the monthly limit. Plan changes apply at the next renewal. Cancellations keep access until the end of the paid period. A failed payment drops the account to Free limits until a payment succeeds; saved reports are never deleted.
 
 ## Who it is for
 
