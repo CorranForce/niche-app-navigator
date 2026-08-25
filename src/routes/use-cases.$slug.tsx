@@ -19,6 +19,9 @@ export const Route = createFileRoute("/use-cases/$slug")({
     const u = loaderData.useCase;
     const url = `${BASE}/use-cases/${params.slug}`;
     const description = `${u.tagline} ${u.description}`.slice(0, 155);
+    const image = `${BASE}${u.ogImage}`;
+    const ratings = u.caseStudies.map((c) => c.rating);
+    const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
     return {
       meta: [
         { title: `${u.title} — MicroSaaS Solution Finder` },
@@ -27,9 +30,9 @@ export const Route = createFileRoute("/use-cases/$slug")({
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { property: "og:url", content: url },
-        { property: "og:image", content: `${BASE}/og-image.jpg` },
+        { property: "og:image", content: image },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:image", content: `${BASE}/og-image.jpg` },
+        { name: "twitter:image", content: image },
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [
@@ -41,7 +44,38 @@ export const Route = createFileRoute("/use-cases/$slug")({
             headline: u.title,
             description,
             url,
-            image: `${BASE}/og-image.jpg`,
+            image,
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: `MicroSaaS Solution Finder — ${u.painType}`,
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            url,
+            image,
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: avg.toFixed(1),
+              reviewCount: ratings.length,
+              bestRating: 5,
+              worstRating: 1,
+            },
+            review: u.caseStudies.map((c) => ({
+              "@type": "Review",
+              name: c.headline,
+              reviewBody: c.quote,
+              author: { "@type": "Person", name: `${c.author}, ${c.role}` },
+              reviewRating: {
+                "@type": "Rating",
+                ratingValue: c.rating,
+                bestRating: 5,
+                worstRating: 1,
+              },
+            })),
           }),
         },
         {
@@ -129,6 +163,46 @@ function UseCaseDetail() {
               </li>
             ))}
           </ol>
+        </section>
+
+        <section className="mt-12">
+          <h2 className="text-xl font-semibold">Mini case studies</h2>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Composite examples drawn from typical niche builds — what hurt, what shipped, and what
+            moved.
+          </p>
+          <div className="mt-6 space-y-4">
+            {u.caseStudies.map((c) => (
+              <Card key={c.headline} className="gap-3 border-border bg-surface p-6">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="label-mono text-primary">{c.niche}</p>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {"★".repeat(c.rating)}
+                    <span className="opacity-30">{"★".repeat(5 - c.rating)}</span>
+                  </span>
+                </div>
+                <h3 className="text-lg font-medium">{c.headline}</h3>
+                <dl className="grid gap-3 sm:grid-cols-3">
+                  {[
+                    ["Challenge", c.challenge],
+                    ["What shipped", c.build],
+                    ["Result", c.result],
+                  ].map(([k, v]) => (
+                    <div key={k}>
+                      <dt className="label-mono text-muted-foreground">{k}</dt>
+                      <dd className="mt-1 text-sm text-muted-foreground">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <blockquote className="mt-1 border-l-2 border-primary pl-4 text-sm italic">
+                  “{c.quote}”
+                  <footer className="mt-1 font-mono text-xs not-italic text-muted-foreground">
+                    {c.author} — {c.role}
+                  </footer>
+                </blockquote>
+              </Card>
+            ))}
+          </div>
         </section>
 
         <section className="mt-12">
