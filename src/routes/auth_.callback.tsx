@@ -34,10 +34,16 @@ function AuthCallback() {
       typeof window === "undefined" ? null : sessionStorage.getItem("post_auth_redirect"),
     );
 
-    function finish() {
+    async function finish() {
       if (done) return;
       done = true;
       sessionStorage.removeItem("post_auth_redirect");
+      // First Google sign-in for this email → provision a free-tier account.
+      try {
+        await ensureAccount();
+      } catch {
+        /* non-blocking: the signup trigger also provisions the account */
+      }
       void navigate({ to: target, replace: true });
     }
 
