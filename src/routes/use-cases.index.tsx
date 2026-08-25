@@ -23,9 +23,9 @@ export const Route = createFileRoute("/use-cases/")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: URL },
-      { property: "og:image", content: "https://idea-spark-fast.lovable.app/og-image.jpg" },
+      { property: "og:image", content: "https://idea-spark-fast.lovable.app/og-use-cases.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://idea-spark-fast.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: "https://idea-spark-fast.lovable.app/og-use-cases.jpg" },
     ],
     links: [{ rel: "canonical", href: URL }],
     scripts: [

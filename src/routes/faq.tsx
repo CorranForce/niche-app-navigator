@@ -64,9 +64,9 @@ export const Route = createFileRoute("/faq")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: FAQ_URL },
-      { property: "og:image", content: "https://idea-spark-fast.lovable.app/og-image.jpg" },
+      { property: "og:image", content: "https://idea-spark-fast.lovable.app/og-faq.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://idea-spark-fast.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: "https://idea-spark-fast.lovable.app/og-faq.jpg" },
     ],
     links: [{ rel: "canonical", href: FAQ_URL }],
     scripts: [
