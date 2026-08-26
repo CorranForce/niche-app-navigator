@@ -133,7 +133,9 @@ function PricingPage() {
               >
                 <div className="flex items-center justify-between">
                   <p className="label-mono text-muted-foreground">{t.name}</p>
-                  {highlighted ? <span className="label-mono text-primary">Most picked</span> : null}
+                  {highlighted ? (
+                    <span className="label-mono text-primary">Most picked</span>
+                  ) : null}
                 </div>
                 <p className="font-mono text-4xl font-semibold">
                   {price.amount}

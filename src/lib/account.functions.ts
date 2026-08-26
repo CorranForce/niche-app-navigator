@@ -42,9 +42,7 @@ export const ensureAccount = createServerFn({ method: "POST" })
       return entitledPlan(sub);
     };
 
-    const c = claims as
-      | { email?: string; user_metadata?: Record<string, unknown> }
-      | undefined;
+    const c = claims as { email?: string; user_metadata?: Record<string, unknown> } | undefined;
     const rawEmail = typeof c?.email === "string" ? c.email.trim() : "";
     const email = rawEmail ? rawEmail.toLowerCase() : "";
     const meta = c?.user_metadata;
@@ -185,18 +183,25 @@ export const getOnboardingProfile = createServerFn({ method: "GET" })
 
 export const completeOnboarding = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { displayName: string; workspaceName: string; roleTitle?: string; useCase?: string }) => {
-    const displayName = input.displayName?.trim() ?? "";
-    const workspaceName = input.workspaceName?.trim() ?? "";
-    if (displayName.length < 2) throw new Error("Please enter your name.");
-    if (workspaceName.length < 2) throw new Error("Please enter a workspace name.");
-    return {
-      displayName: displayName.slice(0, 80),
-      workspaceName: workspaceName.slice(0, 80),
-      roleTitle: (input.roleTitle ?? "").trim().slice(0, 80),
-      useCase: (input.useCase ?? "").trim().slice(0, 200),
-    };
-  })
+  .inputValidator(
+    (input: {
+      displayName: string;
+      workspaceName: string;
+      roleTitle?: string;
+      useCase?: string;
+    }) => {
+      const displayName = input.displayName?.trim() ?? "";
+      const workspaceName = input.workspaceName?.trim() ?? "";
+      if (displayName.length < 2) throw new Error("Please enter your name.");
+      if (workspaceName.length < 2) throw new Error("Please enter a workspace name.");
+      return {
+        displayName: displayName.slice(0, 80),
+        workspaceName: workspaceName.slice(0, 80),
+        roleTitle: (input.roleTitle ?? "").trim().slice(0, 80),
+        useCase: (input.useCase ?? "").trim().slice(0, 200),
+      };
+    },
+  )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("profiles")

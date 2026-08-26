@@ -1,6 +1,6 @@
 import { resolvePaddlePrice } from "@/lib/payments.functions";
 
-const clientToken = import.meta.env['VITE_PAYMENTS_CLIENT_TOKEN'] as string | undefined;
+const clientToken = import.meta.env["VITE_PAYMENTS_CLIENT_TOKEN"] as string | undefined;
 
 declare global {
   interface Window {
@@ -23,8 +23,7 @@ export async function initializePaddle() {
     const script = document.createElement("script");
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
     script.onload = () => {
-      const paddleJsEnvironment =
-        getPaddleEnvironment() === "sandbox" ? "sandbox" : "production";
+      const paddleJsEnvironment = getPaddleEnvironment() === "sandbox" ? "sandbox" : "production";
       window.Paddle.Environment.set(paddleJsEnvironment);
       window.Paddle.Initialize({ token: clientToken });
       paddleInitialized = true;
@@ -39,7 +38,13 @@ export async function getPaddlePriceId(priceId: string): Promise<string> {
   return resolvePaddlePrice({ data: { priceId, environment: getPaddleEnvironment() } });
 }
 
-export { planForProductId, PLAN_LIMITS, limitForPlan, entitledPlan, isPastDue } from "@/lib/plan-limits";
+export {
+  planForProductId,
+  PLAN_LIMITS,
+  limitForPlan,
+  entitledPlan,
+  isPastDue,
+} from "@/lib/plan-limits";
 export type { PlanId } from "@/lib/plan-limits";
 
 export const PLANS = [
@@ -90,4 +95,3 @@ export const PLANS = [
     ],
   },
 ] as const;
-

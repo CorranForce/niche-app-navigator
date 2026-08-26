@@ -77,8 +77,7 @@ export const getSystemHealth = createServerFn({ method: "POST" })
       const key = `${source}:${row.event}`;
       const e = byEvent.get(key);
       if (e) e.total += 1;
-      else
-        byEvent.set(key, { source, total: 1, lastSeen: String(row.created_at) });
+      else byEvent.set(key, { source, total: 1, lastSeen: String(row.created_at) });
     }
 
     return {

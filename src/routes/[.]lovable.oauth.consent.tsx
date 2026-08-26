@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 type OAuthApi = {
-  getAuthorizationDetails: (id: string) => Promise<{ data: AuthDetails | null; error: Error | null }>;
+  getAuthorizationDetails: (
+    id: string,
+  ) => Promise<{ data: AuthDetails | null; error: Error | null }>;
   approveAuthorization: (id: string) => Promise<{ data: AuthDetails | null; error: Error | null }>;
   denyAuthorization: (id: string) => Promise<{ data: AuthDetails | null; error: Error | null }>;
 };
@@ -87,14 +89,22 @@ function ConsentPage() {
     if (err) {
       setBusy(false);
       setError(err.message);
-      reportConsentError(approve ? "consent.approve_failed" : "consent.deny_failed", err.message, clientName);
+      reportConsentError(
+        approve ? "consent.approve_failed" : "consent.deny_failed",
+        err.message,
+        clientName,
+      );
       return;
     }
     const target = data?.redirect_url ?? data?.redirect_to;
     if (!target) {
       setBusy(false);
       setError("No redirect returned by the authorization server.");
-      reportConsentError("consent.missing_redirect", "No redirect returned by the authorization server.", clientName);
+      reportConsentError(
+        "consent.missing_redirect",
+        "No redirect returned by the authorization server.",
+        clientName,
+      );
       return;
     }
     window.location.href = target;

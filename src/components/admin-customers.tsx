@@ -93,93 +93,91 @@ export function AdminCustomersSection() {
   return (
     <section id="customers" className="mt-10 scroll-mt-24">
       <h2 className="text-lg font-semibold tracking-tight">Customer billing</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Search a customer to see their plan, subscription status, renewal date and invoices.
-        </p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Search a customer to see their plan, subscription status, renewal date and invoices.
+      </p>
 
-        <form
-          className="mt-6 flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setQuery(input);
-          }}
-        >
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Search by email or user ID"
-            className="max-w-md"
-          />
-          <Button type="submit">
-            <Search className="h-4 w-4" /> Search
-          </Button>
-        </form>
+      <form
+        className="mt-6 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setQuery(input);
+        }}
+      >
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Search by email or user ID"
+          className="max-w-md"
+        />
+        <Button type="submit">
+          <Search className="h-4 w-4" /> Search
+        </Button>
+      </form>
 
-        {error ? (
-          <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
-            <ShieldAlert className="h-4 w-4 text-destructive" />
-            {(error as Error).message}
-          </Card>
-        ) : null}
+      {error ? (
+        <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
+          <ShieldAlert className="h-4 w-4 text-destructive" />
+          {(error as Error).message}
+        </Card>
+      ) : null}
 
-        <Card className="mt-6 gap-0 overflow-hidden border-border bg-surface p-0">
-          {isLoading ? (
-            <p className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading customers…
-            </p>
-          ) : !data?.length ? (
-            <p className="p-4 text-sm text-muted-foreground">No matching customers.</p>
-          ) : (
-            <table className="w-full text-left text-sm">
-              <thead className="label-mono border-b border-border text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-normal">Customer</th>
-                  <th className="px-4 py-3 font-normal">Plan</th>
-                  <th className="px-4 py-3 font-normal">Status</th>
-                  <th className="px-4 py-3 font-normal">Renews</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((u) => (
-                  <Fragment key={u.userId}>
-                    <tr className="border-t border-border/60">
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-xs">{u.email ?? u.userId}</span>
-                        <span className="block text-[11px] text-muted-foreground">
-                          joined {fmtDate(u.createdAt)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs">{u.plan}</td>
-                      <td className={`px-4 py-3 font-mono text-xs ${statusTone(u.status)}`}>
-                        {u.status ?? "no subscription"}
-                        {u.cancelAtPeriodEnd ? " (cancels)" : ""}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs">
-                        {fmtDate(u.currentPeriodEnd)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setOpenUser(openUser === u.userId ? null : u.userId)}
-                        >
-                          {openUser === u.userId ? "Hide invoices" : "Invoices"}
-                        </Button>
+      <Card className="mt-6 gap-0 overflow-hidden border-border bg-surface p-0">
+        {isLoading ? (
+          <p className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading customers…
+          </p>
+        ) : !data?.length ? (
+          <p className="p-4 text-sm text-muted-foreground">No matching customers.</p>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead className="label-mono border-b border-border text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 font-normal">Customer</th>
+                <th className="px-4 py-3 font-normal">Plan</th>
+                <th className="px-4 py-3 font-normal">Status</th>
+                <th className="px-4 py-3 font-normal">Renews</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((u) => (
+                <Fragment key={u.userId}>
+                  <tr className="border-t border-border/60">
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs">{u.email ?? u.userId}</span>
+                      <span className="block text-[11px] text-muted-foreground">
+                        joined {fmtDate(u.createdAt)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs">{u.plan}</td>
+                    <td className={`px-4 py-3 font-mono text-xs ${statusTone(u.status)}`}>
+                      {u.status ?? "no subscription"}
+                      {u.cancelAtPeriodEnd ? " (cancels)" : ""}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs">{fmtDate(u.currentPeriodEnd)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setOpenUser(openUser === u.userId ? null : u.userId)}
+                      >
+                        {openUser === u.userId ? "Hide invoices" : "Invoices"}
+                      </Button>
+                    </td>
+                  </tr>
+                  {openUser === u.userId ? (
+                    <tr className="border-t border-border/60 bg-background/40">
+                      <td colSpan={5} className="p-0">
+                        <BillingHistory userId={u.userId} />
                       </td>
                     </tr>
-                    {openUser === u.userId ? (
-                      <tr className="border-t border-border/60 bg-background/40">
-                        <td colSpan={5} className="p-0">
-                          <BillingHistory userId={u.userId} />
-                        </td>
-                      </tr>
-                    ) : null}
-                  </Fragment>
-                ))}
-              </tbody>
-            </table>
-          )}
+                  ) : null}
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+        )}
       </Card>
     </section>
   );

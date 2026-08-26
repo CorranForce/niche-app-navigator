@@ -9,7 +9,13 @@ export default defineTool({
   description:
     "List the signed-in user's saved micro-SaaS niche reports (newest first), with id, niche, audience, budget and creation date.",
   inputSchema: {
-    limit: z.number().int().min(1).max(50).optional().describe("How many reports to return (default 10)."),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(50)
+      .optional()
+      .describe("How many reports to return (default 10)."),
     search: z.string().optional().describe("Optional case-insensitive filter on the niche."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },

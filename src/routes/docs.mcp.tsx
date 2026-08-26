@@ -202,8 +202,8 @@ function McpDocsPage() {
             registration
           </p>
           <p>
-            <span className="text-muted-foreground">Metadata</span>{" "}
-            {SITE}/.well-known/oauth-protected-resource
+            <span className="text-muted-foreground">Metadata</span> {SITE}
+            /.well-known/oauth-protected-resource
           </p>
         </Card>
 

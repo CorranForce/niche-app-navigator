@@ -128,7 +128,8 @@ export function BillingManager() {
                   )}
                   Payment details & invoices
                 </Button>
-                {subscription?.cancel_at_period_end || subscription?.status === "canceled" ? null : (
+                {subscription?.cancel_at_period_end ||
+                subscription?.status === "canceled" ? null : (
                   <Button variant="ghost" onClick={handleCancel} disabled={busy !== null}>
                     {busy === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                     Cancel subscription

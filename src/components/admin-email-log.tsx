@@ -61,89 +61,88 @@ export function AdminEmailLogSection() {
   return (
     <section id="emails" className="mt-10 scroll-mt-24">
       <h2 className="text-lg font-semibold tracking-tight">Email delivery log</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Recent app email activity: what was sent, what was refused, and why. Delivered and opened
-          tracking is not available.
-        </p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Recent app email activity: what was sent, what was refused, and why. Delivered and opened
+        tracking is not available.
+      </p>
 
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          <form
-            className="flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setRecipient(input.trim());
-            }}
-          >
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Filter by recipient email"
-              className="w-72"
-            />
-            <Button type="submit" variant="secondary">
-              <Search className="h-4 w-4" /> Filter
-            </Button>
-          </form>
-          <Button variant="ghost" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setRecipient(input.trim());
+          }}
+        >
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Filter by recipient email"
+            className="w-72"
+          />
+          <Button type="submit" variant="secondary">
+            <Search className="h-4 w-4" /> Filter
           </Button>
-        </div>
+        </form>
+        <Button variant="ghost" onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+        </Button>
+      </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <Button
-              key={f.value || "all"}
-              size="sm"
-              variant={filter === f.value ? "default" : "outline"}
-              onClick={() => setFilter(f.value)}
-            >
-              {f.label}
-            </Button>
-          ))}
-        </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {FILTERS.map((f) => (
+          <Button
+            key={f.value || "all"}
+            size="sm"
+            variant={filter === f.value ? "default" : "outline"}
+            onClick={() => setFilter(f.value)}
+          >
+            {f.label}
+          </Button>
+        ))}
+      </div>
 
-        {error ? (
-          <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
-            <ShieldAlert className="h-4 w-4 text-destructive" />
-            {(error as Error).message}
-          </Card>
-        ) : null}
+      {error ? (
+        <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
+          <ShieldAlert className="h-4 w-4 text-destructive" />
+          {(error as Error).message}
+        </Card>
+      ) : null}
 
-        <Card className="mt-6 gap-0 overflow-hidden border-border bg-surface p-0">
-          {isLoading ? (
-            <p className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading email activity…
-            </p>
-          ) : !data?.length ? (
-            <p className="p-4 text-sm text-muted-foreground">
-              No email events in the visible window yet.
-            </p>
-          ) : (
-            <table className="w-full text-left text-sm">
-              <thead className="label-mono border-b border-border text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 font-normal">When</th>
-                  <th className="px-4 py-3 font-normal">Recipient</th>
-                  <th className="px-4 py-3 font-normal">Email</th>
-                  <th className="px-4 py-3 font-normal">Event</th>
-                  <th className="px-4 py-3 font-normal">Reason / status</th>
+      <Card className="mt-6 gap-0 overflow-hidden border-border bg-surface p-0">
+        {isLoading ? (
+          <p className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading email activity…
+          </p>
+        ) : !data?.length ? (
+          <p className="p-4 text-sm text-muted-foreground">
+            No email events in the visible window yet.
+          </p>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead className="label-mono border-b border-border text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 font-normal">When</th>
+                <th className="px-4 py-3 font-normal">Recipient</th>
+                <th className="px-4 py-3 font-normal">Email</th>
+                <th className="px-4 py-3 font-normal">Event</th>
+                <th className="px-4 py-3 font-normal">Reason / status</th>
+              </tr>
+            </thead>
+            <tbody className="font-mono text-xs">
+              {data.map((row) => (
+                <tr key={row.id} className="border-t border-border/60">
+                  <td className="px-4 py-3 whitespace-nowrap">{fmtWhen(row.createdAt)}</td>
+                  <td className="px-4 py-3">{row.recipient ?? "—"}</td>
+                  <td className="px-4 py-3">{row.label ?? row.subject ?? "—"}</td>
+                  <td className={`px-4 py-3 ${eventTone(row.eventType)}`}>{row.eventType}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{row.status ?? "—"}</td>
                 </tr>
-              </thead>
-              <tbody className="font-mono text-xs">
-                {data.map((row) => (
-                  <tr key={row.id} className="border-t border-border/60">
-                    <td className="px-4 py-3 whitespace-nowrap">{fmtWhen(row.createdAt)}</td>
-                    <td className="px-4 py-3">{row.recipient ?? "—"}</td>
-                    <td className="px-4 py-3">{row.label ?? row.subject ?? "—"}</td>
-                    <td className={`px-4 py-3 ${eventTone(row.eventType)}`}>{row.eventType}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{row.status ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+              ))}
+            </tbody>
+          </table>
+        )}
       </Card>
     </section>
   );
 }
-

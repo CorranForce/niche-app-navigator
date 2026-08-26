@@ -32,7 +32,6 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
 });
 
-
 type Identity = { identity_id: string; provider: string; email?: string | undefined };
 
 function AccountPage() {
@@ -57,7 +56,6 @@ function AccountPage() {
 
   useEffect(() => {
     void refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const google = identities?.find((i) => i.provider === "google");
@@ -177,6 +175,5 @@ function AccountPage() {
         </div>
       </main>
     </div>
-
   );
 }

@@ -14,7 +14,6 @@ function getSupabase() {
   return _supabase;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const { id, customerId, items, status, currentBillingPeriod, customData } = data;
 
@@ -35,26 +34,23 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     return;
   }
 
-  await getSupabase()
-    .from("subscriptions")
-    .upsert(
-      {
-        user_id: userId,
-        paddle_subscription_id: id,
-        paddle_customer_id: customerId,
-        product_id: productId,
-        price_id: priceId,
-        status,
-        current_period_start: currentBillingPeriod?.startsAt,
-        current_period_end: currentBillingPeriod?.endsAt,
-        environment: env,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "paddle_subscription_id" },
-    );
+  await getSupabase().from("subscriptions").upsert(
+    {
+      user_id: userId,
+      paddle_subscription_id: id,
+      paddle_customer_id: customerId,
+      product_id: productId,
+      price_id: priceId,
+      status,
+      current_period_start: currentBillingPeriod?.startsAt,
+      current_period_end: currentBillingPeriod?.endsAt,
+      environment: env,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "paddle_subscription_id" },
+  );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
   const { id, status, currentBillingPeriod, scheduledChange, items } = data;
 
@@ -77,7 +73,6 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
     .eq("environment", env);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
   await getSupabase()
     .from("subscriptions")

@@ -55,7 +55,9 @@ function CheckoutSuccessPage() {
               <Link to="/">Generate a report</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/account" hash="billing">Manage billing</Link>
+              <Link to="/account" hash="billing">
+                Manage billing
+              </Link>
             </Button>
           </div>
         </Card>

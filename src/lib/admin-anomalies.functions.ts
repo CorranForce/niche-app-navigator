@@ -70,12 +70,14 @@ export const getBillingAnomalies = createServerFn({ method: "GET" })
       const existedThen = Boolean(sub.created_at && sub.created_at < since30);
       const endedSince = sub.status === "canceled" || isPastDue(sub.status);
       if (existedThen && (plan !== "free" || endedSince)) {
-        const thenPlan = plan !== "free" ? plan : (sub.product_id?.includes("studio") ? "studio" : "pro");
+        const thenPlan =
+          plan !== "free" ? plan : sub.product_id?.includes("studio") ? "studio" : "pro";
         previousCents += PLAN_PRICE_CENTS[thenPlan] ?? 0;
       }
 
       if (sub.cancel_at_period_end) cancelScheduled += 1;
-      if (sub.status === "canceled" && sub.updated_at && sub.updated_at >= since30) canceled30d += 1;
+      if (sub.status === "canceled" && sub.updated_at && sub.updated_at >= since30)
+        canceled30d += 1;
       if (plan !== "free" && sub.created_at && sub.created_at >= since30) newPaid30d += 1;
       if (isPastDue(sub.status)) {
         pastDue.push({
@@ -130,7 +132,8 @@ export const getBillingAnomalies = createServerFn({ method: "GET" })
       }
       repeatFailures.sort((a, b) => b.failures - a.failures);
     } catch (error) {
-      paddleError = error instanceof Error ? error.message : "Could not reach the payment provider.";
+      paddleError =
+        error instanceof Error ? error.message : "Could not reach the payment provider.";
     }
 
     const deltaCents = currentCents - previousCents;

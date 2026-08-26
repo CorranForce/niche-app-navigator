@@ -121,7 +121,10 @@ export function BillingAnomalies() {
               ) : (
                 <ul className="divide-y divide-border/60 font-mono text-xs">
                   {data.pastDue.map((p) => (
-                    <li key={p.userId} className="flex items-center justify-between gap-3 px-4 py-3">
+                    <li
+                      key={p.userId}
+                      className="flex items-center justify-between gap-3 px-4 py-3"
+                    >
                       <span className="truncate">{p.email ?? p.userId}</span>
                       <span className="whitespace-nowrap text-muted-foreground">
                         since {fmtWhen(p.since)}

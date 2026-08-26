@@ -145,7 +145,9 @@ export function OAuthHealthSection() {
               <div className="space-y-2">
                 {data.daily.map((d) => (
                   <div key={d.day} className="grid grid-cols-[80px_1fr_auto] items-center gap-3">
-                    <span className="font-mono text-xs text-muted-foreground">{d.day.slice(5)}</span>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {d.day.slice(5)}
+                    </span>
                     <div className="flex items-center gap-2">
                       <Bar pct={(d.starts / maxDaily) * 100} />
                       {d.error + d.timeout > 0 ? (
