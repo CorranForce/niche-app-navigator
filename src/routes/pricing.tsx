@@ -84,10 +84,10 @@ function PricingPage() {
 
   function handleCta(planId: string) {
     if (!user) {
-      navigate({ to: "/auth", search: { redirect: "/billing" } });
+      navigate({ to: "/auth", search: { redirect: "/account" } });
       return;
     }
-    navigate({ to: "/billing" });
+    navigate({ to: "/account", hash: "billing" });
     void planId;
   }
 
