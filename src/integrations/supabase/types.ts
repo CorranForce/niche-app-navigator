@@ -155,6 +155,39 @@ export type Database = {
         }
         Relationships: []
       }
+      system_events: {
+        Row: {
+          alerted_at: string | null
+          context: Json
+          created_at: string
+          event: string
+          id: string
+          message: string | null
+          severity: string
+          source: string
+        }
+        Insert: {
+          alerted_at?: string | null
+          context?: Json
+          created_at?: string
+          event: string
+          id?: string
+          message?: string | null
+          severity: string
+          source: string
+        }
+        Update: {
+          alerted_at?: string | null
+          context?: Json
+          created_at?: string
+          event?: string
+          id?: string
+          message?: string | null
+          severity?: string
+          source?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -181,6 +214,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_mcp_authorization_stats: {
+        Args: { _days?: number }
+        Returns: {
+          status: string
+          total: number
+        }[]
+      }
+      admin_mcp_clients: {
+        Args: never
+        Returns: {
+          active_consents: number
+          approved_authorizations: number
+          authorizations: number
+          client_name: string
+          client_uri: string
+          consents: number
+          created_at: string
+          id: string
+          last_authorized_at: string
+          last_granted_at: string
+          registration_type: string
+        }[]
+      }
+      admin_mcp_consents: {
+        Args: { _limit?: number }
+        Returns: {
+          client_name: string
+          granted_at: string
+          id: string
+          revoked_at: string
+          scopes: string
+          user_email: string
+        }[]
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
