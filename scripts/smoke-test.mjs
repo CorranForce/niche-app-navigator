@@ -19,6 +19,14 @@ const checks = [
   { name: "Auth page renders", path: "/auth", contains: ["<html"] },
   { name: "Protected route does not 500", path: "/reports", expect: [200, 301, 302, 307, 401, 404] },
   { name: "Telemetry endpoint rejects cross-origin", path: "/api/public/auth-event", method: "POST", expect: [400, 403, 415] },
+  { name: "MCP docs page renders", path: "/docs/mcp", contains: ["<html"] },
+  { name: "MCP endpoint requires OAuth", path: "/mcp", method: "POST", expect: [401] },
+  {
+    name: "MCP resource metadata is published",
+    path: "/.well-known/oauth-protected-resource",
+    contains: ["authorization_servers"],
+  },
+  { name: "System event sink rejects cross-origin", path: "/api/public/system-event", method: "POST", expect: [400, 403, 413] },
   { name: "Unknown route returns 404-ish", path: "/__does_not_exist__", expect: [200, 404] },
 ];
 
