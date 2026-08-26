@@ -7,25 +7,31 @@ import { lovable } from "@/integrations/lovable/index";
 import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { SiteHeader } from "@/components/site-header";
+import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
+import { BillingManager } from "@/components/billing-manager";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
     meta: [
-      { title: "Account & sign-in methods — MicroSaaS Solution Finder" },
+      { title: "Account & billing — MicroSaaS Solution Finder" },
       {
         name: "description",
         content:
-          "Manage the sign-in methods linked to your MicroSaaS Solution Finder account, including Google and email.",
+          "Manage your sign-in methods, plan, payment details and cancellations for MicroSaaS Solution Finder in one place.",
       },
-      { property: "og:title", content: "Account & sign-in methods" },
+      { property: "og:title", content: "Account & billing" },
       {
         property: "og:description",
-        content: "Link or unlink Google sign-in on your MicroSaaS Solution Finder account.",
+        content: "Sign-in methods, plan changes, invoices and cancellations in one place.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AccountPage,
 });
+
 
 type Identity = { identity_id: string; provider: string; email?: string | undefined };
 
