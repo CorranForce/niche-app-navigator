@@ -22,6 +22,7 @@ import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as DocsMcpRouteImport } from './routes/docs.mcp'
 import { Route as UseCasesIndexRouteImport } from './routes/use-cases.index'
 import { Route as UseCasesSlugRouteImport } from './routes/use-cases.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -103,6 +104,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   id: '/checkout/success',
   path: '/checkout/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsMcpRoute = DocsMcpRouteImport.update({
+  id: '/docs/mcp',
+  path: '/docs/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UseCasesIndexRoute = UseCasesIndexRouteImport.update({
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases/': typeof UseCasesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases': typeof UseCasesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases/': typeof UseCasesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/auth/callback'
     | '/checkout/success'
+    | '/docs/mcp'
     | '/use-cases/$slug'
     | '/use-cases/'
     | '/.lovable/oauth/consent'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/auth/callback'
     | '/checkout/success'
+    | '/docs/mcp'
     | '/use-cases/$slug'
     | '/use-cases'
     | '/.lovable/oauth/consent'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/auth_/callback'
     | '/checkout/success'
+    | '/docs/mcp'
     | '/use-cases/$slug'
     | '/use-cases/'
     | '/.lovable/oauth/consent'
@@ -388,6 +400,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+  DocsMcpRoute: typeof DocsMcpRoute
   UseCasesSlugRoute: typeof UseCasesSlugRoute
   UseCasesIndexRoute: typeof UseCasesIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -492,6 +505,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout/success'
       fullPath: '/checkout/success'
       preLoaderRoute: typeof CheckoutSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/mcp': {
+      id: '/docs/mcp'
+      path: '/docs/mcp'
+      fullPath: '/docs/mcp'
+      preLoaderRoute: typeof DocsMcpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/use-cases/': {
@@ -646,6 +666,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
+  DocsMcpRoute: DocsMcpRoute,
   UseCasesSlugRoute: UseCasesSlugRoute,
   UseCasesIndexRoute: UseCasesIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
