@@ -37,6 +37,16 @@ export type McpIntegrationStatus = {
   lastError: { createdAt: string; event: string; message: string | null } | null;
 };
 
+const MCP_ISSUER = `https://${import.meta.env["VITE_SUPABASE_PROJECT_ID"] ?? "project-ref-unset"}.supabase.co/auth/v1`;
+
+/** Mirrors the tools registered in src/lib/mcp/index.ts. */
+const MCP_TOOLS: Array<{ name: string; title: string; readOnly: boolean }> = [
+  { name: "list_use_cases", title: "List pain-point use cases", readOnly: true },
+  { name: "list_reports", title: "List reports", readOnly: true },
+  { name: "get_report", title: "Get report", readOnly: true },
+  { name: "get_account_status", title: "Get account status", readOnly: true },
+];
+
 /** Owner-only snapshot of the app's MCP server, connected clients and consent history. */
 export const getMcpIntegrationStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -65,31 +75,15 @@ export const getMcpIntegrationStatus = createServerFn({ method: "POST" })
         .limit(100),
     ]);
 
-    const manifest = (await import("../../.lovable/mcp/manifest.json")).default as {
-      path?: string;
-      auth?: { issuer?: string };
-      mcp?: {
-        tools?: Array<{
-          name: string;
-          title?: string;
-          annotations?: { readOnlyHint?: boolean };
-        }>;
-      };
-    };
-
-    const tools = (manifest.mcp?.tools ?? []).map((tool) => ({
-      name: tool.name,
-      title: tool.title ?? tool.name,
-      readOnly: Boolean(tool.annotations?.readOnlyHint),
-    }));
+    const tools = MCP_TOOLS;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorRows = (errorsRes.data ?? []) as any[];
 
     return {
-      endpoint: manifest.path ?? "/mcp",
+      endpoint: "/mcp",
       metadataPath: "/.well-known/oauth-protected-resource",
-      issuer: manifest.auth?.issuer ?? "",
+      issuer: MCP_ISSUER,
       toolCount: tools.length,
       tools,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
