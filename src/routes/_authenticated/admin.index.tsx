@@ -10,6 +10,8 @@ import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
 import { AdminCustomersSection } from "@/components/admin-customers";
 import { AdminEmailLogSection } from "@/components/admin-email-log";
+import { McpStatusSection } from "@/components/mcp-status";
+import { SystemHealthSection } from "@/components/system-health";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
