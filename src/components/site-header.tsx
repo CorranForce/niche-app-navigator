@@ -89,22 +89,6 @@ export function SiteHeader() {
               >
                 Owner
               </Link>
-              <Link
-                to="/admin/users"
-                className={`label-mono transition-colors hover:text-foreground ${
-                  pathname.startsWith("/admin/users") ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                Customers
-              </Link>
-              <Link
-                to="/admin/emails"
-                className={`label-mono transition-colors hover:text-foreground ${
-                  pathname.startsWith("/admin/emails") ? "text-primary" : "text-muted-foreground"
-                }`}
-              >
-                Emails
-              </Link>
             </>
           ) : null}
         </nav>
