@@ -24,6 +24,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as UseCasesIndexRouteImport } from './routes/use-cases.index'
 import { Route as UseCasesSlugRouteImport } from './routes/use-cases.$slug'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated/admin.emails'
@@ -113,6 +114,11 @@ const UseCasesSlugRoute = UseCasesSlugRouteImport.update({
   path: '/use-cases/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases/': typeof UseCasesIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases': typeof UseCasesIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases/': typeof UseCasesIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/use-cases/$slug'
     | '/use-cases/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/emails'
     | '/admin/users'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/use-cases/$slug'
     | '/use-cases'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/emails'
     | '/admin/users'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/use-cases/$slug'
     | '/use-cases/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/emails'
     | '/_authenticated/admin/users'
@@ -366,6 +378,7 @@ export interface RootRouteChildren {
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   UseCasesSlugRoute: typeof UseCasesSlugRoute
   UseCasesIndexRoute: typeof UseCasesIndexRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAuthEventRoute: typeof ApiPublicAuthEventRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
@@ -480,6 +493,13 @@ declare module '@tanstack/react-router' {
       path: '/use-cases/$slug'
       fullPath: '/use-cases/$slug'
       preLoaderRoute: typeof UseCasesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
@@ -608,6 +628,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   UseCasesSlugRoute: UseCasesSlugRoute,
   UseCasesIndexRoute: UseCasesIndexRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAuthEventRoute: ApiPublicAuthEventRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
