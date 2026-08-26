@@ -123,50 +123,60 @@ function AccountPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-2xl font-semibold">Account</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {user?.email ?? "Signed in"} — manage how you sign in.
-      </p>
-
-      <Card className="mt-6 gap-4 border-border bg-surface p-6">
-        <h2 className="label-mono text-muted-foreground">Sign-in methods</h2>
-
-        <div className="flex items-center justify-between gap-4 rounded-md border border-border/70 px-4 py-3">
-          <div>
-            <p className="text-sm font-medium">Email &amp; password</p>
-            <p className="text-xs text-muted-foreground">
-              {hasPassword ? (user?.email ?? "Enabled") : "Not set up"}
-            </p>
-          </div>
-          <span className="label-mono text-muted-foreground">
-            {hasPassword ? "linked" : "unlinked"}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between gap-4 rounded-md border border-border/70 px-4 py-3">
-          <div>
-            <p className="text-sm font-medium">Google</p>
-            <p className="text-xs text-muted-foreground">
-              {google ? (google.email ?? "Linked") : "Sign in faster with your Google account"}
-            </p>
-          </div>
-          {google ? (
-            <Button variant="outline" size="sm" onClick={disconnectGoogle} disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disconnect"}
-            </Button>
-          ) : (
-            <Button size="sm" onClick={connectGoogle} disabled={busy}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Connect Google"}
-            </Button>
-          )}
-        </div>
-
-        <p className="text-xs text-muted-foreground">
-          Signing in with Google using an email that already has an account links the two
-          automatically — you keep the same reports and history.
+    <div className="min-h-screen">
+      <PaymentTestModeBanner />
+      <SiteHeader />
+      <main className="mx-auto max-w-6xl px-4 py-12">
+        <p className="label-mono text-primary">Account</p>
+        <h1 className="mt-3 text-3xl font-semibold">Account &amp; billing</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {user?.email ?? "Signed in"} — manage how you sign in and what you pay for.
         </p>
-      </Card>
+
+        <Card className="mt-8 max-w-2xl gap-4 border-border bg-surface p-6">
+          <h2 className="label-mono text-muted-foreground">Sign-in methods</h2>
+
+          <div className="flex items-center justify-between gap-4 rounded-md border border-border/70 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium">Email &amp; password</p>
+              <p className="text-xs text-muted-foreground">
+                {hasPassword ? (user?.email ?? "Enabled") : "Not set up"}
+              </p>
+            </div>
+            <span className="label-mono text-muted-foreground">
+              {hasPassword ? "linked" : "unlinked"}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 rounded-md border border-border/70 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium">Google</p>
+              <p className="text-xs text-muted-foreground">
+                {google ? (google.email ?? "Linked") : "Sign in faster with your Google account"}
+              </p>
+            </div>
+            {google ? (
+              <Button variant="outline" size="sm" onClick={disconnectGoogle} disabled={busy}>
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disconnect"}
+              </Button>
+            ) : (
+              <Button size="sm" onClick={connectGoogle} disabled={busy}>
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Connect Google"}
+              </Button>
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Signing in with Google using an email that already has an account links the two
+            automatically — you keep the same reports and history.
+          </p>
+        </Card>
+
+        <div className="mt-12 border-t border-border pt-10">
+          <BillingManager />
+        </div>
+      </main>
     </div>
+
   );
 }
