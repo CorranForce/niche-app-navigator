@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, RefreshCw, ShieldAlert } from "lucide-react";
@@ -7,6 +7,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
 import { OAuthHealthSection } from "@/components/oauth-health";
+import { BillingAnomalies } from "@/components/billing-anomalies";
+import { AdminCustomersSection } from "@/components/admin-customers";
+import { AdminEmailLogSection } from "@/components/admin-email-log";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -15,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
       {
         name: "description",
         content:
-          "Internal owner dashboard: accounts, plan mix, recurring revenue, report usage and auth health at a glance.",
+          "Internal owner dashboard: accounts, plan mix, recurring revenue, billing anomalies, customers, auth health and email delivery in one place.",
       },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Owner's dashboard — internal" },
@@ -135,14 +138,16 @@ function OwnerDashboardPage() {
                 <p className="label-mono text-muted-foreground">Jump to</p>
                 <div className="flex flex-wrap gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/admin/users">Customers</Link>
+                    <a href="#billing-anomalies">Billing anomalies</a>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <a href="#customers">Customers</a>
                   </Button>
                   <Button asChild size="sm" variant="outline">
                     <a href="#oauth-health">OAuth health</a>
                   </Button>
-
                   <Button asChild size="sm" variant="outline">
-                    <Link to="/admin/emails">Emails</Link>
+                    <a href="#emails">Emails</a>
                   </Button>
                 </div>
               </Card>
@@ -192,7 +197,13 @@ function OwnerDashboardPage() {
           </>
         ) : null}
 
+        <BillingAnomalies />
+
+        <AdminCustomersSection />
+
         <OAuthHealthSection />
+
+        <AdminEmailLogSection />
       </main>
     </div>
   );
