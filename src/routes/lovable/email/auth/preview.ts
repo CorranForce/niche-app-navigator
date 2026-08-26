@@ -90,7 +90,7 @@ export const Route = createFileRoute("/lovable/email/auth/preview")({
           return Response.json({ error: `Unknown email type: ${type}` }, { status: 400 });
         }
 
-        const sampleData = SAMPLE_DATA[type] || {};
+        const sampleData = (SAMPLE_DATA[type] ?? {}) as Record<string, unknown>;
         const html = await render(React.createElement(EmailTemplate, sampleData));
 
         return new Response(html, {
