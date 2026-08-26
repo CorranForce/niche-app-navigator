@@ -125,6 +125,14 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
           return Response.json({ received: true });
         } catch (e) {
           console.error("Webhook error:", e);
+          const { recordSystemEvent, describeError } = await import("@/lib/monitoring.server");
+          await recordSystemEvent({
+            source: "webhook",
+            severity: "critical",
+            event: "paddle.webhook_failed",
+            message: describeError(e),
+            context: { env, path: url.pathname },
+          });
           return new Response("Webhook error", { status: 400 });
         }
       },
