@@ -72,7 +72,7 @@ export async function sendInvoiceEmail(data: any, env: PaddleEnv) {
       invoiceNumber: data?.invoiceNumber ?? undefined,
       billedAt: day(data?.billedAt ?? data?.createdAt),
       nextRenewalAt: customer.nextRenewalAt,
-      billingUrl: `${APP_URL}/billing`,
+      billingUrl: `${APP_URL}/account#billing`,
     },
   });
 }
@@ -89,7 +89,7 @@ export async function sendPaymentFailedEmail(data: any, env: PaddleEnv) {
       amount: money(data?.details?.totals?.grandTotal, data?.currencyCode),
       attemptedAt: day(data?.updatedAt ?? data?.createdAt),
       nextRetryAt: day(data?.payments?.[0]?.errorCode ? null : data?.nextRetryAt),
-      billingUrl: `${APP_URL}/billing`,
+      billingUrl: `${APP_URL}/account#billing`,
     },
   });
 }

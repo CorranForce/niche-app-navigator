@@ -48,8 +48,8 @@ export function PastDueBanner() {
           {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
           Update payment details
         </button>
-        <Link to="/billing" className="text-muted-foreground underline underline-offset-2">
-          Billing page
+        <Link to="/account" hash="billing" className="text-muted-foreground underline underline-offset-2">
+          Account & billing
         </Link>
       </div>
     </div>
