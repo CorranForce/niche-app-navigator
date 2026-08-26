@@ -9,7 +9,7 @@ export type SystemEventRow = {
   severity: string;
   event: string;
   message: string | null;
-  context: Record<string, unknown>;
+  context: Record<string, string | number | boolean | null>;
   alertedAt: string | null;
 };
 
@@ -101,7 +101,7 @@ export const getSystemHealth = createServerFn({ method: "POST" })
         severity: String(row.severity),
         event: String(row.event),
         message: row.message ?? null,
-        context: (row.context ?? {}) as Record<string, unknown>,
+        context: (row.context ?? {}) as Record<string, string | number | boolean | null>,
         alertedAt: row.alerted_at ?? null,
       })),
     };
