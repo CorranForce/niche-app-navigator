@@ -22,6 +22,7 @@ import { Route as AuthenticatedBillingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as DocsMcpRouteImport } from './routes/docs.mcp'
 import { Route as UseCasesIndexRouteImport } from './routes/use-cases.index'
 import { Route as UseCasesSlugRouteImport } from './routes/use-cases.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -32,6 +33,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedReportsIdRouteImport } from './routes/_authenticated/reports.$id'
 import { Route as ApiPublicAuthEventRouteImport } from './routes/api/public/auth-event'
+import { Route as ApiPublicSystemEventRouteImport } from './routes/api/public/system-event'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -104,6 +106,11 @@ const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
   path: '/checkout/success',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsMcpRoute = DocsMcpRouteImport.update({
+  id: '/docs/mcp',
+  path: '/docs/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UseCasesIndexRoute = UseCasesIndexRouteImport.update({
   id: '/use-cases/',
   path: '/use-cases/',
@@ -157,6 +164,11 @@ const ApiPublicAuthEventRoute = ApiPublicAuthEventRouteImport.update({
   path: '/api/public/auth-event',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSystemEventRoute = ApiPublicSystemEventRouteImport.update({
+  id: '/api/public/system-event',
+  path: '/api/public/system-event',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   id: '/lovable/email/events',
   path: '/lovable/email/events',
@@ -198,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases/': typeof UseCasesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -206,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
@@ -227,6 +241,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases': typeof UseCasesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -235,6 +250,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
@@ -258,6 +274,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/checkout/success': typeof CheckoutSuccessRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/use-cases/$slug': typeof UseCasesSlugRoute
   '/use-cases/': typeof UseCasesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -266,6 +283,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
@@ -289,6 +307,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/auth/callback'
     | '/checkout/success'
+    | '/docs/mcp'
     | '/use-cases/$slug'
     | '/use-cases/'
     | '/.lovable/oauth/consent'
@@ -297,6 +316,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
+    | '/api/public/system-event'
     | '/lovable/email/events'
     | '/admin/'
     | '/reports/'
@@ -318,6 +338,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/auth/callback'
     | '/checkout/success'
+    | '/docs/mcp'
     | '/use-cases/$slug'
     | '/use-cases'
     | '/.lovable/oauth/consent'
@@ -326,6 +347,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
+    | '/api/public/system-event'
     | '/lovable/email/events'
     | '/admin'
     | '/reports'
@@ -348,6 +370,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/auth_/callback'
     | '/checkout/success'
+    | '/docs/mcp'
     | '/use-cases/$slug'
     | '/use-cases/'
     | '/.lovable/oauth/consent'
@@ -356,6 +379,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/reports/$id'
     | '/api/public/auth-event'
+    | '/api/public/system-event'
     | '/lovable/email/events'
     | '/_authenticated/admin/'
     | '/_authenticated/reports/'
@@ -376,11 +400,13 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+  DocsMcpRoute: typeof DocsMcpRoute
   UseCasesSlugRoute: typeof UseCasesSlugRoute
   UseCasesIndexRoute: typeof UseCasesIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAuthEventRoute: typeof ApiPublicAuthEventRoute
+  ApiPublicSystemEventRoute: typeof ApiPublicSystemEventRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -481,6 +507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/mcp': {
+      id: '/docs/mcp'
+      path: '/docs/mcp'
+      fullPath: '/docs/mcp'
+      preLoaderRoute: typeof DocsMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/use-cases/': {
       id: '/use-cases/'
       path: '/use-cases'
@@ -549,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/auth-event'
       fullPath: '/api/public/auth-event'
       preLoaderRoute: typeof ApiPublicAuthEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/system-event': {
+      id: '/api/public/system-event'
+      path: '/api/public/system-event'
+      fullPath: '/api/public/system-event'
+      preLoaderRoute: typeof ApiPublicSystemEventRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/events': {
@@ -626,11 +666,13 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
+  DocsMcpRoute: DocsMcpRoute,
   UseCasesSlugRoute: UseCasesSlugRoute,
   UseCasesIndexRoute: UseCasesIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAuthEventRoute: ApiPublicAuthEventRoute,
+  ApiPublicSystemEventRoute: ApiPublicSystemEventRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

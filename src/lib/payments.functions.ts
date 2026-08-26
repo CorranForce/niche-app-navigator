@@ -40,9 +40,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
       sub.paddle_subscription_id,
     ]);
 
-    const perSub = session.urls?.subscriptions?.find(
-      (s) => s.id === sub.paddle_subscription_id,
-    );
+    const perSub = session.urls?.subscriptions?.find((s) => s.id === sub.paddle_subscription_id);
 
     return {
       overviewUrl: session.urls?.general?.overview ?? null,

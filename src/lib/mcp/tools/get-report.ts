@@ -1,6 +1,7 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { supabaseForUser } from "../supabase";
+import { mcpError } from "../telemetry";
 
 export default defineTool({
   name: "get_report",
@@ -11,7 +12,7 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ id }, ctx) => {
     if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+      return await mcpError("get_report", "Not authenticated");
     }
     const supabase = supabaseForUser(ctx);
     const { data, error } = await supabase
@@ -20,7 +21,7 @@ export default defineTool({
       .eq("id", id)
       .maybeSingle();
 
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) return await mcpError("get_report", error.message);
     if (!data) {
       return { content: [{ type: "text", text: `No report found with id ${id}.` }], isError: true };
     }

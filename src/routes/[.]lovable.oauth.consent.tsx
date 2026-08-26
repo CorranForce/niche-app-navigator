@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 type OAuthApi = {
-  getAuthorizationDetails: (id: string) => Promise<{ data: AuthDetails | null; error: Error | null }>;
+  getAuthorizationDetails: (
+    id: string,
+  ) => Promise<{ data: AuthDetails | null; error: Error | null }>;
   approveAuthorization: (id: string) => Promise<{ data: AuthDetails | null; error: Error | null }>;
   denyAuthorization: (id: string) => Promise<{ data: AuthDetails | null; error: Error | null }>;
 };
@@ -15,6 +17,25 @@ type AuthDetails = {
   redirect_url?: string | null;
   redirect_to?: string | null;
 };
+
+/** Fire-and-forget monitoring ping for consent-screen failures. */
+function reportConsentError(event: string, message: string, clientName?: string) {
+  try {
+    void fetch("/api/public/system-event", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        source: "consent",
+        event,
+        message: message.slice(0, 300),
+        ...(clientName ? { clientName: clientName.slice(0, 120) } : {}),
+      }),
+    }).catch(() => {});
+  } catch {
+    // Monitoring must never block the consent flow.
+  }
+}
 
 function oauthApi(): OAuthApi {
   return (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
@@ -35,7 +56,10 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   loader: async ({ location }) => {
     const authorizationId = new URLSearchParams(location.search).get("authorization_id")!;
     const { data, error } = await oauthApi().getAuthorizationDetails(authorizationId);
-    if (error) throw error;
+    if (error) {
+      reportConsentError("consent.details_failed", error.message);
+      throw error;
+    }
     const immediate = data?.redirect_url ?? data?.redirect_to;
     if (immediate && !data?.client) throw redirect({ href: immediate });
     return data;
@@ -65,12 +89,22 @@ function ConsentPage() {
     if (err) {
       setBusy(false);
       setError(err.message);
+      reportConsentError(
+        approve ? "consent.approve_failed" : "consent.deny_failed",
+        err.message,
+        clientName,
+      );
       return;
     }
     const target = data?.redirect_url ?? data?.redirect_to;
     if (!target) {
       setBusy(false);
       setError("No redirect returned by the authorization server.");
+      reportConsentError(
+        "consent.missing_redirect",
+        "No redirect returned by the authorization server.",
+        clientName,
+      );
       return;
     }
     window.location.href = target;

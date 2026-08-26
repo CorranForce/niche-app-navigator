@@ -8,6 +8,8 @@ import { RecoveryEmail } from "@/lib/email-templates/recovery";
 import { EmailChangeEmail } from "@/lib/email-templates/email-change";
 import { ReauthenticationEmail } from "@/lib/email-templates/reauthentication";
 
+// Templates have heterogeneous prop shapes; the sample data below matches each one.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   signup: SignupEmail,
   invite: InviteEmail,
@@ -90,7 +92,7 @@ export const Route = createFileRoute("/lovable/email/auth/preview")({
           return Response.json({ error: `Unknown email type: ${type}` }, { status: 400 });
         }
 
-        const sampleData = SAMPLE_DATA[type] || {};
+        const sampleData = SAMPLE_DATA[type] ?? {};
         const html = await render(React.createElement(EmailTemplate, sampleData));
 
         return new Response(html, {

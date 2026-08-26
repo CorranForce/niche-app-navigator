@@ -13,7 +13,9 @@ import { dirname, join } from "node:path";
 
 const base = (process.argv[2] || process.env.SMOKE_BASE_URL || "").replace(/\/$/, "");
 if (!base) {
-  console.error("No base URL provided. Usage: node scripts/check-og-images.mjs https://example.com");
+  console.error(
+    "No base URL provided. Usage: node scripts/check-og-images.mjs https://example.com",
+  );
   process.exit(1);
 }
 
@@ -127,7 +129,9 @@ for (const path of paths) {
   const ok = problems.length === 0;
   if (!ok) failed++;
   console.log(`${ok ? "PASS" : "FAIL"}  ${path}${ok ? "" : ` — ${problems.join("; ")}`}`);
-  rows.push(`| ${ok ? "✅" : "❌"} | \`${path}\` | ${ok ? "og+twitter image, breadcrumbs OK" : problems.join("; ")} |`);
+  rows.push(
+    `| ${ok ? "✅" : "❌"} | \`${path}\` | ${ok ? "og+twitter image, breadcrumbs OK" : problems.join("; ")} |`,
+  );
 }
 
 if (process.env.GITHUB_STEP_SUMMARY) {

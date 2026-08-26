@@ -10,6 +10,8 @@ import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
 import { AdminCustomersSection } from "@/components/admin-customers";
 import { AdminEmailLogSection } from "@/components/admin-email-log";
+import { McpStatusSection } from "@/components/mcp-status";
+import { SystemHealthSection } from "@/components/system-health";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -147,6 +149,12 @@ function OwnerDashboardPage() {
                     <a href="#oauth-health">OAuth health</a>
                   </Button>
                   <Button asChild size="sm" variant="outline">
+                    <a href="#mcp">Agent integrations</a>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <a href="#monitoring">Monitoring</a>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
                     <a href="#emails">Emails</a>
                   </Button>
                 </div>
@@ -202,6 +210,10 @@ function OwnerDashboardPage() {
         <AdminCustomersSection />
 
         <OAuthHealthSection />
+
+        <McpStatusSection />
+
+        <SystemHealthSection />
 
         <AdminEmailLogSection />
       </main>
