@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 
 import { template as paymentFailedTemplate } from "./payment-failed";
 import { template as invoiceReceiptTemplate } from "./invoice-receipt";
+import { template as systemAlertTemplate } from "./system-alert";
 
 export interface TemplateEntry {
   component: ComponentType<any>;
