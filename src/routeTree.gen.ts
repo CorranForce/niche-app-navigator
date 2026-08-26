@@ -32,6 +32,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedReportsIdRouteImport } from './routes/_authenticated/reports.$id'
 import { Route as ApiPublicAuthEventRouteImport } from './routes/api/public/auth-event'
+import { Route as ApiPublicSystemEventRouteImport } from './routes/api/public/system-event'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -157,6 +158,11 @@ const ApiPublicAuthEventRoute = ApiPublicAuthEventRouteImport.update({
   path: '/api/public/auth-event',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSystemEventRoute = ApiPublicSystemEventRouteImport.update({
+  id: '/api/public/system-event',
+  path: '/api/public/system-event',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   id: '/lovable/email/events',
   path: '/lovable/email/events',
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
@@ -235,6 +242,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
+  '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
+    | '/api/public/system-event'
     | '/lovable/email/events'
     | '/admin/'
     | '/reports/'
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/reports/$id'
     | '/api/public/auth-event'
+    | '/api/public/system-event'
     | '/lovable/email/events'
     | '/admin'
     | '/reports'
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users'
     | '/_authenticated/reports/$id'
     | '/api/public/auth-event'
+    | '/api/public/system-event'
     | '/lovable/email/events'
     | '/_authenticated/admin/'
     | '/_authenticated/reports/'
@@ -381,6 +393,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAuthEventRoute: typeof ApiPublicAuthEventRoute
+  ApiPublicSystemEventRoute: typeof ApiPublicSystemEventRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -551,6 +564,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAuthEventRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/system-event': {
+      id: '/api/public/system-event'
+      path: '/api/public/system-event'
+      fullPath: '/api/public/system-event'
+      preLoaderRoute: typeof ApiPublicSystemEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/events': {
       id: '/lovable/email/events'
       path: '/lovable/email/events'
@@ -631,6 +651,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAuthEventRoute: ApiPublicAuthEventRoute,
+  ApiPublicSystemEventRoute: ApiPublicSystemEventRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
