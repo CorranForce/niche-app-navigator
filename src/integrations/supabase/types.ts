@@ -215,14 +215,14 @@ export type Database = {
     }
     Functions: {
       admin_mcp_authorization_stats: {
-        Args: { _days?: number }
+        Args: { _actor: string; _days?: number }
         Returns: {
           status: string
           total: number
         }[]
       }
       admin_mcp_clients: {
-        Args: never
+        Args: { _actor: string }
         Returns: {
           active_consents: number
           approved_authorizations: number
@@ -238,7 +238,7 @@ export type Database = {
         }[]
       }
       admin_mcp_consents: {
-        Args: { _limit?: number }
+        Args: { _actor: string; _limit?: number }
         Returns: {
           client_name: string
           granted_at: string
