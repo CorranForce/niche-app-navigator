@@ -1,5 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { supabaseForUser } from "../supabase";
+import { mcpError } from "../telemetry";
 import { entitledPlan, limitForPlan, PLAN_LABELS } from "@/lib/plan-limits";
 
 export default defineTool({
@@ -11,7 +12,7 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+      return await mcpError("get_account_status", "Not authenticated");
     }
     const supabase = supabaseForUser(ctx);
 
@@ -33,7 +34,7 @@ export default defineTool({
     ]);
 
     const error = countError ?? subError;
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (error) return await mcpError("get_account_status", error.message);
 
     const plan = entitledPlan(sub);
     const limit = limitForPlan(plan);
