@@ -42,57 +42,84 @@ const record = (ok, name, detail) => {
 
 const html = await get(base + "/").then((r) => r.text());
 
-// 1. Collect the real hashed client assets referenced by the landing page.
-const assets = [
+// 1. Collect the client entry scripts referenced by the landing page.
+const scripts = [
   ...new Set(
-    [...html.matchAll(/(?:src|href)=["'](\/(?:assets|_build)\/[^"']+\.js)["']/g)].map((m) => m[1]),
+    [...html.matchAll(/<script[^>]+src=["']([^"']+)["']/g)].map((m) => m[1]),
   ),
-];
+].filter((s) => s.startsWith("/"));
 
-if (assets.length === 0) {
-  record(false, "Client chunks are referenced", "no hashed .js assets found in landing HTML");
-} else {
-  record(true, "Client chunks are referenced", `${assets.length} module script(s)`);
-}
+const hashed = scripts.filter((s) => /\.js(\?|$)/.test(s));
+const isProdBuild = hashed.length > 0;
+
+record(
+  scripts.length > 0,
+  "Client entry scripts are referenced",
+  `${scripts.length} module script(s)${isProdBuild ? "" : " (dev server: unhashed)"}`,
+);
 
 // 2. A live chunk must be served as JavaScript.
-if (assets.length > 0) {
-  const res = await get(base + assets[0]);
+if (scripts.length > 0) {
+  const res = await get(base + scripts[0]);
   const type = res.headers.get("content-type") || "";
   const ok = res.status === 200 && /javascript|ecmascript/i.test(type);
   record(ok, "Live chunk serves JavaScript", `status ${res.status}, content-type ${type || "none"}`);
 }
 
 // 3. Simulate a stale chunk: same directory, hash that no longer exists.
-const stalePath = assets[0]
-  ? assets[0].replace(/[^/]+\.js$/, "stale-chunk-DEADBEEF.js")
+const stalePath = hashed[0]
+  ? hashed[0].replace(/[^/]+\.js$/, "stale-chunk-DEADBEEF.js")
   : "/assets/stale-chunk-DEADBEEF.js";
 {
   const res = await get(base + stalePath);
   const type = res.headers.get("content-type") || "";
-  const servesHtml = /text\/html/i.test(type);
-  const ok = res.status === 404 || (res.status >= 400 && !servesHtml);
+  const body = await res.text();
+  const looksLikeApp = /text\/html/i.test(type) && /<html/i.test(body);
+  const ok = res.status >= 400 && !(res.status === 200 && looksLikeApp);
   record(
     ok,
-    "Missing chunk 404s instead of falling back to HTML",
+    "Missing chunk 404s instead of falling back to app HTML",
     `${stalePath} → status ${res.status}, content-type ${type || "none"}`,
   );
 }
 
-// 4. The recovery guard must be present in the shipped bundle.
+// 4. The recovery guard must be present in the shipped client code.
 {
+  const seen = new Set();
+  const queue = [...scripts];
   let found = false;
-  for (const asset of assets.slice(0, 8)) {
-    const body = await get(base + asset).then((r) => r.text());
-    if (body.includes("vite:preloadError") && /chunk-reload-at/.test(body)) {
+
+  while (queue.length > 0 && seen.size < 12 && !found) {
+    const url = queue.shift();
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    let body = "";
+    try {
+      const res = await get(base + url);
+      if (res.status !== 200) continue;
+      body = await res.text();
+    } catch {
+      continue;
+    }
+    if (body.includes("vite:preloadError") && body.includes("chunk-reload-at")) {
       found = true;
       break;
     }
+    // Follow one level of static imports so dev-mode entries resolve too.
+    for (const m of body.matchAll(/from\s*["'](\/[^"']+)["']/g)) {
+      if (!seen.has(m[1])) queue.push(m[1]);
+    }
+    for (const m of body.matchAll(/import\s*\(\s*["'](\/[^"']+)["']\s*\)/g)) {
+      if (!seen.has(m[1])) queue.push(m[1]);
+    }
   }
+
   record(
     found,
     "Stale-chunk auto-reload guard is shipped",
-    found ? "vite:preloadError handler found in client bundle" : "guard not found in entry chunks",
+    found
+      ? "vite:preloadError handler found in client code"
+      : `guard not found after scanning ${seen.size} module(s)`,
   );
 }
 
