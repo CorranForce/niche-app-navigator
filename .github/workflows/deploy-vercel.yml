@@ -81,6 +81,10 @@ jobs:
         id: ogcheck
         run: node scripts/check-og-images.mjs "${{ steps.deploy.outputs.url }}"
 
+      - name: Stale-chunk recovery simulation
+        id: stalechunk
+        run: node scripts/check-stale-chunk.mjs "${{ steps.deploy.outputs.url }}"
+
 
       - name: Notify Slack
         if: always() && env.SLACK_WEBHOOK_URL != ''
@@ -90,7 +94,7 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            text: "*Production deploy ${{ job.status }}* — ${{ github.repository }}@${{ github.sha }}\nURL: ${{ steps.deploy.outputs.url }}\nSmoke tests: ${{ steps.smoke.outcome }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            text: "*Production deploy ${{ job.status }}* — ${{ github.repository }}@${{ github.sha }}\nURL: ${{ steps.deploy.outputs.url }}\nSmoke tests: ${{ steps.smoke.outcome }}\nStale-chunk recovery: ${{ steps.stalechunk.outcome }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Notify by email
         if: always() && env.SMTP_SERVER != ''
@@ -108,4 +112,5 @@ jobs:
             Production deploy ${{ job.status }}
             URL: ${{ steps.deploy.outputs.url }}
             Smoke tests: ${{ steps.smoke.outcome }}
+            Stale-chunk recovery: ${{ steps.stalechunk.outcome }}
             Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

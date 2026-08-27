@@ -14,7 +14,8 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "format": "prettier --write .",
-    "smoke": "node scripts/smoke-test.mjs"
+    "smoke": "node scripts/smoke-test.mjs",
+    "check:stale-chunk": "node scripts/check-stale-chunk.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.30",
