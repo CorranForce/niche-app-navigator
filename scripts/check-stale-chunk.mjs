@@ -89,7 +89,7 @@ const stalePath = hashed[0]
   const queue = [...scripts];
   let found = false;
 
-  while (queue.length > 0 && seen.size < 12 && !found) {
+  while (queue.length > 0 && seen.size < 60 && !found) {
     const url = queue.shift();
     if (!url || seen.has(url)) continue;
     seen.add(url);
