@@ -44,9 +44,7 @@ const html = await get(base + "/").then((r) => r.text());
 
 // 1. Collect the client entry scripts referenced by the landing page.
 const scripts = [
-  ...new Set(
-    [...html.matchAll(/<script[^>]+src=["']([^"']+)["']/g)].map((m) => m[1]),
-  ),
+  ...new Set([...html.matchAll(/<script[^>]+src=["']([^"']+)["']/g)].map((m) => m[1])),
 ].filter((s) => s.startsWith("/"));
 
 const hashed = scripts.filter((s) => /\.js(\?|$)/.test(s));
@@ -63,7 +61,11 @@ if (scripts.length > 0) {
   const res = await get(base + scripts[0]);
   const type = res.headers.get("content-type") || "";
   const ok = res.status === 200 && /javascript|ecmascript/i.test(type);
-  record(ok, "Live chunk serves JavaScript", `status ${res.status}, content-type ${type || "none"}`);
+  record(
+    ok,
+    "Live chunk serves JavaScript",
+    `status ${res.status}, content-type ${type || "none"}`,
+  );
 }
 
 // 3. Simulate a stale chunk: same directory, hash that no longer exists.

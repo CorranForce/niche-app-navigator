@@ -101,5 +101,6 @@ jobs:
           body: |
             Staging deploy ${{ job.status }}
             URL: ${{ steps.deploy.outputs.url }}
-            Smoke tests: ${{ steps.smoke.outcome }}\nStale-chunk recovery: ${{ steps.stalechunk.outcome }}
+            Smoke tests: ${{ steps.smoke.outcome }}
+            Stale-chunk recovery: ${{ steps.stalechunk.outcome }}
             Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
