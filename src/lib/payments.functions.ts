@@ -223,7 +223,6 @@ export const syncSubscription = createServerFn({ method: "POST" })
       env,
       `/subscriptions?customer_id=${encodeURIComponent(customerId)}&per_page=20`,
     );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subsJson = (await subsRes.json()) as { data?: any[] };
     const list = subsJson.data ?? [];
     if (!list.length) return { synced: false, reason: "no_subscription" as const };
