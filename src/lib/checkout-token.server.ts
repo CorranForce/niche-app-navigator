@@ -75,7 +75,8 @@ export function verifyCheckoutIntent(
   const expected = signature(body);
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return { ok: false, reason: "bad_signature" };
+  if (a.length !== b.length || !timingSafeEqual(a, b))
+    return { ok: false, reason: "bad_signature" };
 
   let intent: CheckoutIntent;
   try {

@@ -46,7 +46,6 @@ export const createCheckoutIntent = createServerFn({ method: "POST" })
     };
   });
 
-
 /** Opens Paddle's hosted portal so the customer can change payment method, view invoices or cancel. */
 export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

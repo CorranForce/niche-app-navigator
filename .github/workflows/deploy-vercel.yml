@@ -89,6 +89,7 @@ jobs:
         id: entitlement
         env:
           PAYMENTS_SANDBOX_WEBHOOK_SECRET: ${{ secrets.PAYMENTS_SANDBOX_WEBHOOK_SECRET }}
+          CHECKOUT_SIGNING_SECRET: ${{ secrets.CHECKOUT_SIGNING_SECRET }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SMOKE_TEST_USER_ID: ${{ secrets.SMOKE_TEST_USER_ID }}
