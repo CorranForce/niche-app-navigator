@@ -167,11 +167,35 @@ if (secret) {
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const testUser = process.env.SMOKE_TEST_USER_ID;
+const signingSecret = process.env.CHECKOUT_SIGNING_SECRET;
 
+// 3a. Ownership spoofing: custom_data.userId alone must never create a row.
 if (secret && supabaseUrl && serviceKey && testUser) {
+  const subId = `sub_smoke_spoof_${Date.now()}`;
+  const body = JSON.stringify(trialEvent(TIERS[0], testUser, subId, { userId: testUser }));
+  const res = await post(body, { "paddle-signature": sign(body, secret) });
+  const readRes = await fetch(
+    `${supabaseUrl}/rest/v1/subscriptions?paddle_subscription_id=eq.${subId}&select=user_id`,
+    { headers: { apikey: serviceKey, authorization: `Bearer ${serviceKey}` } },
+  );
+  const spoofRows = (await readRes.json()) ?? [];
+  record(
+    "Client-declared userId cannot claim a subscription",
+    res.ok && spoofRows.length === 0,
+    `status ${res.status}, rows ${spoofRows.length}`,
+  );
+} else {
+  skip("Client-declared userId cannot claim a subscription", "smoke credentials not set");
+}
+
+if (secret && supabaseUrl && serviceKey && testUser && signingSecret) {
   for (const tier of TIERS) {
     const subId = `sub_smoke_${tier.plan}_${Date.now()}`;
-    const body = JSON.stringify(trialEvent(tier, testUser, subId));
+    const body = JSON.stringify(
+      trialEvent(tier, testUser, subId, {
+        checkoutToken: signCheckoutToken(testUser, signingSecret, tier.price),
+      }),
+    );
     const res = await post(body, { "paddle-signature": sign(body, secret) });
     if (!res.ok) {
       record(`Signed ${tier.plan} webhook accepted`, false, `status ${res.status}`);
@@ -201,7 +225,10 @@ if (secret && supabaseUrl && serviceKey && testUser) {
     });
   }
 } else {
-  skip("Signed webhook round-trip", "webhook secret, service key or SMOKE_TEST_USER_ID not set");
+  skip(
+    "Signed webhook round-trip",
+    "webhook secret, service key, SMOKE_TEST_USER_ID or CHECKOUT_SIGNING_SECRET not set",
+  );
 }
 
 if (process.env.GITHUB_STEP_SUMMARY) {
