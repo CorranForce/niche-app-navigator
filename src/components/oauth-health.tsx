@@ -70,13 +70,16 @@ function BucketList({
 
 export function OAuthHealthSection() {
   const [days, setDays] = useState<Range>(14);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
   const fetchAnalytics = useServerFn(getAuthAnalytics);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["auth-analytics", days],
-    queryFn: () => fetchAnalytics({ data: { days } }),
+    queryKey: ["auth-analytics", days, page],
+    queryFn: () => fetchAnalytics({ data: { days, page, pageSize } }),
     retry: false,
   });
+
 
   const maxDaily = Math.max(1, ...(data?.daily.map((d) => d.starts) ?? [1]));
 
@@ -95,11 +98,15 @@ export function OAuthHealthSection() {
               key={r}
               size="sm"
               variant={r === days ? "default" : "outline"}
-              onClick={() => setDays(r)}
+              onClick={() => {
+                setDays(r);
+                setPage(0);
+              }}
             >
               {r}d
             </Button>
           ))}
+
         </div>
       </div>
 
@@ -253,7 +260,35 @@ export function OAuthHealthSection() {
                 </table>
               </div>
             )}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+              <p className="font-mono text-xs text-muted-foreground">
+                {data.pagination.total === 0
+                  ? "0 events"
+                  : `${data.pagination.page * data.pagination.pageSize + 1}–${
+                      data.pagination.page * data.pagination.pageSize + data.recent.length
+                    } of ${data.pagination.total}`}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={data.pagination.page === 0}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                >
+                  Previous
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!data.pagination.hasMore}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           </Card>
+
         </>
       ) : null}
     </section>
