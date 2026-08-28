@@ -51,7 +51,12 @@ function SecurityStatusPage() {
               functions locked down.
             </p>
           </div>
-          <Button variant="ghost" className="ml-auto" onClick={() => refetch()} disabled={isFetching}>
+          <Button
+            variant="ghost"
+            className="ml-auto"
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
             <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Re-run check
           </Button>
         </div>

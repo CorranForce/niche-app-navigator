@@ -147,6 +147,41 @@ async function handleSubscriptionCanceled(
   return { applied: true, reason: "subscription_canceled" };
 }
 
+/**
+ * A failed charge immediately restricts the subscription. This only ever moves a
+ * live subscription into `past_due` — it never revives a canceled one — so it is
+ * safe to apply without an ordering guard on replays and out-of-order deliveries.
+ */
+export async function markPastDueFromFailedPayment(
+  data: any,
+  env: PaddleEnv,
+  occurredAt: string,
+): Promise<ApplyOutcome> {
+  const subscriptionId = data?.subscriptionId;
+  if (typeof subscriptionId !== "string" || !subscriptionId) {
+    return { applied: false, reason: "no_subscription_id" };
+  }
+  const { data: existing } = await getSupabase()
+    .from("subscriptions")
+    .select("status")
+    .eq("paddle_subscription_id", subscriptionId)
+    .eq("environment", env)
+    .maybeSingle();
+
+  const status = (existing as any)?.status as string | undefined;
+  if (!status) return { applied: false, reason: "unknown_subscription" };
+  if (status !== "active" && status !== "trialing") {
+    return { applied: false, reason: "not_restrictable" };
+  }
+
+  await getSupabase()
+    .from("subscriptions")
+    .update({ status: "past_due", updated_at: occurredAt })
+    .eq("paddle_subscription_id", subscriptionId)
+    .eq("environment", env);
+  return { applied: true, reason: "marked_past_due" };
+}
+
 async function refreshPeriodFromTransaction(data: any, env: PaddleEnv): Promise<ApplyOutcome> {
   const subscriptionId = data?.subscriptionId;
   const period = data?.billingPeriod;
@@ -204,12 +239,19 @@ export async function applyPaddleEvent(options: {
       return outcome;
     }
     case EventName.TransactionPaymentFailed: {
+      // Access is cut on the first failed charge rather than waiting for Paddle's
+      // dunning to escalate to `past_due`, so a lapsed card can't buy free usage.
+      const restricted = await markPastDueFromFailedPayment(data, env, occurredAt);
       if (sendEmails) {
         const { sendPaymentFailedEmail } = await import("@/lib/billing-emails.server");
         await sendPaymentFailedEmail(data, env);
       }
-      return { applied: sendEmails, reason: "payment_failed_notified" };
+      return {
+        applied: restricted.applied || sendEmails,
+        reason: restricted.applied ? "payment_failed_past_due" : "payment_failed_notified",
+      };
     }
+
     default: {
       // Lifecycle events that only change status/period reuse the update path.
       if (LIFECYCLE_EVENTS.has(eventType)) {
