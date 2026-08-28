@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ArrowRight, Loader2, Search } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
@@ -19,6 +19,7 @@ import {
 import { useSession } from "@/hooks/use-session";
 import { generateReport } from "@/lib/reports.functions";
 import { USE_CASES } from "@/lib/use-cases";
+import { friendlyErrorMessage } from "@/lib/friendly-errors";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -93,13 +94,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const EXAMPLES = [
-  "Independent dental clinics",
-  "Boutique fitness studios",
-  "Freelance wedding photographers",
-];
-
-const QUICK_IDEAS = [
+const NICHE_POOL = [
   "Mobile dog groomers",
   "Indie ceramics sellers",
   "Small-town law firms",
@@ -108,7 +103,35 @@ const QUICK_IDEAS = [
   "Local moving companies",
   "Boutique travel agents",
   "Auto detailing shops",
+  "Independent dental clinics",
+  "Boutique fitness studios",
+  "Freelance wedding photographers",
+  "Independent bookkeepers",
+  "Landscaping crews",
+  "Home inspectors",
+  "Tattoo studios",
+  "Driving schools",
+  "Speciality coffee roasters",
+  "Pool maintenance companies",
+  "Veterinary clinics",
+  "Event DJs",
+  "HVAC contractors",
+  "Physical therapy practices",
+  "Custom furniture makers",
+  "Childcare centres",
 ];
+
+const QUICK_IDEAS = NICHE_POOL.slice(0, 6);
+const EXAMPLES = NICHE_POOL.slice(6, 9);
+
+function sample(pool: string[], count: number, exclude: string[] = []) {
+  const rest = pool.filter((x) => !exclude.includes(x));
+  for (let i = rest.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [rest[i], rest[j]] = [rest[j]!, rest[i]!];
+  }
+  return rest.slice(0, count);
+}
 
 function Index() {
   const { user, loading } = useSession();
@@ -116,20 +139,29 @@ function Index() {
   const [niche, setNiche] = useState("");
   const [audience, setAudience] = useState("small businesses (1-20 staff)");
   const [budget, setBudget] = useState("moderate ($20-100/mo)");
+  const [quickIdeas, setQuickIdeas] = useState<string[]>(QUICK_IDEAS);
+  const [examples, setExamples] = useState<string[]>(EXAMPLES);
+
+  // Shuffle after hydration so SSR and the first client render match.
+  useEffect(() => {
+    const quick = sample(NICHE_POOL, 6);
+    setQuickIdeas(quick);
+    setExamples(sample(NICHE_POOL, 3, quick));
+  }, []);
 
   const generate = useServerFn(generateReport);
   const mutation = useMutation({
     mutationFn: (input: { niche: string; audience: string; budget: string }) =>
       generate({ data: input }),
     onSuccess: ({ id }) => navigate({ to: "/reports/$id", params: { id } }),
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => toast.error(friendlyErrorMessage(error)),
   });
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     let target = niche.trim();
     if (target.length < 2) {
-      target = QUICK_IDEAS[Math.floor(Math.random() * QUICK_IDEAS.length)] ?? "Mobile dog groomers";
+      target = sample(NICHE_POOL, 1)[0] ?? "Mobile dog groomers";
       setNiche(target);
       toast.info(`Feeling lucky — trying "${target}"`);
     }
@@ -162,7 +194,7 @@ function Index() {
                 <div>
                   <p className="label-mono text-muted-foreground">Quick ideas</p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {QUICK_IDEAS.slice(0, 6).map((idea) => (
+                    {quickIdeas.map((idea) => (
                       <button
                         key={idea}
                         type="button"
@@ -234,7 +266,7 @@ function Index() {
 
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   <span className="label-mono text-muted-foreground">Try</span>
-                  {EXAMPLES.map((ex) => (
+                  {examples.map((ex) => (
                     <button
                       key={ex}
                       type="button"
