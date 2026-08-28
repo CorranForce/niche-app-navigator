@@ -17,7 +17,8 @@ const PLAN_PRICE_CENTS: Record<string, number> = { solo: 900, pro: 1900, studio:
 export const getOwnerOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<OwnerOverview> => {
-    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+    const { supabaseAdmin: adminForRole } = await import("@/integrations/supabase/client.server");
+    const { data: isAdmin, error: roleError } = await adminForRole.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
     });

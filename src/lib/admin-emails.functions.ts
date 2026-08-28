@@ -35,7 +35,8 @@ export const listRecentEmailLogs = createServerFn({ method: "POST" })
       .parse(input ?? {}),
   )
   .handler(async ({ data, context }): Promise<EmailLogRow[]> => {
-    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+    const { supabaseAdmin: adminForRole } = await import("@/integrations/supabase/client.server");
+    const { data: isAdmin, error: roleError } = await adminForRole.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
     });
