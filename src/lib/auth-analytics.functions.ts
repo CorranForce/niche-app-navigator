@@ -1,19 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { z } from "zod";
-
-/** Hard caps: a page can never be widened or walked past these bounds. */
-const MAX_PAGE_SIZE = 50;
-const MAX_PAGE = 19;
-const AGGREGATE_ROW_CAP = 5000;
-
-const rangeInput = z
-  .object({
-    days: z.union([z.literal(7), z.literal(14), z.literal(30)]).default(14),
-    page: z.number().int().min(0).max(MAX_PAGE).default(0),
-    pageSize: z.number().int().min(5).max(MAX_PAGE_SIZE).default(25),
-  })
-  .strict();
+import {
+  AGGREGATE_ROW_CAP,
+  authAnalyticsInput,
+  hasMorePages,
+  pageRange,
+  truncateReason,
+} from "@/lib/auth-analytics-guards";
 
 /**
  * Admin-only OAuth telemetry. The caller is authenticated by middleware, the
@@ -26,7 +19,8 @@ const rangeInput = z
  */
 export const getAuthAnalytics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => rangeInput.parse(input ?? {}))
+  .inputValidator((input: unknown) => authAnalyticsInput.parse(input ?? {}))
+
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { aggregate, browserLabel } = await import("@/lib/auth-analytics.server");
