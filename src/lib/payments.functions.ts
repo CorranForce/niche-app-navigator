@@ -118,17 +118,39 @@ export const changePlan = createServerFn({ method: "POST" })
     }
     const { getPaddleClient, gatewayFetch } = await import("@/lib/paddle.server");
 
+    // The payment provider only accepts a replacement price that bills on the
+    // same cycle and currency as the live subscription. Switching monthly <->
+    // yearly has to go through cancel + re-subscribe, so reject it up front
+    // with a message the customer can act on instead of a provider error.
+    const currentIsYearly = (target.price_id ?? "").endsWith("_yearly");
+    if (data.priceId.endsWith("_yearly") !== currentIsYearly) {
+      throw new Error(
+        `Your subscription bills ${currentIsYearly ? "yearly" : "monthly"}. To switch billing periods, cancel your current plan and start a new one when it ends.`,
+      );
+    }
+
     const priceRes = await gatewayFetch(
       env,
       `/prices?external_id=${encodeURIComponent(data.priceId)}`,
     );
-    const priceJson = (await priceRes.json()) as { data?: Array<{ id: string }> };
-    const paddlePriceId = priceJson.data?.[0]?.id;
-    if (!paddlePriceId) throw new Error("That plan is not available right now.");
+    const priceJson = (await priceRes.json()) as {
+      data?: Array<{
+        id: string;
+        billing_cycle?: { interval?: string; frequency?: number } | null;
+        unit_price?: { currency_code?: string } | null;
+      }>;
+    };
+    const price = priceJson.data?.[0];
+    if (!price?.id) throw new Error("That plan is not available right now.");
+    if (price.billing_cycle?.interval !== (currentIsYearly ? "year" : "month")) {
+      throw new Error(
+        "That plan bills on a different schedule than your current subscription. Cancel and re-subscribe to change billing periods.",
+      );
+    }
 
     const paddle = getPaddleClient(env);
     await paddle.subscriptions.update(target.paddle_subscription_id, {
-      items: [{ priceId: paddlePriceId, quantity: 1 }],
+      items: [{ priceId: price.id, quantity: 1 }],
       prorationBillingMode: "full_next_billing_period",
     });
 

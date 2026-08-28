@@ -31,7 +31,7 @@ export function BillingManager() {
   const { user } = useSession();
   const { subscription, plan, isActive, loading, refetch, entitlementSource } = useSubscription();
   const { openCheckout } = usePaddleCheckout();
-  const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
+  const [intervalPref, setInterval] = useState<"monthly" | "yearly" | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   const doChangePlan = useServerFn(changePlan);
@@ -41,7 +41,15 @@ export function BillingManager() {
   const doCheckoutIntent = useServerFn(createCheckoutIntent);
 
   const currentPlan = PLANS.find((p) => p.id === plan) ?? null;
-  const activeInterval = subscription?.price_id?.endsWith("_yearly") ? "yearly" : "monthly";
+  const activeInterval: "monthly" | "yearly" = subscription?.price_id?.endsWith("_yearly")
+    ? "yearly"
+    : "monthly";
+  // A live subscription can only move between plans on its own billing cycle,
+  // so lock the toggle to the cycle the customer is actually billed on.
+  const intervalLocked = Boolean(isActive && subscription);
+  const interval: "monthly" | "yearly" = intervalLocked
+    ? activeInterval
+    : (intervalPref ?? "monthly");
   const endsSoon = Boolean(
     subscription?.cancel_at_period_end && subscription.status !== "canceled",
   );
@@ -227,8 +235,14 @@ export function BillingManager() {
             <button
               key={i}
               type="button"
+              disabled={intervalLocked && i !== activeInterval}
+              title={
+                intervalLocked && i !== activeInterval
+                  ? "Cancel your current plan to switch billing periods."
+                  : undefined
+              }
               onClick={() => setInterval(i)}
-              className={`label-mono rounded-sm px-3 py-1 transition-colors ${
+              className={`label-mono rounded-sm px-3 py-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                 interval === i ? "bg-primary text-primary-foreground" : "text-muted-foreground"
               }`}
             >
@@ -237,6 +251,12 @@ export function BillingManager() {
           ))}
         </div>
       </div>
+      {intervalLocked && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          You&apos;re billed {activeInterval === "yearly" ? "yearly" : "monthly"}. Plan changes stay
+          on this billing period — to switch, cancel and start a new plan when this one ends.
+        </p>
+      )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         {PLANS.map((p) => {
