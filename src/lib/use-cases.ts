@@ -485,6 +485,6 @@ export function buildStarterPrompt(u: UseCase): string {
     `- No payments, teams, or integrations in the MVP.`,
     `- Seed the app with realistic demo data so it is testable immediately.`,
     ``,
-    `Done means: a user can sign up, complete the core workflow (${u.workflow[0].replace(/\.$/, "").toLowerCase()}), and see the result without touching support.`,
+    `Done means: a user can sign up, complete the core workflow (${(u.workflow[0] ?? "the core task").replace(/\.$/, "").toLowerCase()}), and see the result without touching support.`,
   ].join("\n");
 }
