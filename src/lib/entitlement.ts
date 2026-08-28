@@ -5,8 +5,10 @@
  *  - their own subscription row, or
  *  - a Studio workspace they were invited to (seats grant the owner's plan).
  *
- * The `my_effective_subscription` database function encapsulates both, so the
- * teammate's own (non-existent) subscription never hides the inherited one.
+ * The `effective_subscription_for(_user_id, _env)` database function encapsulates
+ * both, so the teammate's own (non-existent) subscription never hides the
+ * inherited one. It is service-role only and reached through a server function.
+
  */
 import {
   entitledPlan,
