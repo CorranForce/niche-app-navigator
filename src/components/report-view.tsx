@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Copy, AlertTriangle, Layers, Rocket, Timer } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Copy, Download, AlertTriangle, Layers, Lock, Rocket, Timer } from "lucide-react";
+import { useSubscription } from "@/hooks/use-subscription";
+import { planFeatures } from "@/lib/plan-limits";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -23,6 +26,19 @@ const severityVariant: Record<string, string> = {
 
 export function ReportView({ niche, report }: { niche: string; report: SolutionReport }) {
   const [copied, setCopied] = useState(false);
+  const { plan } = useSubscription();
+  const canExport = planFeatures(plan).markdownExport;
+
+  function downloadMarkdown() {
+    const blob = new Blob([reportToMarkdown(niche, report)], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${niche.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-report.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Markdown downloaded");
+  }
 
   async function copyMarkdown() {
     try {
@@ -48,10 +64,25 @@ export function ReportView({ niche, report }: { niche: string; report: SolutionR
               {report.buyer_profile}
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={copyMarkdown}>
-            <Copy className="mr-2 h-3.5 w-3.5" />
-            {copied ? "Copied" : "Copy markdown"}
-          </Button>
+          {canExport ? (
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={copyMarkdown}>
+                <Copy className="mr-2 h-3.5 w-3.5" />
+                {copied ? "Copied" : "Copy markdown"}
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadMarkdown}>
+                <Download className="mr-2 h-3.5 w-3.5" />
+                Download .md
+              </Button>
+            </div>
+          ) : (
+            <Button asChild variant="outline" size="sm">
+              <Link to="/account" hash="billing">
+                <Lock className="mr-2 h-3.5 w-3.5" />
+                Markdown export is on Pro
+              </Link>
+            </Button>
+          )}
         </div>
       </section>
 
