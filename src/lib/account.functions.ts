@@ -26,21 +26,10 @@ export type EnsureAccountResult = {
 export const ensureAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<EnsureAccountResult> => {
-    const { entitledPlan } = await import("@/lib/plan-limits");
+    const { effectiveEntitlement } = await import("@/lib/entitlement");
     const { supabase, userId, claims } = context;
 
-    const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
-    const planFor = async () => {
-      const { data: sub } = await supabase
-        .from("subscriptions")
-        .select("status, product_id, current_period_end")
-        .eq("user_id", userId)
-        .eq("environment", paymentsEnv)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return entitledPlan(sub);
-    };
+    const planFor = async () => (await effectiveEntitlement(supabase)).plan;
 
     const c = claims as { email?: string; user_metadata?: Record<string, unknown> } | undefined;
     const rawEmail = typeof c?.email === "string" ? c.email.trim() : "";

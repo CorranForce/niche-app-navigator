@@ -20,37 +20,30 @@ export type TeamState = {
   members: TeamMemberRow[];
 };
 
-async function planFor(
+async function entitlementFor(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
-  userId: string,
 ) {
-  const { entitledPlan } = await import("@/lib/plan-limits");
-  const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
-  const { data: sub } = await supabase
-    .from("subscriptions")
-    .select("status, product_id, current_period_end")
-    .eq("user_id", userId)
-    .eq("environment", paymentsEnv)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return entitledPlan(sub);
+  const { effectiveEntitlement } = await import("@/lib/entitlement");
+  return effectiveEntitlement(supabase);
 }
 
 /** Studio workspace state: seats, members and whether the caller owns it. */
 export const getTeam = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<TeamState> => {
-    const { planFeatures, STUDIO_SEATS } = await import("@/lib/plan-limits");
+    const { STUDIO_SEATS } = await import("@/lib/plan-limits");
     const { ensureTeamForOwner, teamIdsForUser } = await import("@/lib/teams.server");
-    const plan = await planFor(context.supabase, context.userId);
-    const features = planFeatures(plan);
+    const entitlement = await entitlementFor(context.supabase);
+    const features = entitlement.features;
+    // Only the paying owner gets a workspace created for them; invited members
+    // inherit Studio access but must not spawn a second workspace.
+    const ownsPlan = entitlement.source === "own";
 
     let teamId: string | null = null;
     let isOwner = false;
 
-    if (features.team) {
+    if (features.team && ownsPlan) {
       teamId = await ensureTeamForOwner(context.supabase, context.userId);
       isOwner = Boolean(teamId);
     } else {
@@ -96,10 +89,10 @@ export const inviteTeammate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ email: z.string().email() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { planFeatures, STUDIO_SEATS } = await import("@/lib/plan-limits");
+    const { STUDIO_SEATS } = await import("@/lib/plan-limits");
     const { ensureTeamForOwner } = await import("@/lib/teams.server");
-    const plan = await planFor(context.supabase, context.userId);
-    if (!planFeatures(plan).team) {
+    const entitlement = await entitlementFor(context.supabase);
+    if (!entitlement.features.team || entitlement.source !== "own") {
       throw new Error("Team seats are part of the Studio plan. Upgrade to invite teammates.");
     }
     const teamId = await ensureTeamForOwner(context.supabase, context.userId);

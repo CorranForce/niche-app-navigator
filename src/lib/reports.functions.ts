@@ -16,13 +16,8 @@ export const generateReport = createServerFn({ method: "POST" })
     const { streamText, Output, NoObjectGeneratedError } = await import("ai");
     const { createLovableResponsesProvider } = await import("@/lib/ai-gateway.server");
     const { SYSTEM_PROMPT, buildUserPrompt } = await import("@/lib/report-prompt.server");
-    const {
-      entitledPlan,
-      limitForPlan,
-      planFeatures,
-      PLAN_LABELS,
-      STANDARD_QUEUE_COOLDOWN_SECONDS,
-    } = await import("@/lib/plan-limits");
+    const { PLAN_LABELS, STANDARD_QUEUE_COOLDOWN_SECONDS } = await import("@/lib/plan-limits");
+    const { effectiveEntitlement } = await import("@/lib/entitlement");
 
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured for this project yet.");
@@ -36,23 +31,12 @@ export const generateReport = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .gte("created_at", monthStart.toISOString());
 
-    const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
-    const { data: sub } = await context.supabase
-      .from("subscriptions")
-      .select("status, product_id, current_period_end")
-      .eq("user_id", context.userId)
-      .eq("environment", paymentsEnv)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    const plan = entitledPlan(sub);
-    const limit = limitForPlan(plan);
-    const features = planFeatures(plan);
+    const entitlement = await effectiveEntitlement(context.supabase);
+    const { plan, limit, features } = entitlement;
 
     if (!features.generate) {
       throw new Error(
-        sub?.status === "past_due"
+        entitlement.status === "past_due"
           ? "Your last payment failed, so report generation is paused. Update your payment method on the billing page to continue."
           : "Start a plan to generate reports — every plan includes a 7-day free trial. Pick one on the billing page.",
       );
@@ -90,8 +74,11 @@ export const generateReport = createServerFn({ method: "POST" })
     }
 
     if (features.team) {
-      const { ensureTeamForOwner } = await import("@/lib/teams.server");
-      teamId = await ensureTeamForOwner(context.supabase, context.userId);
+      const { ensureTeamForOwner, teamIdsForUser } = await import("@/lib/teams.server");
+      teamId =
+        entitlement.source === "team"
+          ? ((await teamIdsForUser(context.supabase, context.userId))[0] ?? null)
+          : await ensureTeamForOwner(context.supabase, context.userId);
     }
 
     const provider = createLovableResponsesProvider(apiKey);
@@ -169,17 +156,9 @@ export const compareReports = createServerFn({ method: "POST" })
     z.object({ ids: z.array(z.string().uuid()).min(2).max(3) }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { entitledPlan, planFeatures } = await import("@/lib/plan-limits");
-    const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
-    const { data: sub } = await context.supabase
-      .from("subscriptions")
-      .select("status, product_id, current_period_end")
-      .eq("user_id", context.userId)
-      .eq("environment", paymentsEnv)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (!planFeatures(entitledPlan(sub)).compare) {
+    const { effectiveEntitlement } = await import("@/lib/entitlement");
+    const { features } = await effectiveEntitlement(context.supabase);
+    if (!features.compare) {
       throw new Error("Side-by-side comparison is part of the Studio plan.");
     }
 
@@ -216,7 +195,7 @@ export const deleteReport = createServerFn({ method: "POST" })
 export const getUsage = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { entitledPlan, limitForPlan } = await import("@/lib/plan-limits");
+    const { effectiveEntitlement } = await import("@/lib/entitlement");
     const monthStart = new Date();
     monthStart.setUTCDate(1);
     monthStart.setUTCHours(0, 0, 0, 0);
@@ -225,15 +204,6 @@ export const getUsage = createServerFn({ method: "GET" })
       .select("id", { count: "exact", head: true })
       .eq("user_id", context.userId)
       .gte("created_at", monthStart.toISOString());
-    const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
-    const { data: sub } = await context.supabase
-      .from("subscriptions")
-      .select("status, product_id, current_period_end")
-      .eq("user_id", context.userId)
-      .eq("environment", paymentsEnv)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const plan = entitledPlan(sub);
-    return { used: count ?? 0, limit: limitForPlan(plan), plan };
+    const { plan, limit } = await effectiveEntitlement(context.supabase);
+    return { used: count ?? 0, limit, plan };
   });
