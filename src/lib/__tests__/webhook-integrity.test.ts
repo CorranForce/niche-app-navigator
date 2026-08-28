@@ -90,7 +90,8 @@ describe("checkout intent token integrity", () => {
 
 describe("webhook payload validation", () => {
   const ok = (data: SubscriptionEventData, intent?: { env?: string; price?: string }) =>
-    subscriptionRowFromEvent(data, "sandbox", { userId: "user-1", intent });
+    subscriptionRowFromEvent(data, "sandbox", { userId: "user-1", intent: intent ?? null });
+
 
   it("maps a well-formed payload", () => {
     const result = ok(event());
