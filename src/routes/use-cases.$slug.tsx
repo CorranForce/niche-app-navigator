@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -238,6 +239,7 @@ function UseCaseDetail() {
           </div>
         </section>
       </main>
+      <SiteFooter />
     </div>
   );
 }

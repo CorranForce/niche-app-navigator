@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check } from "lucide-react";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { Card } from "@/components/ui/card";
@@ -198,6 +199,7 @@ function PricingPage() {
           </div>
         </section>
       </main>
+      <SiteFooter />
     </div>
   );
 }

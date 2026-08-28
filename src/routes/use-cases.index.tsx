@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { USE_CASES } from "@/lib/use-cases";
@@ -96,6 +97,7 @@ function UseCasesIndex() {
           ))}
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ArrowRight, Loader2, Search } from "lucide-react";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -339,25 +340,7 @@ function Index() {
         </section>
       </main>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-8">
-          <p className="font-mono text-xs text-muted-foreground">µ solutionfinder</p>
-          <nav className="flex flex-wrap gap-4">
-            <Link
-              to="/use-cases"
-              className="label-mono text-muted-foreground hover:text-foreground"
-            >
-              Use cases
-            </Link>
-            <Link to="/pricing" className="label-mono text-muted-foreground hover:text-foreground">
-              Pricing
-            </Link>
-            <Link to="/faq" className="label-mono text-muted-foreground hover:text-foreground">
-              FAQ
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
