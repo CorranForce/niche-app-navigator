@@ -48,8 +48,7 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     // Event log: fetched as its own bounded page rather than sliced client-side.
-    const pageSize = Math.min(data.pageSize, MAX_PAGE_SIZE);
-    const from = Math.min(data.page, MAX_PAGE) * pageSize;
+    const { page, pageSize, from, to } = pageRange(data);
     const {
       data: pageRows,
       count,
@@ -59,7 +58,7 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
       .select("event, reason, user_agent, ip_prefix, created_at", { count: "exact" })
       .gte("created_at", sinceIso)
       .order("created_at", { ascending: false })
-      .range(from, from + pageSize - 1);
+      .range(from, to);
 
     if (pageError) throw new Error(pageError.message);
 
@@ -67,7 +66,7 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
     const recent = ((pageRows ?? []) as AuthEventRow[]).map((r) => ({
       created_at: r.created_at,
       event: r.event,
-      reason: r.reason ? r.reason.slice(0, 200) : null,
+      reason: truncateReason(r.reason),
       browser: browserLabel(r.user_agent),
       ip_prefix: r.ip_prefix,
     }));
@@ -76,13 +75,14 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
       ...aggregate((rows ?? []) as AuthEventRow[], data.days),
       recent,
       pagination: {
-        page: Math.min(data.page, MAX_PAGE),
+        page,
         pageSize,
         total,
-        hasMore: from + recent.length < total && Math.min(data.page, MAX_PAGE) < MAX_PAGE,
+        hasMore: hasMorePages({ page, from, returned: recent.length, total }),
       },
     };
   });
+
 
 
 /** Whether the signed-in user may open the internal dashboard. */
