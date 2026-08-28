@@ -98,16 +98,31 @@ for (const tier of TIERS) {
 }
 {
   const past = entitlement("past_due", "pro_plan", new Date(Date.now() + 86400000).toISOString());
-  record("past_due pauses generation", past.plan === "none" && past.limit === 0, `plan=${past.plan}`);
-  const canceled = entitlement("canceled", "pro_plan", new Date(Date.now() + 86400000).toISOString());
-  record("cancellation keeps access to period end", canceled.plan === "pro", `plan=${canceled.plan}`);
+  record(
+    "past_due pauses generation",
+    past.plan === "none" && past.limit === 0,
+    `plan=${past.plan}`,
+  );
+  const canceled = entitlement(
+    "canceled",
+    "pro_plan",
+    new Date(Date.now() + 86400000).toISOString(),
+  );
+  record(
+    "cancellation keeps access to period end",
+    canceled.plan === "pro",
+    `plan=${canceled.plan}`,
+  );
   const lapsed = entitlement("canceled", "pro_plan", new Date(Date.now() - 86400000).toISOString());
   record("lapsed trial loses access", lapsed.plan === "none", `plan=${lapsed.plan}`);
 }
 
 // 2. Unsigned / tampered webhooks must be rejected.
 try {
-  const res = await post(JSON.stringify(trialEvent(TIERS[0], "00000000-0000-0000-0000-000000000000", "sub_unsigned")), {});
+  const res = await post(
+    JSON.stringify(trialEvent(TIERS[0], "00000000-0000-0000-0000-000000000000", "sub_unsigned")),
+    {},
+  );
   record("Unsigned webhook rejected", res.status >= 400, `status ${res.status}`);
 } catch (err) {
   record("Unsigned webhook rejected", false, err.message);
@@ -115,7 +130,9 @@ try {
 
 const secret = process.env.PAYMENTS_SANDBOX_WEBHOOK_SECRET;
 if (secret) {
-  const body = JSON.stringify(trialEvent(TIERS[0], "00000000-0000-0000-0000-000000000000", "sub_bad_sig"));
+  const body = JSON.stringify(
+    trialEvent(TIERS[0], "00000000-0000-0000-0000-000000000000", "sub_bad_sig"),
+  );
   const res = await post(body, { "paddle-signature": sign(body, `${secret}-wrong`) });
   record("Tampered signature rejected", res.status >= 400, `status ${res.status}`);
 } else {
