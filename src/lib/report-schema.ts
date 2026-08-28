@@ -117,3 +117,37 @@ export function reportToMarkdown(niche: string, r: SolutionReport): string {
   r.risks.forEach((x) => lines.push(`- ${x}`));
   return lines.join("\n");
 }
+
+/**
+ * Barebones "vibe-code" prompt for a single app concept: enough scope for an
+ * LLM to scaffold a 72-hour MVP, with recommended features pulled from the
+ * report's MVP breakdown.
+ */
+export function conceptVibePrompt(
+  niche: string,
+  report: SolutionReport,
+  concept: SolutionReport["concepts"][number],
+): string {
+  const features = report.feature_breakdown.mvp.slice(0, 6).map((f) => `- ${f.feature}`);
+  if (features.length === 0) features.push(...concept.solves.map((s) => `- ${s}`));
+  const tiers = report.pricing_tiers
+    .map((t) => `${t.name} $${t.monthly_price_usd}/mo`)
+    .join(" · ");
+
+  return [
+    `Build a small web app called "${concept.name}" — ${concept.tagline}.`,
+    "",
+    `Users: ${concept.who_its_for} in ${niche}.`,
+    `Problem it removes: ${concept.solves.join("; ")}.`,
+    "",
+    "Keep it barebones — ship a working v1 in 72 hours. Recommended features:",
+    ...features,
+    "",
+    "Also include:",
+    "- Email + Google sign-in, each user only sees their own data",
+    "- One simple dashboard listing records with create/edit/delete",
+    `- Paid plans: ${tiers || "a free tier and one paid tier"}`,
+    "",
+    "Clean, modern UI. No extra features beyond the list above.",
+  ].join("\n");
+}
