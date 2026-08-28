@@ -152,6 +152,7 @@ export function ReportView({ niche, report }: { niche: string; report: SolutionR
                   ))}
                 </ul>
                 <p className="border-t border-border pt-3 text-xs text-muted-foreground">{c.why}</p>
+                <ConceptPrompt niche={niche} report={report} concept={c} />
               </Card>
             );
           })}
