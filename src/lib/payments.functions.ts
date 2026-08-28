@@ -56,7 +56,7 @@ export const changePlan = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: sub, error } = await context.supabase
       .from("subscriptions")
-      .select("paddle_subscription_id, environment, status")
+      .select("paddle_subscription_id, environment, status, price_id")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -68,6 +68,9 @@ export const changePlan = createServerFn({ method: "POST" })
     }
 
     const env = sub.environment as "sandbox" | "live";
+    if (sub.price_id === data.priceId) {
+      throw new Error("You're already on that plan.");
+    }
     const { getPaddleClient, gatewayFetch } = await import("@/lib/paddle.server");
 
     const priceRes = await gatewayFetch(
@@ -109,4 +112,81 @@ export const cancelSubscription = createServerFn({ method: "POST" })
     });
 
     return { ok: true };
+  });
+
+/**
+ * Recovery path for a delayed or dropped webhook: pulls the caller's live
+ * subscription state straight from the payment provider and writes it to the
+ * database, so entitlements never depend on a single webhook delivery.
+ */
+export const syncSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { gatewayFetch } = await import("@/lib/paddle.server");
+    const { paymentsEnv } = await import("@/lib/payments-env");
+    const env = paymentsEnv();
+
+    const claims = context.claims as { email?: string } | undefined;
+    const email = typeof claims?.email === "string" ? claims.email.toLowerCase() : "";
+
+    // Known customer id from a previous row, otherwise look the customer up by email.
+    const { data: known } = await context.supabase
+      .from("subscriptions")
+      .select("paddle_customer_id")
+      .eq("user_id", context.userId)
+      .eq("environment", env)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let customerId = (known?.paddle_customer_id as string | undefined) ?? undefined;
+    if (!customerId && email) {
+      const res = await gatewayFetch(env, `/customers?email=${encodeURIComponent(email)}`);
+      const json = (await res.json()) as { data?: Array<{ id: string }> };
+      customerId = json.data?.[0]?.id;
+    }
+    if (!customerId) return { synced: false, reason: "no_customer" as const };
+
+    const subsRes = await gatewayFetch(
+      env,
+      `/subscriptions?customer_id=${encodeURIComponent(customerId)}&per_page=20`,
+    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subsJson = (await subsRes.json()) as { data?: any[] };
+    const list = subsJson.data ?? [];
+    if (!list.length) return { synced: false, reason: "no_subscription" as const };
+
+    const rank: Record<string, number> = { active: 4, trialing: 4, past_due: 3, paused: 2, canceled: 1 };
+    const best = [...list].sort(
+      (a, b) => (rank[b.status] ?? 0) - (rank[a.status] ?? 0) ||
+        new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime(),
+    )[0];
+
+    const item = best.items?.[0];
+    const priceExternal = item?.price?.import_meta?.external_id as string | undefined;
+    const productExternal = item?.product?.import_meta?.external_id as string | undefined;
+    if (!priceExternal || !productExternal) {
+      return { synced: false, reason: "missing_external_ids" as const };
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: upsertError } = await supabaseAdmin.from("subscriptions").upsert(
+      {
+        user_id: context.userId,
+        paddle_subscription_id: best.id,
+        paddle_customer_id: customerId,
+        product_id: productExternal,
+        price_id: priceExternal,
+        status: best.status,
+        current_period_start: best.current_billing_period?.starts_at ?? null,
+        current_period_end: best.current_billing_period?.ends_at ?? null,
+        cancel_at_period_end: best.scheduled_change?.action === "cancel",
+        environment: env,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "paddle_subscription_id" },
+    );
+    if (upsertError) throw new Error(upsertError.message);
+
+    return { synced: true, status: best.status as string, productId: productExternal };
   });
