@@ -61,6 +61,12 @@ function trialEvent(tier, userId, subId) {
       customer_id: "ctm_smoke_test",
       status: "trialing",
       custom_data: { userId },
+      currency_code: "USD",
+      collection_mode: "automatic",
+      billing_cycle: { interval: "month", frequency: 1 },
+      started_at: now.toISOString(),
+      created_at: now.toISOString(),
+      updated_at: now.toISOString(),
       current_billing_period: { starts_at: now.toISOString(), ends_at: trialEnd.toISOString() },
       items: [
         {
