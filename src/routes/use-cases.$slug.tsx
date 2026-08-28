@@ -1,9 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getUseCase, USE_CASES } from "@/lib/use-cases";
+import { buildStarterPrompt, getUseCase, USE_CASES } from "@/lib/use-cases";
 
 const BASE = "https://idea-spark-fast.lovable.app";
 
@@ -98,6 +100,42 @@ export const Route = createFileRoute("/use-cases/$slug")({
   notFoundComponent: UseCaseNotFound,
 });
 
+function StarterPromptSection({ prompt }: { prompt: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable — the prompt is still selectable below
+    }
+  }
+
+  return (
+    <section className="mt-12">
+      <h2 className="text-xl font-semibold">Build it: paste this into a coding LLM</h2>
+      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+        A bare-bones starter prompt for this pain point. Copy it into Lovable, Cursor, Claude, or
+        any coding assistant to scaffold the MVP — then iterate.
+      </p>
+      <Card className="mt-4 gap-0 overflow-hidden border-border bg-surface p-0">
+        <div className="flex items-center justify-between border-b border-border px-4 py-2">
+          <span className="label-mono text-muted-foreground">starter-prompt.txt</span>
+          <Button variant="ghost" size="sm" onClick={copyPrompt} className="gap-2">
+            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            {copied ? "Copied" : "Copy prompt"}
+          </Button>
+        </div>
+        <pre className="max-h-80 overflow-auto whitespace-pre-wrap p-4 font-mono text-xs leading-relaxed text-muted-foreground">
+          {prompt}
+        </pre>
+      </Card>
+    </section>
+  );
+}
+
 function UseCaseNotFound() {
   return (
     <div className="min-h-screen">
@@ -165,6 +203,8 @@ function UseCaseDetail() {
             ))}
           </ol>
         </section>
+
+        <StarterPromptSection prompt={buildStarterPrompt(u)} />
 
         <section className="mt-12">
           <h2 className="text-xl font-semibold">Mini case studies</h2>
