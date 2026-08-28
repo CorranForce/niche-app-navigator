@@ -31,10 +31,7 @@ export const getGrantCheck = createServerFn({ method: "POST" })
     if (roleError) throw new Error("Could not verify access.");
     if (!isAdmin) throw new Error("Admins only.");
 
-    const functions = [
-      ...RLS_FUNCTION_GRANTS.map((e) => e.fn),
-      ...SERVICE_ROLE_ONLY_FUNCTIONS,
-    ];
+    const functions = [...RLS_FUNCTION_GRANTS.map((e) => e.fn), ...SERVICE_ROLE_ONLY_FUNCTIONS];
     const { data, error } = await supabaseAdmin.rpc(
       "function_grant_audit" as never,
       { _functions: functions, _roles: ["anon", "authenticated", "service_role"] } as never,
