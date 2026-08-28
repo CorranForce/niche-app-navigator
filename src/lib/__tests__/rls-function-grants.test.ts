@@ -43,7 +43,9 @@ describe("reports endpoint regression: permission denied for function is_team_me
   });
 
   it("surfaces a permission-denied function error as an actionable message, not a raw string", () => {
-    const message = friendlyErrorMessage(new Error("permission denied for function is_team_member"));
+    const message = friendlyErrorMessage(
+      new Error("permission denied for function is_team_member"),
+    );
     expect(message).not.toMatch(/^permission denied/);
     expect(message).toContain("is_team_member");
     expect(message.toLowerCase()).toContain("retry");

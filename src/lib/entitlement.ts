@@ -77,4 +77,3 @@ export async function effectiveEntitlement(
   const row = (Array.isArray(data) ? data[0] : data) as Row | null;
   return entitlementFromRow(row ?? null, environment);
 }
-

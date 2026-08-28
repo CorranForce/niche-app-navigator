@@ -130,9 +130,7 @@ export function conceptVibePrompt(
 ): string {
   const features = report.feature_breakdown.mvp.slice(0, 6).map((f) => `- ${f.feature}`);
   if (features.length === 0) features.push(...concept.solves.map((s) => `- ${s}`));
-  const tiers = report.pricing_tiers
-    .map((t) => `${t.name} $${t.monthly_price_usd}/mo`)
-    .join(" · ");
+  const tiers = report.pricing_tiers.map((t) => `${t.name} $${t.monthly_price_usd}/mo`).join(" · ");
 
   return [
     `Build a small web app called "${concept.name}" — ${concept.tagline}.`,
