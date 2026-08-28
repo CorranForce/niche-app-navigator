@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
@@ -221,7 +221,7 @@ function UseCaseDetail() {
           </ol>
         </section>
 
-        <StarterPromptSection prompt={buildStarterPrompt(u)} />
+        <StarterPromptSection prompt={buildStarterPrompt(u)} slug={u.slug} title={u.title} />
 
         <section className="mt-12">
           <h2 className="text-xl font-semibold">Mini case studies</h2>
