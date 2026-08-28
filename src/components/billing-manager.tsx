@@ -31,7 +31,7 @@ export function BillingManager() {
   const { user } = useSession();
   const { subscription, plan, isActive, loading, refetch, entitlementSource } = useSubscription();
   const { openCheckout } = usePaddleCheckout();
-  const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
+  const [intervalPref, setInterval] = useState<"monthly" | "yearly" | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   const doChangePlan = useServerFn(changePlan);
