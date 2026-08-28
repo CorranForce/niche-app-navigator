@@ -84,13 +84,6 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
       break;
-    case EventName.SubscriptionPaused:
-    case EventName.SubscriptionResumed:
-    case EventName.SubscriptionActivated:
-    case EventName.SubscriptionTrialing:
-    case EventName.SubscriptionPastDue:
-      await handleSubscriptionUpdated(event.data, env);
-      break;
     case EventName.TransactionCompleted: {
       // A renewal payment also refreshes the billing period, so keep the row in
       // step even if the matching subscription.updated event is delayed.
@@ -104,8 +97,22 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
       await sendPaymentFailedEmail(event.data, env);
       break;
     }
-    default:
+    default: {
+      // Lifecycle events that only change status/period reuse the update path.
+      const lifecycle = new Set([
+        "subscription.activated",
+        "subscription.trialing",
+        "subscription.past_due",
+        "subscription.paused",
+        "subscription.resumed",
+        "subscription.imported",
+      ]);
+      if (lifecycle.has(event.eventType as string)) {
+        await handleSubscriptionUpdated(event.data, env);
+        break;
+      }
       console.log("Unhandled event:", event.eventType);
+    }
   }
 }
 
