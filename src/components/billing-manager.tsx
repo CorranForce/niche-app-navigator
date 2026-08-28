@@ -41,7 +41,15 @@ export function BillingManager() {
   const doCheckoutIntent = useServerFn(createCheckoutIntent);
 
   const currentPlan = PLANS.find((p) => p.id === plan) ?? null;
-  const activeInterval = subscription?.price_id?.endsWith("_yearly") ? "yearly" : "monthly";
+  const activeInterval: "monthly" | "yearly" = subscription?.price_id?.endsWith("_yearly")
+    ? "yearly"
+    : "monthly";
+  // A live subscription can only move between plans on its own billing cycle,
+  // so lock the toggle to the cycle the customer is actually billed on.
+  const intervalLocked = Boolean(isActive && subscription);
+  const interval: "monthly" | "yearly" = intervalLocked
+    ? activeInterval
+    : (intervalPref ?? "monthly");
   const endsSoon = Boolean(
     subscription?.cancel_at_period_end && subscription.status !== "canceled",
   );
