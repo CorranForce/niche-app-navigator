@@ -161,6 +161,9 @@ function OwnerDashboardPage() {
                   <Button asChild size="sm" variant="outline">
                     <a href="#emails">Emails</a>
                   </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/admin/security">Security status</Link>
+                  </Button>
                 </div>
               </Card>
             </section>
