@@ -95,12 +95,7 @@ export async function sendPaymentFailedEmail(data: any, env: PaddleEnv) {
 }
 
 export type SubscriptionChangeKind =
-  | "plan_changed"
-  | "cancellation_scheduled"
-  | "canceled"
-  | "resumed"
-  | "paused"
-  | "past_due";
+  "plan_changed" | "cancellation_scheduled" | "canceled" | "resumed" | "paused" | "past_due";
 
 const CHANGE_COPY: Record<SubscriptionChangeKind, { headline: string; summary: string }> = {
   plan_changed: {

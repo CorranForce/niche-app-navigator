@@ -61,7 +61,8 @@ export function BillingManager() {
     : "monthly";
   // The toggle stays usable on a live subscription: picking the other cycle
   // routes through the switch flow instead of an in-place plan change.
-  const interval: "monthly" | "yearly" = intervalPref ?? (subscription ? activeInterval : "monthly");
+  const interval: "monthly" | "yearly" =
+    intervalPref ?? (subscription ? activeInterval : "monthly");
   const endsSoon = Boolean(
     subscription?.cancel_at_period_end && subscription.status !== "canceled",
   );
@@ -130,9 +131,7 @@ export function BillingManager() {
       }
       await refetch();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Could not switch your billing period.",
-      );
+      toast.error(error instanceof Error ? error.message : "Could not switch your billing period.");
     } finally {
       setBusy(null);
     }
@@ -293,8 +292,8 @@ export function BillingManager() {
       {isActive && subscription && interval !== activeInterval && (
         <p className="mt-2 text-sm text-muted-foreground">
           You&apos;re billed {activeInterval === "yearly" ? "yearly" : "monthly"} today. Choosing a
-          plan here switches you to {interval} billing — we&apos;ll ask whether to switch now or when
-          your current period ends.
+          plan here switches you to {interval} billing — we&apos;ll ask whether to switch now or
+          when your current period ends.
         </p>
       )}
 

@@ -156,13 +156,7 @@ async function handleSubscriptionUpdated(
 function classifyChange(
   before: { status?: string; price_id?: string | null; cancel_at_period_end?: boolean | null },
   after: { status: string; priceId?: string | null; cancelScheduled: boolean },
-):
-  | "plan_changed"
-  | "cancellation_scheduled"
-  | "resumed"
-  | "paused"
-  | "past_due"
-  | null {
+): "plan_changed" | "cancellation_scheduled" | "resumed" | "paused" | "past_due" | null {
   if (after.cancelScheduled && !before.cancel_at_period_end) return "cancellation_scheduled";
   if (!after.cancelScheduled && before.cancel_at_period_end) return "resumed";
   if (after.status !== before.status) {

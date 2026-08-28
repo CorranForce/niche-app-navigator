@@ -221,8 +221,6 @@ export const switchBillingPeriod = createServerFn({ method: "POST" })
     };
   });
 
-
-
 /** Cancels the active subscription at the end of the current billing period. */
 export const cancelSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
