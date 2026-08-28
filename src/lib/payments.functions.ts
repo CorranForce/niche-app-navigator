@@ -15,8 +15,15 @@ export const resolvePaddlePrice = createServerFn({ method: "GET" })
       `/prices?external_id=${encodeURIComponent(data.priceId)}`,
     );
     const result = (await response.json()) as { data?: Array<{ id: string }> };
-    if (!result.data?.length) throw new Error("Price not found");
+    if (!result.data?.length) {
+      throw new Error(
+        data.environment === "live"
+          ? "Live checkout isn't available yet — this plan hasn't been activated for live payments. Please try again once the account is verified."
+          : "Price not found",
+      );
+    }
     return result.data[0]!.id;
+
   });
 
 /** Opens Paddle's hosted portal so the customer can change payment method, view invoices or cancel. */
