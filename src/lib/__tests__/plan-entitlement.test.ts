@@ -23,7 +23,7 @@ function event(product: string, status = "trialing"): SubscriptionEventData {
     id: `sub_${product}`,
     customerId: "ctm_123",
     status,
-    customData: { userId: "user-1" },
+    customData: { checkoutToken: "signed.token" },
     currentBillingPeriod: { startsAt: inDays(0), endsAt: inDays(TRIAL_DAYS) },
     items: [
       {
@@ -36,7 +36,9 @@ function event(product: string, status = "trialing"): SubscriptionEventData {
 
 describe("webhook → subscription row", () => {
   it("maps a trial subscription.created event to a row", () => {
-    const result = subscriptionRowFromEvent(event("pro_plan"), "sandbox");
+    const result = subscriptionRowFromEvent(event("pro_plan"), "sandbox", {
+      userId: "user-1",
+    });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.row).toMatchObject({
@@ -48,9 +50,13 @@ describe("webhook → subscription row", () => {
     });
   });
 
-  it("rejects events without a linked app user", () => {
-    const bad = { ...event("pro_plan"), customData: null };
-    expect(subscriptionRowFromEvent(bad, "sandbox")).toEqual({ ok: false, reason: "missing_user" });
+  it("rejects events without a server-verified app user", () => {
+    // A browser-supplied customData.userId must never attribute the purchase.
+    const spoofed = { ...event("pro_plan"), customData: { userId: "victim-user" } };
+    expect(subscriptionRowFromEvent(spoofed, "sandbox")).toEqual({
+      ok: false,
+      reason: "missing_user",
+    });
   });
 
   it("rejects events missing catalog external ids", () => {
@@ -58,7 +64,7 @@ describe("webhook → subscription row", () => {
       ...event("pro_plan"),
       items: [{ price: { id: "pri_x" }, product: { id: "pro_x" } }],
     };
-    expect(subscriptionRowFromEvent(bad, "sandbox")).toEqual({
+    expect(subscriptionRowFromEvent(bad, "sandbox", { userId: "user-1" })).toEqual({
       ok: false,
       reason: "missing_external_ids",
     });
