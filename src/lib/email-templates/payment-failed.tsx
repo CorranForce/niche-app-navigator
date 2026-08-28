@@ -42,7 +42,7 @@ const PaymentFailedEmail = ({
         </Text>
         <Text style={text}>
           Until it is resolved, new report generation is paused on your account for the rest of the
-          month. Your saved reports are untouched.
+          billing period. Your saved reports are untouched.
         </Text>
 
         <Section style={panel}>
