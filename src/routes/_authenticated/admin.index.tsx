@@ -97,7 +97,7 @@ function OwnerDashboardPage() {
               <Stat
                 label="Monthly recurring revenue"
                 value={money(data.revenue.mrrCents)}
-                hint={`${data.plans.pro} Pro · ${data.plans.studio} Studio`}
+                hint={`${data.plans.solo} Solo · ${data.plans.pro} Pro · ${data.plans.studio} Studio`}
               />
               <Stat
                 label="Total accounts"
@@ -117,8 +117,8 @@ function OwnerDashboardPage() {
             </section>
 
             <section className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Stat label="Free accounts" value={String(data.plans.free)} />
-              <Stat label="Paying customers" value={String(data.plans.pro + data.plans.studio)} />
+              <Stat label="No active plan" value={String(data.plans.none)} />
+              <Stat label="Paying customers" value={String(data.plans.solo + data.plans.pro + data.plans.studio)} />
               <Stat
                 label="Past due"
                 value={String(data.revenue.pastDue)}
