@@ -24,7 +24,12 @@ export type SubscriptionEventData = {
   items?: SubscriptionEventItem[];
   currentBillingPeriod?: { startsAt?: string | null; endsAt?: string | null } | null;
   scheduledChange?: { action?: string } | null;
-  customData?: { userId?: string } | null;
+  /**
+   * Browser-supplied data. `checkoutToken` is a server-signed intent; the raw
+   * `userId` is NEVER trusted for attribution — callers must pass the verified
+   * owner explicitly via `options.userId`.
+   */
+  customData?: { checkoutToken?: string; userId?: string } | null;
 };
 
 export type SubscriptionRowInput = {
