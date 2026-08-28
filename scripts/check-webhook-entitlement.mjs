@@ -51,9 +51,9 @@ function entitlement(status, productId, periodEnd) {
 }
 
 /** Mirrors src/lib/checkout-token.server.ts — the only trusted source of ownership. */
-function signCheckoutToken(uid, secret, price) {
+function signCheckoutToken(uid, secret, price, { ttlSeconds = 3600 } = {}) {
   const iat = Math.floor(Date.now() / 1000);
-  const body = Buffer.from(JSON.stringify({ uid, price, env: "sandbox", iat, exp: iat + 3600 }))
+  const body = Buffer.from(JSON.stringify({ uid, price, env: "sandbox", iat, exp: iat + ttlSeconds }))
     .toString("base64")
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
@@ -229,6 +229,90 @@ if (secret && supabaseUrl && serviceKey && testUser && signingSecret) {
     "Signed webhook round-trip",
     "webhook secret, service key, SMOKE_TEST_USER_ID or CHECKOUT_SIGNING_SECRET not set",
   );
+}
+
+// 3b. Stale and tampered checkout tokens must never create a subscription row.
+async function expectNoRow(label, subId, body) {
+  const res = await post(body, { "paddle-signature": sign(body, secret) });
+  const readRes = await fetch(
+    `${supabaseUrl}/rest/v1/subscriptions?paddle_subscription_id=eq.${subId}&select=user_id`,
+    { headers: { apikey: serviceKey, authorization: `Bearer ${serviceKey}` } },
+  );
+  const rows = (await readRes.json()) ?? [];
+  record(label, res.ok && rows.length === 0, `status ${res.status}, rows ${rows.length}`);
+}
+
+if (secret && supabaseUrl && serviceKey && testUser && signingSecret) {
+  const tier = TIERS[0];
+
+  const expiredId = `sub_smoke_expired_${Date.now()}`;
+  await expectNoRow(
+    "Expired checkout token rejected",
+    expiredId,
+    JSON.stringify(
+      trialEvent(tier, testUser, expiredId, {
+        checkoutToken: signCheckoutToken(testUser, signingSecret, tier.price, { ttlSeconds: -60 }),
+      }),
+    ),
+  );
+
+  const forgedId = `sub_smoke_forged_${Date.now()}`;
+  await expectNoRow(
+    "Token signed with the wrong key rejected",
+    forgedId,
+    JSON.stringify(
+      trialEvent(tier, testUser, forgedId, {
+        checkoutToken: signCheckoutToken(testUser, `${signingSecret}-wrong`, tier.price),
+      }),
+    ),
+  );
+
+  const tamperedId = `sub_smoke_tampered_${Date.now()}`;
+  const good = signCheckoutToken("00000000-0000-0000-0000-0000000000ff", signingSecret, tier.price);
+  const [gBody, gSig] = good.split(".");
+  const payload = JSON.parse(Buffer.from(gBody, "base64url").toString("utf8"));
+  payload.uid = testUser;
+  const tampered = `${Buffer.from(JSON.stringify(payload)).toString("base64url")}.${gSig}`;
+  await expectNoRow(
+    "Token re-pointed at another account rejected",
+    tamperedId,
+    JSON.stringify(trialEvent(tier, testUser, tamperedId, { checkoutToken: tampered })),
+  );
+
+  // 3c. Idempotency + out-of-order: replaying and rewinding must not change state.
+  const idemId = `sub_smoke_idem_${Date.now()}`;
+  const token = signCheckoutToken(testUser, signingSecret, tier.price);
+  const created = trialEvent(tier, testUser, idemId, { checkoutToken: token });
+  created.occurred_at = new Date().toISOString();
+  const createdBody = JSON.stringify(created);
+  await post(createdBody, { "paddle-signature": sign(createdBody, secret) });
+  await post(createdBody, { "paddle-signature": sign(createdBody, secret) });
+
+  const stale = {
+    event_id: `evt_smoke_stale_${Date.now()}`,
+    event_type: "subscription.updated",
+    occurred_at: new Date(Date.now() - 86400000).toISOString(),
+    data: { ...created.data, status: "canceled" },
+  };
+  const staleBody = JSON.stringify(stale);
+  await post(staleBody, { "paddle-signature": sign(staleBody, secret) });
+
+  const readRes = await fetch(
+    `${supabaseUrl}/rest/v1/subscriptions?paddle_subscription_id=eq.${idemId}&select=status`,
+    { headers: { apikey: serviceKey, authorization: `Bearer ${serviceKey}` } },
+  );
+  const rows = (await readRes.json()) ?? [];
+  record(
+    "Replayed and out-of-order events leave one unchanged row",
+    rows.length === 1 && rows[0].status === "trialing",
+    `rows ${rows.length}, status ${rows[0]?.status}`,
+  );
+  await fetch(`${supabaseUrl}/rest/v1/subscriptions?paddle_subscription_id=eq.${idemId}`, {
+    method: "DELETE",
+    headers: { apikey: serviceKey, authorization: `Bearer ${serviceKey}` },
+  });
+} else {
+  skip("Checkout token abuse checks", "smoke credentials not set");
 }
 
 if (process.env.GITHUB_STEP_SUMMARY) {
