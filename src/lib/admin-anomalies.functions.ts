@@ -18,7 +18,7 @@ export type BillingAnomalies = {
   paddleError: string | null;
 };
 
-const PLAN_PRICE_CENTS: Record<string, number> = { pro: 1900, studio: 4900 };
+const PLAN_PRICE_CENTS: Record<string, number> = { solo: 900, pro: 1900, studio: 4900 };
 
 /** Owner-only billing anomaly detection: MRR swings, failed payments and repeat charge failures. */
 export const getBillingAnomalies = createServerFn({ method: "GET" })
@@ -64,21 +64,21 @@ export const getBillingAnomalies = createServerFn({ method: "GET" })
     for (const sub of latest.values()) {
       const plan = entitledPlan(sub);
       const price = PLAN_PRICE_CENTS[plan] ?? 0;
-      if (plan !== "free") currentCents += price;
+      if (plan !== "none") currentCents += price;
 
       // MRR 30 days ago: the subscription must have existed and not have ended since.
       const existedThen = Boolean(sub.created_at && sub.created_at < since30);
       const endedSince = sub.status === "canceled" || isPastDue(sub.status);
-      if (existedThen && (plan !== "free" || endedSince)) {
+      if (existedThen && (plan !== "none" || endedSince)) {
         const thenPlan =
-          plan !== "free" ? plan : sub.product_id?.includes("studio") ? "studio" : "pro";
+          plan !== "none" ? plan : sub.product_id?.includes("studio") ? "studio" : "pro";
         previousCents += PLAN_PRICE_CENTS[thenPlan] ?? 0;
       }
 
       if (sub.cancel_at_period_end) cancelScheduled += 1;
       if (sub.status === "canceled" && sub.updated_at && sub.updated_at >= since30)
         canceled30d += 1;
-      if (plan !== "free" && sub.created_at && sub.created_at >= since30) newPaid30d += 1;
+      if (plan !== "none" && sub.created_at && sub.created_at >= since30) newPaid30d += 1;
       if (isPastDue(sub.status)) {
         pastDue.push({
           userId: sub.user_id,

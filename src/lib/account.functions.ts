@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type EnsureAccountStatus =
-  | "created" // brand-new free account provisioned
+  | "created" // brand-new account provisioned
   | "existing" // account already existed for this user
   | "linked" // this Google identity attached to an account that already had this email
   | "missing_email" // provider returned no email address
@@ -13,14 +13,14 @@ export type EnsureAccountResult = {
   status: EnsureAccountStatus;
   created: boolean;
   needsOnboarding: boolean;
-  plan: "free" | "pro" | "studio";
+  plan: import("@/lib/plan-limits").PlanId;
   message?: string;
 };
 
 /**
  * Called right after a sign-in (Google or email). Looks the signed-in user's
  * account up by id and by email, links the identity to an existing account when
- * the email already exists, and otherwise provisions a free-tier account.
+ * the email already exists, and otherwise provisions a new account.
  * Idempotent and race-safe — safe to call on every sign-in, concurrently.
  */
 export const ensureAccount = createServerFn({ method: "POST" })

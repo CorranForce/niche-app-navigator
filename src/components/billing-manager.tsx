@@ -167,7 +167,7 @@ export function BillingManager() {
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         {PLANS.map((p) => {
           const price = p[interval];
-          const isCurrent = p.id === plan && (p.id === "free" || interval === activeInterval);
+          const isCurrent = p.id === plan && interval === activeInterval;
           return (
             <Card
               key={p.id}

@@ -157,7 +157,7 @@ function PricingPage() {
                   className="mt-2"
                   onClick={() => handleCta(t.id)}
                 >
-                  {t.id === "free" ? "Start free" : `Get ${t.name}`}
+                  {`Start ${t.name} — 7-day free trial`}
                 </Button>
               </Card>
             );
