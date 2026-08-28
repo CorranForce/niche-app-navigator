@@ -118,7 +118,10 @@ function OwnerDashboardPage() {
 
             <section className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Stat label="No active plan" value={String(data.plans.none)} />
-              <Stat label="Paying customers" value={String(data.plans.solo + data.plans.pro + data.plans.studio)} />
+              <Stat
+                label="Paying customers"
+                value={String(data.plans.solo + data.plans.pro + data.plans.studio)}
+              />
               <Stat
                 label="Past due"
                 value={String(data.revenue.pastDue)}

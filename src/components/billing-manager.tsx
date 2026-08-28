@@ -117,8 +117,8 @@ export function BillingManager() {
 
             {subscription?.status === "past_due" ? (
               <p className="rounded-sm border border-destructive/40 bg-destructive/10 p-3 text-sm">
-                Your last payment failed, so report generation is paused until it's resolved.
-                Update your payment method to restore your plan.
+                Your last payment failed, so report generation is paused until it's resolved. Update
+                your payment method to restore your plan.
               </p>
             ) : null}
 
@@ -142,7 +142,7 @@ export function BillingManager() {
               </div>
             ) : (
               <p className="border-t border-border pt-4 text-sm text-muted-foreground">
-You don't have an active plan yet. Every plan starts with a 7-day free trial — pick
+                You don't have an active plan yet. Every plan starts with a 7-day free trial — pick
                 one below to start generating reports.
               </p>
             )}
@@ -199,17 +199,17 @@ You don't have an active plan yet. Every plan starts with a 7-day free trial —
                 ))}
               </ul>
               <Button
-                  className="mt-2"
-                  variant={isCurrent ? "outline" : "default"}
-                  disabled={isCurrent || busy !== null}
-                  onClick={() => handleSelect(p.id, price.priceId)}
-                >
-                  {busy === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {isCurrent
-                    ? "Current plan"
-                    : isActive
-                      ? `Switch to ${p.name}`
-                      : `Start ${p.name} — 7-day trial`}
+                className="mt-2"
+                variant={isCurrent ? "outline" : "default"}
+                disabled={isCurrent || busy !== null}
+                onClick={() => handleSelect(p.id, price.priceId)}
+              >
+                {busy === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {isCurrent
+                  ? "Current plan"
+                  : isActive
+                    ? `Switch to ${p.name}`
+                    : `Start ${p.name} — 7-day trial`}
               </Button>
             </Card>
           );

@@ -37,7 +37,6 @@ if (typeof window !== "undefined") {
   });
 }
 
-
 export const getRouter = () => {
   const queryClient = new QueryClient();
 

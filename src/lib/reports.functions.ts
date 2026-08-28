@@ -16,8 +16,13 @@ export const generateReport = createServerFn({ method: "POST" })
     const { streamText, Output, NoObjectGeneratedError } = await import("ai");
     const { createLovableResponsesProvider } = await import("@/lib/ai-gateway.server");
     const { SYSTEM_PROMPT, buildUserPrompt } = await import("@/lib/report-prompt.server");
-    const { entitledPlan, limitForPlan, planFeatures, PLAN_LABELS, STANDARD_QUEUE_COOLDOWN_SECONDS } =
-      await import("@/lib/plan-limits");
+    const {
+      entitledPlan,
+      limitForPlan,
+      planFeatures,
+      PLAN_LABELS,
+      STANDARD_QUEUE_COOLDOWN_SECONDS,
+    } = await import("@/lib/plan-limits");
 
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured for this project yet.");

@@ -173,7 +173,7 @@ function AccountPage() {
 
         <div className="mt-12 border-t border-border pt-10">
           <BillingManager />
-        <TeamManager />
+          <TeamManager />
         </div>
       </main>
     </div>
