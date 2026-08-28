@@ -88,6 +88,7 @@ async function handleSubscriptionUpdated(
   data: any,
   env: PaddleEnv,
   occurredAt: string,
+  sendEmails = true,
 ): Promise<ApplyOutcome> {
   const { id, status, currentBillingPeriod, scheduledChange, items } = data ?? {};
   if (typeof id !== "string" || !id) {
@@ -110,6 +111,17 @@ async function handleSubscriptionUpdated(
   const priceId = item?.price?.importMeta?.externalId;
   const productId = item?.product?.importMeta?.externalId;
 
+  // Snapshot the row first so the confirmation email only goes out when the
+  // customer's plan, status or cancellation schedule actually moved.
+  const { data: previous } = await getSupabase()
+    .from("subscriptions")
+    .select("status, price_id, cancel_at_period_end")
+    .eq("paddle_subscription_id", id)
+    .eq("environment", env)
+    .maybeSingle();
+
+  const cancelScheduled = scheduledChange?.action === "cancel";
+
   await getSupabase()
     .from("subscriptions")
     .update({
@@ -118,18 +130,60 @@ async function handleSubscriptionUpdated(
       ...(productId ? { product_id: productId } : {}),
       current_period_start: currentBillingPeriod?.startsAt,
       current_period_end: currentBillingPeriod?.endsAt,
-      cancel_at_period_end: scheduledChange?.action === "cancel",
+      cancel_at_period_end: cancelScheduled,
       updated_at: occurredAt,
     })
     .eq("paddle_subscription_id", id)
     .eq("environment", env);
+
+  if (sendEmails && previous) {
+    const before = previous as {
+      status?: string;
+      price_id?: string | null;
+      cancel_at_period_end?: boolean | null;
+    };
+    const kind = classifyChange(before, { status, priceId, cancelScheduled });
+    if (kind) {
+      const { sendSubscriptionChangeEmail } = await import("@/lib/billing-emails.server");
+      await sendSubscriptionChangeEmail(data, env, kind, occurredAt);
+    }
+  }
+
   return { applied: true, reason: "subscription_updated" };
+}
+
+/** Decides which confirmation (if any) a subscription update warrants. */
+function classifyChange(
+  before: { status?: string; price_id?: string | null; cancel_at_period_end?: boolean | null },
+  after: { status: string; priceId?: string | null; cancelScheduled: boolean },
+):
+  | "plan_changed"
+  | "cancellation_scheduled"
+  | "resumed"
+  | "paused"
+  | "past_due"
+  | null {
+  if (after.cancelScheduled && !before.cancel_at_period_end) return "cancellation_scheduled";
+  if (!after.cancelScheduled && before.cancel_at_period_end) return "resumed";
+  if (after.status !== before.status) {
+    if (after.status === "paused") return "paused";
+    if (after.status === "past_due") return "past_due";
+    if (
+      (after.status === "active" || after.status === "trialing") &&
+      (before.status === "paused" || before.status === "past_due")
+    ) {
+      return "resumed";
+    }
+  }
+  if (after.priceId && after.priceId !== before.price_id) return "plan_changed";
+  return null;
 }
 
 async function handleSubscriptionCanceled(
   data: any,
   env: PaddleEnv,
   occurredAt: string,
+  sendEmails = true,
 ): Promise<ApplyOutcome> {
   if (typeof data?.id !== "string" || !data.id) {
     return { applied: false, reason: "missing_subscription_id" };
@@ -144,6 +198,11 @@ async function handleSubscriptionCanceled(
     .update({ status: "canceled", updated_at: occurredAt })
     .eq("paddle_subscription_id", data.id)
     .eq("environment", env);
+
+  if (sendEmails) {
+    const { sendSubscriptionChangeEmail } = await import("@/lib/billing-emails.server");
+    await sendSubscriptionChangeEmail(data, env, "canceled", occurredAt);
+  }
   return { applied: true, reason: "subscription_canceled" };
 }
 
