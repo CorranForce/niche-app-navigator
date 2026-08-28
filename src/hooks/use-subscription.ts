@@ -45,26 +45,24 @@ export function useSubscription() {
   // Webhook-driven plan changes land in the database out-of-band; listen for them
   // so entitlements update live without a page reload or a fresh sign-in.
   useEffect(() => {
-    if (!user) return;
+    const userId = user?.id;
+    if (!userId) return;
+    const topic = `subscriptions:${userId}:${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel(`subscriptions:${user.id}`)
+      .channel(topic)
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "subscriptions",
-          filter: `user_id=eq.${user.id}`,
-        },
+        { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${userId}` },
         () => {
-          void queryClient.invalidateQueries({ queryKey });
+          void queryClient.invalidateQueries({ queryKey: ["subscription", userId, environment] });
         },
       )
       .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [user?.id, environment]);
+  }, [user?.id, environment, queryClient]);
+
 
   const sub = query.data ?? null;
 
