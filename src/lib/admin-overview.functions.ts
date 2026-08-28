@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type OwnerOverview = {
   users: { total: number; new7d: number; new30d: number; onboarded: number };
-  plans: { free: number; pro: number; studio: number };
+  plans: { none: number; solo: number; pro: number; studio: number };
   revenue: { mrrCents: number; pastDue: number; cancelScheduled: number };
   reports: { total: number; last7d: number; last30d: number };
   auth: { events7d: number; failures7d: number };
@@ -58,7 +58,7 @@ export const getOwnerOverview = createServerFn({ method: "GET" })
     const latest = new Map<string, SubRow>();
     for (const s of subs) if (!latest.has(s.user_id)) latest.set(s.user_id, s);
 
-    const plans = { free: 0, pro: 0, studio: 0 };
+    const plans = { none: 0, solo: 0, pro: 0, studio: 0 };
     let mrrCents = 0;
     let pastDue = 0;
     let cancelScheduled = 0;
