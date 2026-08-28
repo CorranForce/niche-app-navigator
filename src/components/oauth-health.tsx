@@ -260,7 +260,35 @@ export function OAuthHealthSection() {
                 </table>
               </div>
             )}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+              <p className="font-mono text-xs text-muted-foreground">
+                {data.pagination.total === 0
+                  ? "0 events"
+                  : `${data.pagination.page * data.pagination.pageSize + 1}–${
+                      data.pagination.page * data.pagination.pageSize + data.recent.length
+                    } of ${data.pagination.total}`}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={data.pagination.page === 0}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                >
+                  Previous
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!data.pagination.hasMore}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           </Card>
+
         </>
       ) : null}
     </section>
