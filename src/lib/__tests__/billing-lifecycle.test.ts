@@ -125,6 +125,11 @@ describe("plan-change timing", () => {
 
   it("selects the subscription by liveness rather than raw recency", () => {
     expect(source).toContain("pickBillableSubscription");
-    expect(source).not.toMatch(/order\("created_at", \{ ascending: false \}\)\s*\n\s*\.limit\(1\)/);
+    // Management actions go through the ranked helper, not a bare "newest row" read.
+    for (const fn of ["createPortalSession", "changePlan", "cancelSubscription"]) {
+      const body = source.slice(source.indexOf(`export const ${fn}`), source.length);
+      expect(body.slice(0, 400)).toContain("loadTargetSubscription");
+    }
   });
 });
+
