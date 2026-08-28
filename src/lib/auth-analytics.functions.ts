@@ -1,19 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { z } from "zod";
-
-/** Hard caps: a page can never be widened or walked past these bounds. */
-const MAX_PAGE_SIZE = 50;
-const MAX_PAGE = 19;
-const AGGREGATE_ROW_CAP = 5000;
-
-const rangeInput = z
-  .object({
-    days: z.union([z.literal(7), z.literal(14), z.literal(30)]).default(14),
-    page: z.number().int().min(0).max(MAX_PAGE).default(0),
-    pageSize: z.number().int().min(5).max(MAX_PAGE_SIZE).default(25),
-  })
-  .strict();
+import {
+  AGGREGATE_ROW_CAP,
+  authAnalyticsInput,
+  hasMorePages,
+  pageRange,
+  truncateReason,
+} from "@/lib/auth-analytics-guards";
 
 /**
  * Admin-only OAuth telemetry. The caller is authenticated by middleware, the
@@ -26,7 +19,8 @@ const rangeInput = z
  */
 export const getAuthAnalytics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => rangeInput.parse(input ?? {}))
+  .inputValidator((input: unknown) => authAnalyticsInput.parse(input ?? {}))
+
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { aggregate, browserLabel } = await import("@/lib/auth-analytics.server");
@@ -54,8 +48,7 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     // Event log: fetched as its own bounded page rather than sliced client-side.
-    const pageSize = Math.min(data.pageSize, MAX_PAGE_SIZE);
-    const from = Math.min(data.page, MAX_PAGE) * pageSize;
+    const { page, pageSize, from, to } = pageRange(data);
     const {
       data: pageRows,
       count,
@@ -65,7 +58,7 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
       .select("event, reason, user_agent, ip_prefix, created_at", { count: "exact" })
       .gte("created_at", sinceIso)
       .order("created_at", { ascending: false })
-      .range(from, from + pageSize - 1);
+      .range(from, to);
 
     if (pageError) throw new Error(pageError.message);
 
@@ -73,7 +66,7 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
     const recent = ((pageRows ?? []) as AuthEventRow[]).map((r) => ({
       created_at: r.created_at,
       event: r.event,
-      reason: r.reason ? r.reason.slice(0, 200) : null,
+      reason: truncateReason(r.reason),
       browser: browserLabel(r.user_agent),
       ip_prefix: r.ip_prefix,
     }));
@@ -82,13 +75,14 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
       ...aggregate((rows ?? []) as AuthEventRow[], data.days),
       recent,
       pagination: {
-        page: Math.min(data.page, MAX_PAGE),
+        page,
         pageSize,
         total,
-        hasMore: from + recent.length < total && Math.min(data.page, MAX_PAGE) < MAX_PAGE,
+        hasMore: hasMorePages({ page, from, returned: recent.length, total }),
       },
     };
   });
+
 
 
 /** Whether the signed-in user may open the internal dashboard. */
