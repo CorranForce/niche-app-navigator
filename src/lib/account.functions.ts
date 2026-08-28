@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type EnsureAccountStatus =
-  | "created" // brand-new free account provisioned
+  | "created" // brand-new account provisioned
   | "existing" // account already existed for this user
   | "linked" // this Google identity attached to an account that already had this email
   | "missing_email" // provider returned no email address
@@ -13,14 +13,14 @@ export type EnsureAccountResult = {
   status: EnsureAccountStatus;
   created: boolean;
   needsOnboarding: boolean;
-  plan: "free" | "pro" | "studio";
+  plan: import("@/lib/plan-limits").PlanId;
   message?: string;
 };
 
 /**
  * Called right after a sign-in (Google or email). Looks the signed-in user's
  * account up by id and by email, links the identity to an existing account when
- * the email already exists, and otherwise provisions a free-tier account.
+ * the email already exists, and otherwise provisions a new account.
  * Idempotent and race-safe — safe to call on every sign-in, concurrently.
  */
 export const ensureAccount = createServerFn({ method: "POST" })
@@ -67,11 +67,19 @@ export const ensureAccount = createServerFn({ method: "POST" })
       };
     }
 
+    // Pending Studio invitations for this email attach on first sign-in.
+    async function claimPendingInvites() {
+      if (!email) return;
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.rpc("claim_team_invites", { _user_id: userId, _email: email });
+    }
+
     if (existing) {
       // Backfill the email once we know it (older rows predate the column).
       if (email && !existing.email) {
         await supabase.from("profiles").update({ email }).eq("id", userId);
       }
+      await claimPendingInvites();
       return {
         status: "existing",
         created: false,
@@ -153,6 +161,7 @@ export const ensureAccount = createServerFn({ method: "POST" })
       };
     }
 
+    await claimPendingInvites();
     return { status: "created", created: true, needsOnboarding: true, plan: await planFor() };
   });
 

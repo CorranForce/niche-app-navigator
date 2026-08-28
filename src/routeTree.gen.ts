@@ -32,6 +32,7 @@ import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedReportsIdRouteImport } from './routes/_authenticated/reports.$id'
+import { Route as AuthenticatedReportsCompareRouteImport } from './routes/_authenticated/reports.compare'
 import { Route as ApiPublicAuthEventRouteImport } from './routes/api/public/auth-event'
 import { Route as ApiPublicSystemEventRouteImport } from './routes/api/public/system-event'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
@@ -159,6 +160,12 @@ const AuthenticatedReportsIdRoute = AuthenticatedReportsIdRouteImport.update({
   path: '/reports/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReportsCompareRoute =
+  AuthenticatedReportsCompareRouteImport.update({
+    id: '/reports/compare',
+    path: '/reports/compare',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicAuthEventRoute = ApiPublicAuthEventRouteImport.update({
   id: '/api/public/auth-event',
   path: '/api/public/auth-event',
@@ -218,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
+  '/reports/compare': typeof AuthenticatedReportsCompareRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
@@ -249,6 +257,7 @@ export interface FileRoutesByTo {
   '/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/$id': typeof AuthenticatedReportsIdRoute
+  '/reports/compare': typeof AuthenticatedReportsCompareRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
@@ -282,6 +291,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/reports/$id': typeof AuthenticatedReportsIdRoute
+  '/_authenticated/reports/compare': typeof AuthenticatedReportsCompareRoute
   '/api/public/auth-event': typeof ApiPublicAuthEventRoute
   '/api/public/system-event': typeof ApiPublicSystemEventRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
@@ -315,6 +325,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/users'
     | '/reports/$id'
+    | '/reports/compare'
     | '/api/public/auth-event'
     | '/api/public/system-event'
     | '/lovable/email/events'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/admin/emails'
     | '/admin/users'
     | '/reports/$id'
+    | '/reports/compare'
     | '/api/public/auth-event'
     | '/api/public/system-event'
     | '/lovable/email/events'
@@ -378,6 +390,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/emails'
     | '/_authenticated/admin/users'
     | '/_authenticated/reports/$id'
+    | '/_authenticated/reports/compare'
     | '/api/public/auth-event'
     | '/api/public/system-event'
     | '/lovable/email/events'
@@ -577,6 +590,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reports/compare': {
+      id: '/_authenticated/reports/compare'
+      path: '/reports/compare'
+      fullPath: '/reports/compare'
+      preLoaderRoute: typeof AuthenticatedReportsCompareRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/auth-event': {
       id: '/api/public/auth-event'
       path: '/api/public/auth-event'
@@ -636,6 +656,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedReportsIdRoute: typeof AuthenticatedReportsIdRoute
+  AuthenticatedReportsCompareRoute: typeof AuthenticatedReportsCompareRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
 }
@@ -647,6 +668,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedReportsIdRoute: AuthenticatedReportsIdRoute,
+  AuthenticatedReportsCompareRoute: AuthenticatedReportsCompareRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
 }

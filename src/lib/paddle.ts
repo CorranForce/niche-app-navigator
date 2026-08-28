@@ -40,6 +40,9 @@ export async function getPaddlePriceId(priceId: string): Promise<string> {
 
 export {
   planForProductId,
+  planFeatures,
+  TRIAL_DAYS,
+  STUDIO_SEATS,
   PLAN_LIMITS,
   limitForPlan,
   entitledPlan,
@@ -49,18 +52,19 @@ export type { PlanId } from "@/lib/plan-limits";
 
 export const PLANS = [
   {
-    id: "free",
-    name: "Free",
-    tagline: "Test the tool on a niche you already know.",
-    monthly: { amount: "$0", priceId: null as string | null },
-    yearly: { amount: "$0", priceId: null as string | null },
-    productId: null as string | null,
+    id: "solo",
+    name: "Solo",
+    tagline: "For the solo builder validating one niche at a time.",
+    monthly: { amount: "$9", priceId: "solo_monthly" as string | null },
+    yearly: { amount: "$90", priceId: "solo_yearly" as string | null },
+    productId: "solo_plan" as string | null,
     features: [
-      "5 reports per month",
+      "10 reports per month",
       "Full pain-point analysis",
       "3 app concepts per report",
       "Pricing tiers + feature breakdown",
       "Saved report history",
+      "7-day free trial",
     ],
   },
   {
@@ -72,10 +76,11 @@ export const PLANS = [
     productId: "pro_plan" as string | null,
     features: [
       "50 reports per month",
-      "Everything in Free",
-      "Markdown export",
+      "Everything in Solo",
+      "Markdown export & download",
       "Deeper 72-hour build plans",
       "Priority generation queue",
+      "7-day free trial",
     ],
   },
   {
@@ -92,6 +97,7 @@ export const PLANS = [
       "Shared report library",
       "Side-by-side niche comparison",
       "Priority support",
+      "7-day free trial",
     ],
   },
 ] as const;

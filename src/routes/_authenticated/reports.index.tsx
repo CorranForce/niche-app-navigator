@@ -48,7 +48,12 @@ function ReportsPage() {
       <SiteHeader />
       <main className="mx-auto max-w-4xl px-4 py-12">
         <p className="label-mono text-primary">Library</p>
-        <h1 className="mt-3 text-3xl font-semibold">My reports</h1>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-semibold">My reports</h1>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/reports/compare">Compare niches</Link>
+          </Button>
+        </div>
 
         {isLoading ? (
           <div className="mt-10 flex items-center gap-2 text-muted-foreground">
@@ -74,6 +79,11 @@ function ReportsPage() {
                   >
                     {r.niche}
                   </Link>
+                  {r.shared ? (
+                    <span className="label-mono mt-1 inline-block text-primary">
+                      Shared by a teammate
+                    </span>
+                  ) : null}
                   <p className="mt-1 truncate font-mono text-xs text-muted-foreground">
                     {new Date(r.created_at).toLocaleDateString()}
                     {r.audience ? ` · ${r.audience}` : ""}
@@ -83,6 +93,7 @@ function ReportsPage() {
                   variant="ghost"
                   size="icon"
                   aria-label="Delete report"
+                  hidden={r.shared}
                   disabled={del.isPending}
                   onClick={() => del.mutate(r.id)}
                 >

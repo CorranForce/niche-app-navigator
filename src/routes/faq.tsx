@@ -21,7 +21,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What happens if I cancel my subscription?",
-    a: "Cancelling keeps full access until the end of the period you already paid for. At that point the account drops back to the Free plan and its 5 reports per month. Reports you already generated stay in your history.",
+    a: "Cancelling keeps full access until the end of the period you already paid for. At that point report generation pauses until you start a new plan. Reports you already generated stay in your history.",
   },
   {
     q: "Do you offer refunds?",
@@ -29,7 +29,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "My payment failed — what happens to my account?",
-    a: "A failed payment puts the subscription into a past-due state and the account immediately falls back to Free plan limits. Nothing is deleted: your saved reports remain available, and full limits return as soon as a payment succeeds.",
+    a: "A failed payment puts the subscription into a past-due state and report generation pauses. Nothing is deleted: your saved reports remain available, and full limits return as soon as a payment succeeds.",
   },
   {
     q: "How do I recover from a failed payment?",

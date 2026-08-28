@@ -44,7 +44,7 @@ function CheckoutSuccessPage() {
           <p className="text-sm text-muted-foreground">
             {loading
               ? "Confirming your subscription…"
-              : plan === "free"
+              : plan === "none"
                 ? "We're still confirming your subscription — this usually takes a few seconds. Refresh the billing page if it doesn't appear."
                 : `Your ${PLAN_LABELS[plan]} plan is active — ${
                     limit === null ? "unlimited reports" : `${limit} reports per month`
