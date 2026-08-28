@@ -23,8 +23,29 @@ export const resolvePaddlePrice = createServerFn({ method: "GET" })
       );
     }
     return result.data[0]!.id;
-
   });
+
+/**
+ * Mints a signed checkout intent that binds this checkout to the signed-in
+ * user. The browser passes it to Paddle as opaque custom data; the webhook
+ * verifies the signature to decide which account the subscription belongs to,
+ * so a client can never attribute a purchase to somebody else's account.
+ */
+export const createCheckoutIntent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ priceId: z.string().min(1).max(80) }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { signCheckoutIntent } = await import("@/lib/checkout-token.server");
+    const { paymentsEnv } = await import("@/lib/payments-env");
+    return {
+      checkoutToken: signCheckoutIntent({
+        uid: context.userId,
+        price: data.priceId,
+        env: paymentsEnv(),
+      }),
+    };
+  });
+
 
 /** Opens Paddle's hosted portal so the customer can change payment method, view invoices or cancel. */
 export const createPortalSession = createServerFn({ method: "POST" })
