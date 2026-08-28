@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, RefreshCw, ShieldAlert } from "lucide-react";
@@ -160,6 +160,9 @@ function OwnerDashboardPage() {
                   </Button>
                   <Button asChild size="sm" variant="outline">
                     <a href="#emails">Emails</a>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/admin/security">Security status</Link>
                   </Button>
                 </div>
               </Card>

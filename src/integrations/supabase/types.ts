@@ -368,6 +368,15 @@ export type Database = {
           status: string
         }[]
       }
+      function_grant_audit: {
+        Args: { _functions: string[]; _roles: string[] }
+        Returns: {
+          can_execute: boolean
+          fn: string
+          role_name: string
+          signature: string
+        }[]
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
