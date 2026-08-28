@@ -95,9 +95,8 @@ async function handleSubscriptionUpdated(
     return { applied: false, reason: "missing_subscription_id" };
   }
 
-  const { shouldApplyEvent, KNOWN_SUBSCRIPTION_STATUSES } = await import(
-    "@/lib/webhook-entitlement"
-  );
+  const { shouldApplyEvent, KNOWN_SUBSCRIPTION_STATUSES } =
+    await import("@/lib/webhook-entitlement");
   if (typeof status !== "string" || !KNOWN_SUBSCRIPTION_STATUSES.includes(status as never)) {
     console.warn("Skipping subscription update with unknown status:", status);
     return { applied: false, reason: "unknown_status" };

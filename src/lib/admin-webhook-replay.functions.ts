@@ -27,7 +27,10 @@ const replayInput = z.object({
     .trim()
     .min(6)
     .max(120)
-    .regex(/^[A-Za-z0-9_-]+$/, "Event id may only contain letters, numbers, dashes and underscores"),
+    .regex(
+      /^[A-Za-z0-9_-]+$/,
+      "Event id may only contain letters, numbers, dashes and underscores",
+    ),
   environment: z.enum(["sandbox", "live"]),
 });
 
@@ -98,7 +101,10 @@ export const reprocessWebhookEvent = createServerFn({ method: "POST" })
       throw new Error(claimError.message);
     }
 
-    const finish = async (outcome: string, detail: Record<string, string | number | boolean | null>) => {
+    const finish = async (
+      outcome: string,
+      detail: Record<string, string | number | boolean | null>,
+    ) => {
       await supabaseAdmin
         .from("webhook_replays")
         .update({ outcome, detail, updated_at: new Date().toISOString() })
@@ -109,7 +115,10 @@ export const reprocessWebhookEvent = createServerFn({ method: "POST" })
     try {
       // 2. Fetch the canonical event from Paddle — never from client input.
       const { gatewayFetch } = await import("@/lib/paddle.server");
-      const res = await gatewayFetch(env, `/events?per_page=1&id=${encodeURIComponent(data.eventId)}`);
+      const res = await gatewayFetch(
+        env,
+        `/events?per_page=1&id=${encodeURIComponent(data.eventId)}`,
+      );
       let payload: Record<string, unknown> | null = null;
       if (res.ok) {
         const json = (await res.json()) as { data?: Array<Record<string, unknown>> };
@@ -127,9 +136,8 @@ export const reprocessWebhookEvent = createServerFn({ method: "POST" })
         throw new Error("No Paddle event found with that id in this environment.");
       }
 
-      const { applyPaddleEvent, toCamelCase, normalisedOccurredAt } = await import(
-        "@/lib/webhook-apply.server"
-      );
+      const { applyPaddleEvent, toCamelCase, normalisedOccurredAt } =
+        await import("@/lib/webhook-apply.server");
       const eventType = String(payload["event_type"] ?? payload["eventType"] ?? "");
       const occurredAt = normalisedOccurredAt(payload["occurred_at"] ?? payload["occurredAt"]);
       const eventData = toCamelCase(payload["data"]);
