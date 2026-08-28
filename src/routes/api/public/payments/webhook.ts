@@ -14,7 +14,19 @@ function getSupabase() {
   return _supabase;
 }
 
-async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
+/** Reads the timestamp of the state we already persisted for a subscription. */
+async function existingUpdatedAt(subscriptionId: string, env: PaddleEnv): Promise<string | null> {
+  if (!subscriptionId) return null;
+  const { data } = await getSupabase()
+    .from("subscriptions")
+    .select("updated_at")
+    .eq("paddle_subscription_id", subscriptionId)
+    .eq("environment", env)
+    .maybeSingle();
+  return (data as any)?.updated_at ?? null;
+}
+
+async function handleSubscriptionCreated(data: any, env: PaddleEnv, occurredAt: string) {
   const { subscriptionRowFromEvent } = await import("@/lib/webhook-entitlement");
   const { verifyCheckoutIntent } = await import("@/lib/checkout-token.server");
 
@@ -35,18 +47,54 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     return;
   }
 
-  const mapped = subscriptionRowFromEvent(data, env, { userId: verified.intent.uid });
+  const mapped = subscriptionRowFromEvent(data, env, {
+    userId: verified.intent.uid,
+    now: new Date(occurredAt),
+    intent: { env: verified.intent.env, price: verified.intent.price },
+  });
   if (!mapped.ok) {
+    const { recordSystemEvent } = await import("@/lib/monitoring.server");
+    await recordSystemEvent({
+      source: "webhook",
+      severity: mapped.reason.startsWith("intent_") ? "critical" : "warning",
+      event: "paddle.payload_rejected",
+      message: `Subscription payload rejected (${mapped.reason}).`,
+      context: { env, subscriptionId: data?.id ?? null },
+    });
     console.warn("Skipping subscription webhook:", mapped.reason);
     return;
   }
+
+  // Retries and out-of-order deliveries must not roll state backwards.
+  const { shouldApplyEvent } = await import("@/lib/webhook-entitlement");
+  const current = await existingUpdatedAt(mapped.row.paddle_subscription_id, env);
+  if (!shouldApplyEvent(current, occurredAt)) {
+    console.log("Skipping stale/duplicate subscription.created", mapped.row.paddle_subscription_id);
+    return;
+  }
+
   await getSupabase()
     .from("subscriptions")
     .upsert(mapped.row, { onConflict: "paddle_subscription_id" });
 }
 
-async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
-  const { id, status, currentBillingPeriod, scheduledChange, items } = data;
+async function handleSubscriptionUpdated(data: any, env: PaddleEnv, occurredAt: string) {
+  const { id, status, currentBillingPeriod, scheduledChange, items } = data ?? {};
+  if (typeof id !== "string" || !id) {
+    console.warn("Skipping subscription update without an id");
+    return;
+  }
+
+  const { shouldApplyEvent, KNOWN_SUBSCRIPTION_STATUSES } =
+    await import("@/lib/webhook-entitlement");
+  if (typeof status !== "string" || !KNOWN_SUBSCRIPTION_STATUSES.includes(status as never)) {
+    console.warn("Skipping subscription update with unknown status:", status);
+    return;
+  }
+  if (!shouldApplyEvent(await existingUpdatedAt(id, env), occurredAt)) {
+    console.log("Skipping stale/duplicate subscription update", id);
+    return;
+  }
 
   const item = items?.[0];
   const priceId = item?.price?.importMeta?.externalId;
@@ -61,16 +109,22 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
       current_period_start: currentBillingPeriod?.startsAt,
       current_period_end: currentBillingPeriod?.endsAt,
       cancel_at_period_end: scheduledChange?.action === "cancel",
-      updated_at: new Date().toISOString(),
+      updated_at: occurredAt,
     })
     .eq("paddle_subscription_id", id)
     .eq("environment", env);
 }
 
-async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
+async function handleSubscriptionCanceled(data: any, env: PaddleEnv, occurredAt: string) {
+  if (typeof data?.id !== "string" || !data.id) return;
+  const { shouldApplyEvent } = await import("@/lib/webhook-entitlement");
+  if (!shouldApplyEvent(await existingUpdatedAt(data.id, env), occurredAt)) {
+    console.log("Skipping stale/duplicate cancellation", data.id);
+    return;
+  }
   await getSupabase()
     .from("subscriptions")
-    .update({ status: "canceled", updated_at: new Date().toISOString() })
+    .update({ status: "canceled", updated_at: occurredAt })
     .eq("paddle_subscription_id", data.id)
     .eq("environment", env);
 }
@@ -92,16 +146,26 @@ async function refreshPeriodFromTransaction(data: any, env: PaddleEnv) {
 
 async function handleWebhook(req: Request, env: PaddleEnv) {
   const event = await verifyWebhook(req, env);
+  // Paddle stamps every event; fall back to arrival time if it is ever absent.
+  const rawOccurredAt = (event as any)?.occurredAt ?? (event as any)?.occurred_at;
+  const parsed = rawOccurredAt ? Date.parse(rawOccurredAt) : Number.NaN;
+  const occurredAt = Number.isNaN(parsed)
+    ? new Date().toISOString()
+    : new Date(parsed).toISOString();
+
+  if (!event?.data || typeof event.data !== "object") {
+    throw new Error("Webhook payload is missing an event data object");
+  }
 
   switch (event.eventType) {
     case EventName.SubscriptionCreated:
-      await handleSubscriptionCreated(event.data, env);
+      await handleSubscriptionCreated(event.data, env, occurredAt);
       break;
     case EventName.SubscriptionUpdated:
-      await handleSubscriptionUpdated(event.data, env);
+      await handleSubscriptionUpdated(event.data, env, occurredAt);
       break;
     case EventName.SubscriptionCanceled:
-      await handleSubscriptionCanceled(event.data, env);
+      await handleSubscriptionCanceled(event.data, env, occurredAt);
       break;
     case EventName.TransactionCompleted: {
       // A renewal payment also refreshes the billing period, so keep the row in
@@ -127,7 +191,7 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
         "subscription.imported",
       ]);
       if (lifecycle.has(event.eventType as string)) {
-        await handleSubscriptionUpdated(event.data, env);
+        await handleSubscriptionUpdated(event.data, env, occurredAt);
         break;
       }
       console.log("Unhandled event:", event.eventType);
