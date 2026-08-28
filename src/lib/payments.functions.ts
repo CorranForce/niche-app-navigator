@@ -122,7 +122,7 @@ export const changePlan = createServerFn({ method: "POST" })
     // same cycle and currency as the live subscription. Switching monthly <->
     // yearly has to go through cancel + re-subscribe, so reject it up front
     // with a message the customer can act on instead of a provider error.
-    const currentIsYearly = target.price_id.endsWith("_yearly");
+    const currentIsYearly = (target.price_id ?? "").endsWith("_yearly");
     if (data.priceId.endsWith("_yearly") !== currentIsYearly) {
       throw new Error(
         `Your subscription bills ${currentIsYearly ? "yearly" : "monthly"}. To switch billing periods, cancel your current plan and start a new one when it ends.`,
