@@ -31,7 +31,7 @@ export function BillingManager() {
   const doCancel = useServerFn(cancelSubscription);
   const doPortal = useServerFn(createPortalSession);
 
-  const currentPlan = PLANS.find((p) => p.id === plan)!;
+  const currentPlan = PLANS.find((p) => p.id === plan) ?? null;
   const activeInterval = subscription?.price_id?.endsWith("_yearly") ? "yearly" : "monthly";
 
   async function handleSelect(planId: string, priceId: string | null) {
@@ -94,8 +94,12 @@ export function BillingManager() {
           <>
             <div className="flex flex-wrap items-baseline justify-between gap-3">
               <div>
-                <p className="font-mono text-2xl font-semibold">{currentPlan.name}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{currentPlan.tagline}</p>
+                <p className="font-mono text-2xl font-semibold">
+                  {currentPlan?.name ?? "No active plan"}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {currentPlan?.tagline ?? "Start a 7-day free trial on any plan to run reports."}
+                </p>
               </div>
               <div className="text-right text-sm">
                 <p className="label-mono text-muted-foreground">
@@ -113,8 +117,8 @@ export function BillingManager() {
 
             {subscription?.status === "past_due" ? (
               <p className="rounded-sm border border-destructive/40 bg-destructive/10 p-3 text-sm">
-                Your last payment failed, so paid features are limited to the Free plan until it's
-                resolved. Update your payment method to restore your plan.
+                Your last payment failed, so report generation is paused until it's resolved.
+                Update your payment method to restore your plan.
               </p>
             ) : null}
 
@@ -138,8 +142,8 @@ export function BillingManager() {
               </div>
             ) : (
               <p className="border-t border-border pt-4 text-sm text-muted-foreground">
-                You're on the Free plan — 5 reports per month. Pick a paid plan below for more
-                research capacity.
+You don't have an active plan yet. Every plan starts with a 7-day free trial — pick
+                one below to start generating reports.
               </p>
             )}
           </>
@@ -194,16 +198,7 @@ export function BillingManager() {
                   </li>
                 ))}
               </ul>
-              {p.id === "free" ? (
-                <Button
-                  variant="outline"
-                  className="mt-2"
-                  disabled={!isActive}
-                  onClick={handleCancel}
-                >
-                  {isActive ? "Downgrade to Free" : "Current plan"}
-                </Button>
-              ) : (
+              {(
                 <Button
                   className="mt-2"
                   variant={isCurrent ? "outline" : "default"}
@@ -211,7 +206,11 @@ export function BillingManager() {
                   onClick={() => handleSelect(p.id, price.priceId)}
                 >
                   {busy === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {isCurrent ? "Current plan" : isActive ? `Switch to ${p.name}` : `Get ${p.name}`}
+                  {isCurrent
+                    ? "Current plan"
+                    : isActive
+                      ? `Switch to ${p.name}`
+                      : `Start ${p.name} — 7-day trial`}
                 </Button>
               )}
             </Card>
