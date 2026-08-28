@@ -147,6 +147,41 @@ async function handleSubscriptionCanceled(
   return { applied: true, reason: "subscription_canceled" };
 }
 
+/**
+ * A failed charge immediately restricts the subscription. This only ever moves a
+ * live subscription into `past_due` — it never revives a canceled one — so it is
+ * safe to apply without an ordering guard on replays and out-of-order deliveries.
+ */
+export async function markPastDueFromFailedPayment(
+  data: any,
+  env: PaddleEnv,
+  occurredAt: string,
+): Promise<ApplyOutcome> {
+  const subscriptionId = data?.subscriptionId;
+  if (typeof subscriptionId !== "string" || !subscriptionId) {
+    return { applied: false, reason: "no_subscription_id" };
+  }
+  const { data: existing } = await getSupabase()
+    .from("subscriptions")
+    .select("status")
+    .eq("paddle_subscription_id", subscriptionId)
+    .eq("environment", env)
+    .maybeSingle();
+
+  const status = (existing as any)?.status as string | undefined;
+  if (!status) return { applied: false, reason: "unknown_subscription" };
+  if (status !== "active" && status !== "trialing") {
+    return { applied: false, reason: "not_restrictable" };
+  }
+
+  await getSupabase()
+    .from("subscriptions")
+    .update({ status: "past_due", updated_at: occurredAt })
+    .eq("paddle_subscription_id", subscriptionId)
+    .eq("environment", env);
+  return { applied: true, reason: "marked_past_due" };
+}
+
 async function refreshPeriodFromTransaction(data: any, env: PaddleEnv): Promise<ApplyOutcome> {
   const subscriptionId = data?.subscriptionId;
   const period = data?.billingPeriod;
