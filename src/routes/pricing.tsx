@@ -16,13 +16,13 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Free, Pro and Studio plans for the MicroSaaS Solution Finder. Start with five niche reports a month, upgrade for 50 a month or unlimited.",
+          "Solo, Pro and Studio plans for the MicroSaaS Solution Finder. Every plan starts with a 7-day free trial: 10, 50 or unlimited niche reports a month.",
       },
       { property: "og:title", content: "Pricing — MicroSaaS Solution Finder" },
       {
         property: "og:description",
         content:
-          "Start free with five niche reports a month. Upgrade for more capacity and exports.",
+          "Every plan starts with a 7-day free trial. Solo $9, Pro $19, Studio $49 per month.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://idea-spark-fast.lovable.app/pricing" },
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/pricing")({
           offers: {
             "@type": "AggregateOffer",
             priceCurrency: "USD",
-            lowPrice: "0",
+            lowPrice: "9",
             highPrice: "49",
             offerCount: 3,
             url: "https://idea-spark-fast.lovable.app/pricing",
