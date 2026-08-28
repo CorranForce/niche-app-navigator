@@ -89,4 +89,4 @@ try {
 }
 
 console.log(failed === 0 ? "\nAll function grants OK" : `\n${failed} grant problem(s) found`);
-process.exit(failed === 0 ? 1 && 1 : 1);
+process.exit(failed === 0 ? 0 : 1);
