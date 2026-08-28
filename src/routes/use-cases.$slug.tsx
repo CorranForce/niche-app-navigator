@@ -100,7 +100,7 @@ export const Route = createFileRoute("/use-cases/$slug")({
   notFoundComponent: UseCaseNotFound,
 });
 
-function StarterPromptSection({ prompt }: { prompt: string }) {
+function StarterPromptSection({ prompt, slug, title }: { prompt: string; slug: string; title: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copyPrompt() {
@@ -113,6 +113,16 @@ function StarterPromptSection({ prompt }: { prompt: string }) {
     }
   }
 
+  function downloadPrompt() {
+    const markdown = `# Starter prompt — ${title}\n\n\`\`\`text\n${prompt}\n\`\`\`\n`;
+    const url = URL.createObjectURL(new Blob([markdown], { type: "text/markdown" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slug}-starter-prompt.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <section className="mt-12">
       <h2 className="text-xl font-semibold">Build it: paste this into a coding LLM</h2>
@@ -123,10 +133,16 @@ function StarterPromptSection({ prompt }: { prompt: string }) {
       <Card className="mt-4 gap-0 overflow-hidden border-border bg-surface p-0">
         <div className="flex items-center justify-between border-b border-border px-4 py-2">
           <span className="label-mono text-muted-foreground">starter-prompt.txt</span>
-          <Button variant="ghost" size="sm" onClick={copyPrompt} className="gap-2">
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            {copied ? "Copied" : "Copy prompt"}
-          </Button>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="sm" onClick={copyPrompt} className="gap-2">
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? "Copied" : "Copy prompt"}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={downloadPrompt} className="gap-2">
+              <Download className="h-4 w-4" />
+              Download .md
+            </Button>
+          </div>
         </div>
         <pre className="max-h-80 overflow-auto whitespace-pre-wrap p-4 font-mono text-xs leading-relaxed text-muted-foreground">
           {prompt}
@@ -135,6 +151,7 @@ function StarterPromptSection({ prompt }: { prompt: string }) {
     </section>
   );
 }
+
 
 function UseCaseNotFound() {
   return (
