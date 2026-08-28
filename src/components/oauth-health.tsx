@@ -80,7 +80,6 @@ export function OAuthHealthSection() {
     retry: false,
   });
 
-
   const maxDaily = Math.max(1, ...(data?.daily.map((d) => d.starts) ?? [1]));
 
   return (
@@ -106,7 +105,6 @@ export function OAuthHealthSection() {
               {r}d
             </Button>
           ))}
-
         </div>
       </div>
 
@@ -288,7 +286,6 @@ export function OAuthHealthSection() {
               </div>
             </div>
           </Card>
-
         </>
       ) : null}
     </section>

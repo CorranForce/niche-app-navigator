@@ -100,7 +100,15 @@ export const Route = createFileRoute("/use-cases/$slug")({
   notFoundComponent: UseCaseNotFound,
 });
 
-function StarterPromptSection({ prompt, slug, title }: { prompt: string; slug: string; title: string }) {
+function StarterPromptSection({
+  prompt,
+  slug,
+  title,
+}: {
+  prompt: string;
+  slug: string;
+  title: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copyPrompt() {
@@ -151,7 +159,6 @@ function StarterPromptSection({ prompt, slug, title }: { prompt: string; slug: s
     </section>
   );
 }
-
 
 function UseCaseNotFound() {
   return (

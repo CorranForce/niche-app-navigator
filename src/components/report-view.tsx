@@ -7,7 +7,7 @@ import { planFeatures } from "@/lib/plan-limits";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { reportToMarkdown, type SolutionReport } from "@/lib/report-schema";
+import { conceptVibePrompt, reportToMarkdown, type SolutionReport } from "@/lib/report-schema";
 
 function SectionTitle({ icon, children }: { icon?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -23,6 +23,45 @@ const severityVariant: Record<string, string> = {
   high: "bg-warning/15 text-warning border-warning/30",
   medium: "bg-muted text-muted-foreground border-border",
 };
+
+function ConceptPrompt({
+  niche,
+  report,
+  concept,
+}: {
+  niche: string;
+  report: SolutionReport;
+  concept: SolutionReport["concepts"][number];
+}) {
+  const [copied, setCopied] = useState(false);
+  const prompt = conceptVibePrompt(niche, report, concept);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      toast.success("Vibe-code prompt copied");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Couldn't copy to clipboard");
+    }
+  }
+
+  return (
+    <div className="mt-auto rounded-md border border-border bg-background p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="label-mono text-muted-foreground">Vibe-code prompt</p>
+        <Button size="sm" variant="ghost" className="h-7 px-2" onClick={copy}>
+          <Copy className="h-3.5 w-3.5" />
+          <span className="ml-1.5 text-xs">{copied ? "Copied" : "Copy"}</span>
+        </Button>
+      </div>
+      <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-muted-foreground">
+        {prompt}
+      </pre>
+    </div>
+  );
+}
 
 export function ReportView({ niche, report }: { niche: string; report: SolutionReport }) {
   const [copied, setCopied] = useState(false);
@@ -152,6 +191,7 @@ export function ReportView({ niche, report }: { niche: string; report: SolutionR
                   ))}
                 </ul>
                 <p className="border-t border-border pt-3 text-xs text-muted-foreground">{c.why}</p>
+                <ConceptPrompt niche={niche} report={report} concept={c} />
               </Card>
             );
           })}

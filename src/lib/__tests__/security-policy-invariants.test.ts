@@ -105,7 +105,7 @@ describe("system_events_insert_policy_missing", () => {
     expect(src).toContain("system_events");
     // service-role credentials only; never the browser client
     expect(src).toContain("SUPABASE_SERVICE_ROLE_KEY");
-    expect(src).not.toContain("@/integrations/supabase/client\"");
+    expect(src).not.toContain('@/integrations/supabase/client"');
   });
 
   it("no client component inserts system events directly", () => {

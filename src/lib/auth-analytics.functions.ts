@@ -83,8 +83,6 @@ export const getAuthAnalytics = createServerFn({ method: "POST" })
     };
   });
 
-
-
 /** Whether the signed-in user may open the internal dashboard. */
 export const getIsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
