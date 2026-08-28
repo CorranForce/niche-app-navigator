@@ -15,40 +15,15 @@ function getSupabase() {
 }
 
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
-  const { id, customerId, items, status, currentBillingPeriod, customData } = data;
-
-  const userId = customData?.userId;
-  if (!userId) {
-    console.error("No userId in customData");
+  const { subscriptionRowFromEvent } = await import("@/lib/webhook-entitlement");
+  const mapped = subscriptionRowFromEvent(data, env);
+  if (!mapped.ok) {
+    console.warn("Skipping subscription webhook:", mapped.reason);
     return;
   }
-
-  const item = items?.[0];
-  const priceId = item?.price?.importMeta?.externalId;
-  const productId = item?.product?.importMeta?.externalId;
-  if (!priceId || !productId) {
-    console.warn("Skipping subscription: missing importMeta.externalId", {
-      rawPriceId: item?.price?.id,
-      rawProductId: item?.product?.id,
-    });
-    return;
-  }
-
-  await getSupabase().from("subscriptions").upsert(
-    {
-      user_id: userId,
-      paddle_subscription_id: id,
-      paddle_customer_id: customerId,
-      product_id: productId,
-      price_id: priceId,
-      status,
-      current_period_start: currentBillingPeriod?.startsAt,
-      current_period_end: currentBillingPeriod?.endsAt,
-      environment: env,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "paddle_subscription_id" },
-  );
+  await getSupabase()
+    .from("subscriptions")
+    .upsert(mapped.row, { onConflict: "paddle_subscription_id" });
 }
 
 async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
