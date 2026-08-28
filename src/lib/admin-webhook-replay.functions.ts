@@ -8,7 +8,7 @@ export type WebhookReplayRow = {
   environment: string;
   eventType: string | null;
   outcome: string;
-  detail: Record<string, unknown>;
+  detail: Record<string, string | number | boolean | null>;
   createdAt: string;
 };
 
@@ -59,7 +59,7 @@ export const listWebhookReplays = createServerFn({ method: "POST" })
       environment: String(row.environment),
       eventType: row.event_type ?? null,
       outcome: String(row.outcome),
-      detail: (row.detail ?? {}) as Record<string, unknown>,
+      detail: (row.detail ?? {}) as Record<string, string | number | boolean | null>,
       createdAt: String(row.created_at),
     }));
   });
@@ -98,7 +98,7 @@ export const reprocessWebhookEvent = createServerFn({ method: "POST" })
       throw new Error(claimError.message);
     }
 
-    const finish = async (outcome: string, detail: Record<string, unknown>) => {
+    const finish = async (outcome: string, detail: Record<string, string | number | boolean | null>) => {
       await supabaseAdmin
         .from("webhook_replays")
         .update({ outcome, detail, updated_at: new Date().toISOString() })
