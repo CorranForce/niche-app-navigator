@@ -37,6 +37,11 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Verify RLS function grants
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bun run check:function-grants
+
       - name: Test with coverage
         run: bun run test:coverage
 

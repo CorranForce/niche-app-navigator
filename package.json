@@ -16,7 +16,8 @@
     "format": "prettier --write .",
     "smoke": "node scripts/smoke-test.mjs",
     "check:stale-chunk": "node scripts/check-stale-chunk.mjs",
-    "check:webhook-entitlement": "node scripts/check-webhook-entitlement.mjs"
+    "check:webhook-entitlement": "node scripts/check-webhook-entitlement.mjs",
+    "check:function-grants": "node scripts/check-function-grants.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.30",

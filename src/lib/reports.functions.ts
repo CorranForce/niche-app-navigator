@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { reportSchema } from "@/lib/report-schema";
 import { z } from "zod";
+import { toFriendlyError } from "@/lib/friendly-errors";
 
 const generateInput = z.object({
   niche: z.string().min(2).max(120),
@@ -127,7 +128,7 @@ export const generateReport = createServerFn({ method: "POST" })
       .select("id")
       .single();
 
-    if (insertError) throw new Error(insertError.message);
+    if (insertError) throw toFriendlyError(insertError);
     return { id: row.id as string };
   });
 
@@ -145,7 +146,7 @@ export const listReports = createServerFn({ method: "GET" })
       : query.eq("user_id", context.userId);
 
     const { data, error } = await query.order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw toFriendlyError(error);
     return (data ?? []).map((r) => ({ ...r, shared: r.user_id !== context.userId }));
   });
 
@@ -166,7 +167,7 @@ export const compareReports = createServerFn({ method: "POST" })
       .from("reports")
       .select("id, niche, audience, created_at, payload")
       .in("id", data.ids);
-    if (error) throw new Error(error.message);
+    if (error) throw toFriendlyError(error);
     return rows ?? [];
   });
 
@@ -179,7 +180,7 @@ export const getReport = createServerFn({ method: "POST" })
       .select("id, niche, audience, budget, created_at, payload")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw toFriendlyError(error);
     return row;
   });
 
@@ -188,7 +189,7 @@ export const deleteReport = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("reports").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) throw toFriendlyError(error);
     return { ok: true };
   });
 
