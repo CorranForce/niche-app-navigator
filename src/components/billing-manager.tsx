@@ -235,8 +235,14 @@ export function BillingManager() {
             <button
               key={i}
               type="button"
+              disabled={intervalLocked && i !== activeInterval}
+              title={
+                intervalLocked && i !== activeInterval
+                  ? "Cancel your current plan to switch billing periods."
+                  : undefined
+              }
               onClick={() => setInterval(i)}
-              className={`label-mono rounded-sm px-3 py-1 transition-colors ${
+              className={`label-mono rounded-sm px-3 py-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                 interval === i ? "bg-primary text-primary-foreground" : "text-muted-foreground"
               }`}
             >
@@ -245,6 +251,12 @@ export function BillingManager() {
           ))}
         </div>
       </div>
+      {intervalLocked && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          You&apos;re billed {activeInterval === "yearly" ? "yearly" : "monthly"}. Plan changes stay
+          on this billing period — to switch, cancel and start a new plan when this one ends.
+        </p>
+      )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         {PLANS.map((p) => {
