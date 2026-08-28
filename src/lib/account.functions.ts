@@ -67,11 +67,19 @@ export const ensureAccount = createServerFn({ method: "POST" })
       };
     }
 
+    // Pending Studio invitations for this email attach on first sign-in.
+    async function claimPendingInvites() {
+      if (!email) return;
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.rpc("claim_team_invites", { _user_id: userId, _email: email });
+    }
+
     if (existing) {
       // Backfill the email once we know it (older rows predate the column).
       if (email && !existing.email) {
         await supabase.from("profiles").update({ email }).eq("id", userId);
       }
+      await claimPendingInvites();
       return {
         status: "existing",
         created: false,
@@ -153,6 +161,7 @@ export const ensureAccount = createServerFn({ method: "POST" })
       };
     }
 
+    await claimPendingInvites();
     return { status: "created", created: true, needsOnboarding: true, plan: await planFor() };
   });
 
