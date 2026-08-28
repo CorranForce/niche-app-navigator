@@ -62,7 +62,7 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
           // Never block deletion on a provider hiccup — record it for the owner.
           const { recordSystemEvent, describeError } = await import("@/lib/monitoring.server");
           await recordSystemEvent({
-            source: "webhook",
+            source: "other",
             severity: "critical",
             event: "account.delete_cancel_failed",
             message: describeError(error),

@@ -56,6 +56,21 @@ async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
     .eq("environment", env);
 }
 
+async function refreshPeriodFromTransaction(data: any, env: PaddleEnv) {
+  const subscriptionId = data?.subscriptionId;
+  const period = data?.billingPeriod;
+  if (!subscriptionId || !period?.endsAt) return;
+  await getSupabase()
+    .from("subscriptions")
+    .update({
+      current_period_start: period.startsAt ?? null,
+      current_period_end: period.endsAt,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("paddle_subscription_id", subscriptionId)
+    .eq("environment", env);
+}
+
 async function handleWebhook(req: Request, env: PaddleEnv) {
   const event = await verifyWebhook(req, env);
 
@@ -69,7 +84,17 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
       break;
+    case EventName.SubscriptionPaused:
+    case EventName.SubscriptionResumed:
+    case EventName.SubscriptionActivated:
+    case EventName.SubscriptionTrialing:
+    case EventName.SubscriptionPastDue:
+      await handleSubscriptionUpdated(event.data, env);
+      break;
     case EventName.TransactionCompleted: {
+      // A renewal payment also refreshes the billing period, so keep the row in
+      // step even if the matching subscription.updated event is delayed.
+      await refreshPeriodFromTransaction(event.data, env);
       const { sendInvoiceEmail } = await import("@/lib/billing-emails.server");
       await sendInvoiceEmail(event.data, env);
       break;
