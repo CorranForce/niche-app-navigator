@@ -284,9 +284,9 @@ export async function applyPaddleEvent(options: {
     case EventName.SubscriptionCreated:
       return handleSubscriptionCreated(data, env, occurredAt);
     case EventName.SubscriptionUpdated:
-      return handleSubscriptionUpdated(data, env, occurredAt);
+      return handleSubscriptionUpdated(data, env, occurredAt, sendEmails);
     case EventName.SubscriptionCanceled:
-      return handleSubscriptionCanceled(data, env, occurredAt);
+      return handleSubscriptionCanceled(data, env, occurredAt, sendEmails);
     case EventName.TransactionCompleted: {
       // A renewal payment also refreshes the billing period, so keep the row in
       // step even if the matching subscription.updated event is delayed.
@@ -314,7 +314,7 @@ export async function applyPaddleEvent(options: {
     default: {
       // Lifecycle events that only change status/period reuse the update path.
       if (LIFECYCLE_EVENTS.has(eventType)) {
-        return handleSubscriptionUpdated(data, env, occurredAt);
+        return handleSubscriptionUpdated(data, env, occurredAt, sendEmails);
       }
       console.log("Unhandled event:", eventType);
       return { applied: false, reason: "unhandled_event_type" };
