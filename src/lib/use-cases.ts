@@ -462,3 +462,29 @@ export const USE_CASES: UseCase[] = [
 export function getUseCase(slug: string) {
   return USE_CASES.find((u) => u.slug === slug);
 }
+
+/**
+ * Bare-bones prompt a visitor can paste straight into a coding LLM
+ * (Lovable, Cursor, Claude, etc.) to scaffold the microSaaS for this pain type.
+ */
+export function buildStarterPrompt(u: UseCase): string {
+  return [
+    `Build a minimal web app (MVP, shippable in 72 hours) that solves this problem:`,
+    ``,
+    `Problem: ${u.painType} — ${u.description}`,
+    ``,
+    `Target users: ${u.niches.join("; ")}.`,
+    ``,
+    `Core features (build in this order):`,
+    ...u.appShapes.map((a, i) => `${i + 1}. ${a.name} — ${a.blurb}`),
+    ``,
+    `Scope rules:`,
+    `- Web app only, mobile-responsive, no native apps.`,
+    `- Feature 1 must work end-to-end before starting feature 2.`,
+    `- Use simple email/password auth only; no social logins.`,
+    `- No payments, teams, or integrations in the MVP.`,
+    `- Seed the app with realistic demo data so it is testable immediately.`,
+    ``,
+    `Done means: a user can sign up, complete the core workflow (${u.workflow[0].replace(/\.$/, "").toLowerCase()}), and see the result without touching support.`,
+  ].join("\n");
+}
