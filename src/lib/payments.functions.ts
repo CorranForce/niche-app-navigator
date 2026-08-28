@@ -186,7 +186,6 @@ export const resumeSubscription = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
 /**
  * Recovery path for a delayed or dropped webhook: pulls the caller's live
  * subscription state straight from the payment provider and writes it to the

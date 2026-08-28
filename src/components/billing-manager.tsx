@@ -115,7 +115,6 @@ export function BillingManager() {
     } finally {
       setBusy(null);
     }
-
   }
 
   async function handlePortal() {
@@ -212,7 +211,6 @@ export function BillingManager() {
                 )}
               </div>
             ) : (
-
               <p className="border-t border-border pt-4 text-sm text-muted-foreground">
                 You don't have an active plan yet. Every plan starts with a 7-day free trial — pick
                 one below to start generating reports.

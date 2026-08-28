@@ -20,7 +20,11 @@ const row = (over: Partial<SelectableSubscription>): SelectableSubscription => (
 describe("subscription selection", () => {
   it("prefers a live subscription over a newer canceled one", () => {
     const picked = pickBillableSubscription([
-      row({ paddle_subscription_id: "new", status: "canceled", created_at: "2026-06-01T00:00:00Z" }),
+      row({
+        paddle_subscription_id: "new",
+        status: "canceled",
+        created_at: "2026-06-01T00:00:00Z",
+      }),
       row({ paddle_subscription_id: "old", status: "active", created_at: "2026-01-01T00:00:00Z" }),
     ]);
     expect(picked?.paddle_subscription_id).toBe("old");
@@ -96,10 +100,7 @@ describe("entitlement lifecycle", () => {
 });
 
 describe("webhook payment-failure handling", () => {
-  const source = readFileSync(
-    resolve(process.cwd(), "src/lib/webhook-apply.server.ts"),
-    "utf8",
-  );
+  const source = readFileSync(resolve(process.cwd(), "src/lib/webhook-apply.server.ts"), "utf8");
 
   it("restricts the subscription on transaction.payment_failed", () => {
     expect(source).toContain("markPastDueFromFailedPayment");
@@ -132,4 +133,3 @@ describe("plan-change timing", () => {
     }
   });
 });
-
