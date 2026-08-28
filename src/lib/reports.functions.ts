@@ -142,13 +142,48 @@ export const generateReport = createServerFn({ method: "POST" })
 export const listReports = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+    const { teamIdsForUser } = await import("@/lib/teams.server");
+    const teamIds = await teamIdsForUser(context.supabase, context.userId);
+
+    let query = context.supabase
       .from("reports")
-      .select("id, niche, audience, budget, created_at")
-      .eq("user_id", context.userId)
-      .order("created_at", { ascending: false });
+      .select("id, niche, audience, budget, created_at, user_id, team_id");
+    query = teamIds.length
+      ? query.or(`user_id.eq.${context.userId},team_id.in.(${teamIds.join(",")})`)
+      : query.eq("user_id", context.userId);
+
+    const { data, error } = await query.order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return (data ?? []).map((r) => ({ ...r, shared: r.user_id !== context.userId }));
+  });
+
+/** Side-by-side comparison payloads (Studio only). */
+export const compareReports = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ ids: z.array(z.string().uuid()).min(2).max(3) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { entitledPlan, planFeatures } = await import("@/lib/plan-limits");
+    const paymentsEnv = import.meta.env.PROD ? "live" : "sandbox";
+    const { data: sub } = await context.supabase
+      .from("subscriptions")
+      .select("status, product_id, current_period_end")
+      .eq("user_id", context.userId)
+      .eq("environment", paymentsEnv)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!planFeatures(entitledPlan(sub)).compare) {
+      throw new Error("Side-by-side comparison is part of the Studio plan.");
+    }
+
+    const { data: rows, error } = await context.supabase
+      .from("reports")
+      .select("id, niche, audience, created_at, payload")
+      .in("id", data.ids);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
   });
 
 export const getReport = createServerFn({ method: "POST" })
