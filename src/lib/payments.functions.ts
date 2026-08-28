@@ -125,7 +125,7 @@ export const changePlan = createServerFn({ method: "POST" })
     const currentIsYearly = (target.price_id ?? "").endsWith("_yearly");
     if (data.priceId.endsWith("_yearly") !== currentIsYearly) {
       throw new Error(
-        `Your subscription bills ${currentIsYearly ? "yearly" : "monthly"}. To switch billing periods, cancel your current plan and start a new one when it ends.`,
+        `Your subscription bills ${currentIsYearly ? "yearly" : "monthly"}. Use "Switch billing period" to move to ${currentIsYearly ? "monthly" : "yearly"} billing.`,
       );
     }
 
@@ -155,6 +155,70 @@ export const changePlan = createServerFn({ method: "POST" })
     });
 
     return { ok: true, effectiveAt: target.current_period_end ?? null };
+  });
+
+/**
+ * Moves a customer between monthly and yearly billing.
+ *
+ * The payment provider can't rewrite a live subscription onto a different
+ * billing cycle, so this is a cancel + re-subscribe: either end the current
+ * subscription now and open checkout for the new cycle, or let the paid period
+ * finish first and start the new cycle afterwards.
+ */
+export const switchBillingPeriod = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        priceId: z.string().min(1).max(80),
+        when: z.enum(["immediately", "period_end"]),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const sub = await loadTargetSubscription(context.supabase, context.userId);
+    if (!isManageable(sub)) {
+      throw new Error("No active subscription to switch. Start a new plan instead.");
+    }
+    const target = sub!;
+    const env = target.environment as "sandbox" | "live";
+
+    const currentIsYearly = (target.price_id ?? "").endsWith("_yearly");
+    if (data.priceId.endsWith("_yearly") === currentIsYearly) {
+      throw new Error("That plan already bills on your current schedule — switch plans instead.");
+    }
+
+    const { getPaddleClient } = await import("@/lib/paddle.server");
+    const paddle = getPaddleClient(env);
+
+    if (data.when === "period_end") {
+      if (!target.cancel_at_period_end) {
+        await paddle.subscriptions.cancel(target.paddle_subscription_id, {
+          effectiveFrom: "next_billing_period",
+        });
+      }
+      return {
+        switched: false as const,
+        accessUntil: target.current_period_end ?? null,
+        checkoutToken: null,
+      };
+    }
+
+    await paddle.subscriptions.cancel(target.paddle_subscription_id, {
+      effectiveFrom: "immediately",
+    });
+
+    const { signCheckoutIntent } = await import("@/lib/checkout-token.server");
+    const { paymentsEnv } = await import("@/lib/payments-env");
+    return {
+      switched: true as const,
+      accessUntil: null,
+      checkoutToken: signCheckoutIntent({
+        uid: context.userId,
+        price: data.priceId,
+        env: paymentsEnv(),
+      }),
+    };
   });
 
 /** Cancels the active subscription at the end of the current billing period. */
