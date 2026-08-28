@@ -36,19 +36,37 @@ export function BillingManager() {
 
   const doChangePlan = useServerFn(changePlan);
   const doCancel = useServerFn(cancelSubscription);
+  const doResume = useServerFn(resumeSubscription);
   const doPortal = useServerFn(createPortalSession);
   const doCheckoutIntent = useServerFn(createCheckoutIntent);
 
   const currentPlan = PLANS.find((p) => p.id === plan) ?? null;
   const activeInterval = subscription?.price_id?.endsWith("_yearly") ? "yearly" : "monthly";
+  const endsSoon = Boolean(
+    subscription?.cancel_at_period_end && subscription.status !== "canceled",
+  );
+  const canResume = endsSoon || subscription?.status === "paused";
 
   async function handleSelect(planId: string, priceId: string | null) {
     if (!priceId) return;
+    const isDowngrade = (PLAN_RANK[planId as PlanId] ?? 0) < (PLAN_RANK[plan] ?? 0);
+    if (isActive && subscription && isDowngrade) {
+      const ok = window.confirm(
+        `Downgrade to ${planId}? You keep your current plan and limits until ${formatDate(
+          subscription.current_period_end,
+        )}, then the new price applies. No partial refund is issued for the current period.`,
+      );
+      if (!ok) return;
+    }
     setBusy(planId);
     try {
       if (isActive && subscription) {
         await doChangePlan({ data: { priceId } });
-        toast.success("Plan change scheduled — it takes effect at your next renewal.");
+        toast.success(
+          isDowngrade
+            ? "Downgrade scheduled — your current plan stays active until the period ends."
+            : "Plan change scheduled — it takes effect at your next renewal.",
+        );
         await refetch();
       } else {
         // The account a purchase belongs to is decided server-side: we send an
@@ -68,6 +86,12 @@ export function BillingManager() {
   }
 
   async function handleCancel() {
+    const ok = window.confirm(
+      `Cancel your subscription? You keep full access until ${formatDate(
+        subscription?.current_period_end,
+      )}, and you can undo this any time before then.`,
+    );
+    if (!ok) return;
     setBusy("cancel");
     try {
       await doCancel({});
@@ -78,6 +102,20 @@ export function BillingManager() {
     } finally {
       setBusy(null);
     }
+  }
+
+  async function handleResume() {
+    setBusy("resume");
+    try {
+      await doResume({});
+      toast.success("Subscription resumed — your plan will keep renewing.");
+      await refetch();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not resume the subscription.");
+    } finally {
+      setBusy(null);
+    }
+
   }
 
   async function handlePortal() {
