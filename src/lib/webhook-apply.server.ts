@@ -204,12 +204,19 @@ export async function applyPaddleEvent(options: {
       return outcome;
     }
     case EventName.TransactionPaymentFailed: {
+      // Access is cut on the first failed charge rather than waiting for Paddle's
+      // dunning to escalate to `past_due`, so a lapsed card can't buy free usage.
+      const restricted = await markPastDueFromFailedPayment(data, env, occurredAt);
       if (sendEmails) {
         const { sendPaymentFailedEmail } = await import("@/lib/billing-emails.server");
         await sendPaymentFailedEmail(data, env);
       }
-      return { applied: sendEmails, reason: "payment_failed_notified" };
+      return {
+        applied: restricted.applied || sendEmails,
+        reason: restricted.applied ? "payment_failed_past_due" : "payment_failed_notified",
+      };
     }
+
     default: {
       // Lifecycle events that only change status/period reuse the update path.
       if (LIFECYCLE_EVENTS.has(eventType)) {
