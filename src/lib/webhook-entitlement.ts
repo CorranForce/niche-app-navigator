@@ -49,13 +49,19 @@ export type MappingResult =
   | { ok: true; row: SubscriptionRowInput }
   | { ok: false; reason: "missing_user" | "missing_external_ids" | "missing_subscription_id" };
 
-/** Builds the DB row for a subscription.created event, or explains why it can't. */
+/**
+ * Builds the DB row for a subscription.created event, or explains why it can't.
+ *
+ * `options.userId` must be the owner the *server* resolved (from the signed
+ * checkout intent). Anything the browser put in `customData` is ignored here.
+ */
 export function subscriptionRowFromEvent(
   data: SubscriptionEventData,
   environment: string,
-  now: Date = new Date(),
+  options: { userId?: string | null; now?: Date } = {},
 ): MappingResult {
-  const userId = data.customData?.userId;
+  const now = options.now ?? new Date();
+  const userId = options.userId;
   if (!userId) return { ok: false, reason: "missing_user" };
   if (!data.id || !data.customerId) return { ok: false, reason: "missing_subscription_id" };
 
