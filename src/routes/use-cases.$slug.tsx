@@ -1,9 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getUseCase, USE_CASES } from "@/lib/use-cases";
+import { buildStarterPrompt, getUseCase, USE_CASES } from "@/lib/use-cases";
 
 const BASE = "https://idea-spark-fast.lovable.app";
 
