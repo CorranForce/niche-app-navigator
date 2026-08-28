@@ -43,9 +43,11 @@ describe("SUPA_authenticated_security_definer_function_executable", () => {
   });
 
   it("entitlement is resolved through an authenticated server function", () => {
-    const src = read("src/lib/entitlement.functions.ts");
-    expect(src).toContain("requireSupabaseAuth");
-    expect(src).toContain("effective_subscription_for");
+    const fn = read("src/lib/entitlement.functions.ts");
+    expect(fn).toContain("requireSupabaseAuth");
+    // the RPC itself is only reachable from the service-role server module
+    const impl = read("src/lib/entitlement.ts");
+    expect(impl).toMatch(/supabaseAdmin\.rpc\(\s*"effective_subscription_for"/);
   });
 });
 
@@ -101,7 +103,9 @@ describe("system_events_insert_policy_missing", () => {
   it("system events are written only from server-side code via the admin client", () => {
     const src = read("src/lib/monitoring.server.ts");
     expect(src).toContain("system_events");
-    expect(src).toContain("client.server");
+    // service-role credentials only; never the browser client
+    expect(src).toContain("SUPABASE_SERVICE_ROLE_KEY");
+    expect(src).not.toContain("@/integrations/supabase/client\"");
   });
 
   it("no client component inserts system events directly", () => {
@@ -112,13 +116,21 @@ describe("system_events_insert_policy_missing", () => {
 
 describe("paddle_customdata_trust", () => {
   const webhook = read("src/routes/api/public/payments/webhook.ts");
+  const apply = read("src/lib/webhook-apply.server.ts");
 
-  it("verifies the signature and the signed checkout token", () => {
-    expect(webhook).toMatch(/verify/i);
-    expect(webhook).toMatch(/checkout-token|checkoutToken|verifyCheckoutIntent/i);
+  it("verifies the Paddle signature before any processing", () => {
+    expect(webhook).toContain("verifyWebhook");
+    expect(read("src/lib/paddle.server.ts")).toContain("paddle-signature");
+  });
+
+  it("attributes the subscription from a server-signed checkout intent", () => {
+    expect(apply).toContain("verifyCheckoutIntent");
+    expect(apply).toMatch(/customData\?\.checkoutToken/);
   });
 
   it("does not trust raw custom_data for user attribution", () => {
-    expect(webhook).not.toMatch(/custom_data\??\.\s*user_id/);
+    for (const src of [webhook, apply]) {
+      expect(src).not.toMatch(/custom_?[Dd]ata\??\.\s*user_?[Ii]d/);
+    }
   });
 });
