@@ -134,7 +134,7 @@ function ComparePage() {
                         <ul className="mt-2 space-y-1 font-mono text-sm">
                           {payload.pricing_tiers.map((t) => (
                             <li key={t.name}>
-                              {t.name} · ${t.monthly_price}/mo
+                              {t.name} · ${t.monthly_price_usd}/mo
                             </li>
                           ))}
                         </ul>
