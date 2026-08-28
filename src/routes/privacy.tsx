@@ -40,9 +40,7 @@ function PrivacyPage() {
       <main className="mx-auto max-w-3xl px-4 py-12">
         <p className="label-mono text-primary">Legal</p>
         <h1 className="mt-3 text-3xl font-semibold">Privacy Notice</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Last updated {POLICY_LAST_UPDATED}.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Last updated {POLICY_LAST_UPDATED}.</p>
 
         <Section title="Who controls your data">
           <p>
@@ -55,17 +53,16 @@ function PrivacyPage() {
           </p>
           <p>
             Paddle.com Market Ltd is our Merchant of Record and an independent controller for
-            payment and tax data it collects at checkout. See paddle.net for Paddle&rsquo;s
-            privacy notice.
+            payment and tax data it collects at checkout. See paddle.net for Paddle&rsquo;s privacy
+            notice.
           </p>
         </Section>
 
         <Section title="Categories of personal data we collect">
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              <strong>Account data</strong> — email address, display name, Google account
-              identifier when you sign in with Google, and password credentials held by our auth
-              provider.
+              <strong>Account data</strong> — email address, display name, Google account identifier
+              when you sign in with Google, and password credentials held by our auth provider.
             </li>
             <li>
               <strong>Profile and onboarding data</strong> — workspace name, role title and stated
@@ -166,7 +163,10 @@ function PrivacyPage() {
         </Section>
 
         <Section title="Children">
-          <p>The Service is not directed to anyone under 18 and we do not knowingly collect their data.</p>
+          <p>
+            The Service is not directed to anyone under 18 and we do not knowingly collect their
+            data.
+          </p>
         </Section>
       </main>
       <SiteFooter />

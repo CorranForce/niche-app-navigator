@@ -61,11 +61,11 @@ function TermsPage() {
             .
           </p>
           <p>
-            Our order process is conducted by our online reseller and Merchant of Record,
-            Paddle.com Market Ltd (&ldquo;Paddle&rdquo;). Paddle handles all customer orders,
-            payments, invoicing, tax and refunds, and is the seller of record for every purchase
-            made through this site. Paddle&rsquo;s own terms and privacy notice are available at
-            paddle.net and apply to the payment transaction.
+            Our order process is conducted by our online reseller and Merchant of Record, Paddle.com
+            Market Ltd (&ldquo;Paddle&rdquo;). Paddle handles all customer orders, payments,
+            invoicing, tax and refunds, and is the seller of record for every purchase made through
+            this site. Paddle&rsquo;s own terms and privacy notice are available at paddle.net and
+            apply to the payment transaction.
           </p>
         </Section>
 
@@ -81,22 +81,22 @@ function TermsPage() {
         <Section title="3. Accounts">
           <p>
             You must provide accurate information, be at least 18 years old, and keep your
-            credentials secure. You are responsible for all activity under your account. Studio
-            plan seat holders you invite are also bound by these terms.
+            credentials secure. You are responsible for all activity under your account. Studio plan
+            seat holders you invite are also bound by these terms.
           </p>
         </Section>
 
         <Section title="4. Subscriptions, trials and billing">
           <p>
-            Plans are Solo, Pro and Studio, billed monthly or annually as shown on the pricing
-            page. Every plan starts with a 7-day free trial and requires a valid payment method. If
-            you do not cancel before the trial ends, the plan renews automatically at the listed
-            price until cancelled.
+            Plans are Solo, Pro and Studio, billed monthly or annually as shown on the pricing page.
+            Every plan starts with a 7-day free trial and requires a valid payment method. If you do
+            not cancel before the trial ends, the plan renews automatically at the listed price
+            until cancelled.
           </p>
           <p>
-            Plan changes (upgrades and downgrades) take effect at your next renewal.
-            Cancellations keep access until the end of the paid period. Prices are shown exclusive
-            or inclusive of tax as determined by Paddle at checkout for your location.
+            Plan changes (upgrades and downgrades) take effect at your next renewal. Cancellations
+            keep access until the end of the paid period. Prices are shown exclusive or inclusive of
+            tax as determined by Paddle at checkout for your location.
           </p>
           <p>
             Refunds are governed by our Refund Policy, which allows a full refund within{" "}
@@ -107,10 +107,21 @@ function TermsPage() {
         <Section title="5. Acceptable use">
           <p>You agree not to:</p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>resell, sublicense or redistribute the Service or generated reports as a competing product;</li>
-            <li>scrape, reverse engineer, or attempt to access the Service outside the published interfaces or MCP endpoints;</li>
-            <li>use the Service for unlawful, deceptive, infringing, harassing or harmful purposes;</li>
-            <li>submit content you have no right to submit, or personal data of others without a lawful basis;</li>
+            <li>
+              resell, sublicense or redistribute the Service or generated reports as a competing
+              product;
+            </li>
+            <li>
+              scrape, reverse engineer, or attempt to access the Service outside the published
+              interfaces or MCP endpoints;
+            </li>
+            <li>
+              use the Service for unlawful, deceptive, infringing, harassing or harmful purposes;
+            </li>
+            <li>
+              submit content you have no right to submit, or personal data of others without a
+              lawful basis;
+            </li>
             <li>circumvent plan limits, rate limits, trials or billing;</li>
             <li>overload, disrupt or probe our infrastructure or that of our providers.</li>
           </ul>

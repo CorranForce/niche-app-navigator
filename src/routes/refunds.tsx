@@ -45,8 +45,8 @@ function RefundsPage() {
         <p className="label-mono text-primary">Legal</p>
         <h1 className="mt-3 text-3xl font-semibold">Refund Policy</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Last updated {POLICY_LAST_UPDATED}. This policy applies to all subscriptions to
-          MicroSaaS Solution Finder, sold by {SELLER_LEGAL_NAME} through our Merchant of Record.
+          Last updated {POLICY_LAST_UPDATED}. This policy applies to all subscriptions to MicroSaaS
+          Solution Finder, sold by {SELLER_LEGAL_NAME} through our Merchant of Record.
         </p>
 
         <Section title={`${REFUND_WINDOW_DAYS}-day refund guarantee`}>
