@@ -70,13 +70,16 @@ function BucketList({
 
 export function OAuthHealthSection() {
   const [days, setDays] = useState<Range>(14);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
   const fetchAnalytics = useServerFn(getAuthAnalytics);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["auth-analytics", days],
-    queryFn: () => fetchAnalytics({ data: { days } }),
+    queryKey: ["auth-analytics", days, page],
+    queryFn: () => fetchAnalytics({ data: { days, page, pageSize } }),
     retry: false,
   });
+
 
   const maxDaily = Math.max(1, ...(data?.daily.map((d) => d.starts) ?? [1]));
 
