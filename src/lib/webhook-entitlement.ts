@@ -8,9 +8,11 @@ import {
   entitledPlan,
   limitForPlan,
   planFeatures,
+  PRODUCT_PLAN_MAP,
   type PlanFeatures,
   type PlanId,
 } from "@/lib/plan-limits";
+
 
 export type SubscriptionEventItem = {
   price?: { id?: string; importMeta?: { externalId?: string | null } | null } | null;
