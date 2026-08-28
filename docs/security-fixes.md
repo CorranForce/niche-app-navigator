@@ -17,3 +17,37 @@ change, or application change that resolved it.
 - Role checks always run through the `has_role` security-definer function, never against a
   profile column and never client-side.
 - The service-role client is imported inside handlers only, after the caller is verified.
+
+## Policy → required function grants
+
+RLS policy expressions execute as the **querying role**, not as the policy author.
+Every function referenced in a `USING` / `WITH CHECK` clause must keep `EXECUTE`
+for that role. Revoking one of these does not fail the migration — it fails every
+protected read at runtime with `permission denied for function ...`.
+
+| Table | Policy (intent) | Function called in the policy | Roles that MUST keep EXECUTE |
+| --- | --- | --- | --- |
+| `public.reports` | Team members read reports shared into their workspace | `is_team_member(uuid, uuid)` | `authenticated`, `service_role` |
+| `public.team_members` | Members read the roster of their own team | `is_team_member(uuid, uuid)` | `authenticated`, `service_role` |
+| `public.team_members` | Owners add/remove teammates | `is_team_owner(uuid, uuid)` | `authenticated`, `service_role` |
+| `public.teams` | Members read their team; owners update it | `is_team_member`, `is_team_owner` | `authenticated`, `service_role` |
+| `public.auth_events` | Admins read sign-in telemetry | `has_role(uuid, app_role)` | `authenticated`, `service_role` |
+| `public.system_events` | Admins read monitoring events | `has_role(uuid, app_role)` | `authenticated`, `service_role` |
+| `public.webhook_replays` | Admins read/replay webhook events | `has_role(uuid, app_role)` | `authenticated`, `service_role` |
+| `public.subscriptions` | Admins read all subscriptions | `has_role(uuid, app_role)` | `authenticated`, `service_role` |
+
+Service-role-only functions (must stay **non**-executable by `anon` / `authenticated`):
+`effective_subscription_for`, `has_active_subscription`, `claim_team_invites`,
+`admin_mcp_clients`, `admin_mcp_consents`, `admin_mcp_authorization_stats`.
+
+Enforcement:
+
+- Machine-readable contract: `src/lib/rls-grant-contract.ts`.
+- Post-migration/CI guard: `bun run check:function-grants`
+  (`scripts/check-function-grants.mjs`) asserts both directions with
+  `has_function_privilege`; it runs in CI after every push and skips when
+  `SUPABASE_DB_URL` is unavailable.
+- Regression tests: `src/lib/__tests__/rls-function-grants.test.ts`.
+- Runtime safety net: `src/lib/friendly-errors.ts` maps
+  `permission denied for function ...` into an actionable message instead of a
+  blank error screen.
