@@ -63,7 +63,6 @@ export function useSubscription() {
     };
   }, [user?.id, environment, queryClient]);
 
-
   const sub = query.data ?? null;
 
   const plan: PlanId = entitledPlan(sub);
