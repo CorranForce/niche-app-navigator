@@ -41,7 +41,7 @@ const PaymentFailedEmail = ({
           {attemptedAt ? ` on ${attemptedAt}` : ""}, but the charge was declined.
         </Text>
         <Text style={text}>
-          Until it is resolved, your account is limited to the Free plan allowance of 5 reports per
+          Until it is resolved, new report generation is paused on your account for the rest of the
           month. Your saved reports are untouched.
         </Text>
 

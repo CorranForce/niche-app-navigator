@@ -76,7 +76,7 @@ function OnboardingPage() {
         <p className="label-mono text-primary">Step 1 of 1</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Set up your workspace</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          You&apos;re on the free plan — 5 reports a month. A few details so your reports read like
+          Your 7-day free trial is running. A few details so your reports read like
           they were written for you.
         </p>
 
