@@ -3,7 +3,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { paymentsEnv } from "@/lib/payments-env";
-import { entitlementFromRow } from "@/lib/entitlement";
+import { useServerFn } from "@tanstack/react-start";
+import { entitlementFromRow, type EffectiveEntitlement } from "@/lib/entitlement";
+import { getMyEntitlement } from "@/lib/entitlement.functions";
 import { isPastDue } from "@/lib/plan-limits";
 
 export type SubscriptionRow = {
@@ -19,26 +21,22 @@ export type SubscriptionRow = {
   created_at: string | null;
 };
 
-type EffectiveRow = {
-  status: string | null;
-  product_id: string | null;
-  current_period_end: string | null;
-  source: string | null;
-  owner_id: string | null;
-};
-
 export function useSubscription() {
   const { user, loading } = useSession();
   const queryClient = useQueryClient();
   const environment = paymentsEnv();
   const queryKey = ["subscription", user?.id, environment];
+  const fetchEntitlement = useServerFn(getMyEntitlement);
 
   const query = useQuery({
     queryKey,
     enabled: Boolean(user),
     refetchOnWindowFocus: true,
-    queryFn: async (): Promise<{ row: SubscriptionRow | null; effective: EffectiveRow | null }> => {
-      const [own, effective] = await Promise.all([
+    queryFn: async (): Promise<{
+      row: SubscriptionRow | null;
+      entitlement: EffectiveEntitlement;
+    }> => {
+      const [own, entitlement] = await Promise.all([
         supabase
           .from("subscriptions")
           .select("*")
@@ -47,13 +45,12 @@ export function useSubscription() {
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
-        supabase.rpc("my_effective_subscription", { _env: environment }),
+        fetchEntitlement(),
       ]);
       if (own.error) throw own.error;
-      const rows = (effective.data ?? []) as unknown as EffectiveRow[];
       return {
         row: (own.data as SubscriptionRow | null) ?? null,
-        effective: rows[0] ?? null,
+        entitlement,
       };
     },
   });
@@ -80,7 +77,7 @@ export function useSubscription() {
   }, [user?.id, environment, queryClient]);
 
   const sub = query.data?.row ?? null;
-  const entitlement = entitlementFromRow(query.data?.effective ?? null, environment);
+  const entitlement = query.data?.entitlement ?? entitlementFromRow(null, environment);
 
   return {
     subscription: sub,

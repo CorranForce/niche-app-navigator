@@ -54,14 +54,25 @@ export function entitlementFromRow(
   };
 }
 
-/** Reads the caller's effective entitlement through the security-definer RPC. */
+/**
+ * Reads a user's effective entitlement.
+ *
+ * The underlying SECURITY DEFINER function is not executable by signed-in
+ * users; it is invoked here with the service-role client only after the caller
+ * has been authenticated by `requireSupabaseAuth`, so the user id is trusted.
+ * Server-only: call this from inside a server function handler.
+ */
 export async function effectiveEntitlement(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
+  userId: string,
   environment: PaymentsEnv = paymentsEnv(),
 ): Promise<EffectiveEntitlement> {
-  const { data, error } = await supabase.rpc("my_effective_subscription", { _env: environment });
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin.rpc("effective_subscription_for", {
+    _user_id: userId,
+    _env: environment,
+  });
   if (error) return entitlementFromRow(null, environment);
   const row = (Array.isArray(data) ? data[0] : data) as Row | null;
   return entitlementFromRow(row ?? null, environment);
 }
+

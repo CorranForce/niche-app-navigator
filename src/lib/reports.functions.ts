@@ -31,7 +31,7 @@ export const generateReport = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .gte("created_at", monthStart.toISOString());
 
-    const entitlement = await effectiveEntitlement(context.supabase);
+    const entitlement = await effectiveEntitlement(context.userId);
     const { plan, limit, features } = entitlement;
 
     if (!features.generate) {
@@ -157,7 +157,7 @@ export const compareReports = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { effectiveEntitlement } = await import("@/lib/entitlement");
-    const { features } = await effectiveEntitlement(context.supabase);
+    const { features } = await effectiveEntitlement(context.userId);
     if (!features.compare) {
       throw new Error("Side-by-side comparison is part of the Studio plan.");
     }
@@ -204,6 +204,6 @@ export const getUsage = createServerFn({ method: "GET" })
       .select("id", { count: "exact", head: true })
       .eq("user_id", context.userId)
       .gte("created_at", monthStart.toISOString());
-    const { plan, limit } = await effectiveEntitlement(context.supabase);
+    const { plan, limit } = await effectiveEntitlement(context.userId);
     return { used: count ?? 0, limit, plan };
   });
