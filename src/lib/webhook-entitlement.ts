@@ -105,8 +105,9 @@ export function entitlementForRow(
 export function entitlementFromEvent(
   data: SubscriptionEventData,
   environment: string,
+  userId: string = "verified-user",
 ): Entitlement | null {
-  const mapped = subscriptionRowFromEvent(data, environment);
+  const mapped = subscriptionRowFromEvent(data, environment, { userId });
   if (!mapped.ok) return null;
   return entitlementForRow(mapped.row);
 }
