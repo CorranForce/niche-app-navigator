@@ -1,6 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import {
+  isManageable,
+  isResumable,
+  pickBillableSubscription,
+  type SelectableSubscription,
+} from "@/lib/subscription-select";
 
 const envSchema = z.enum(["sandbox", "live"]);
 
@@ -46,20 +53,33 @@ export const createCheckoutIntent = createServerFn({ method: "POST" })
     };
   });
 
+/**
+ * Loads the subscription row a management action should target. Ranked by how
+ * live the subscription is, so a newer canceled row can never shadow the one
+ * that is still billing.
+ */
+async function loadTargetSubscription(
+  supabase: { from: (t: string) => any },
+  userId: string,
+): Promise<SelectableSubscription | null> {
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select(
+      "paddle_subscription_id, paddle_customer_id, environment, status, price_id, cancel_at_period_end, current_period_end, created_at",
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  if (error) throw new Error(error.message);
+  return pickBillableSubscription((data ?? []) as SelectableSubscription[]);
+}
+
 /** Opens Paddle's hosted portal so the customer can change payment method, view invoices or cancel. */
 export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: sub, error } = await context.supabase
-      .from("subscriptions")
-      .select("paddle_subscription_id, paddle_customer_id, environment")
-      .eq("user_id", context.userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) throw new Error(error.message);
-    if (!sub) throw new Error("No subscription found for this account.");
+    const sub = await loadTargetSubscription(context.supabase, context.userId);
+    if (!sub?.paddle_customer_id) throw new Error("No subscription found for this account.");
 
     const { getPaddleClient } = await import("@/lib/paddle.server");
     const paddle = getPaddleClient(sub.environment as "sandbox" | "live");
@@ -76,26 +96,24 @@ export const createPortalSession = createServerFn({ method: "POST" })
     };
   });
 
-/** Switches the active subscription to a different price, effective at the next renewal. */
+/**
+ * Switches the subscription to a different price.
+ *
+ * Both upgrades and downgrades take effect at the next renewal with no mid-cycle
+ * proration, so the customer always keeps what the current period paid for.
+ */
 export const changePlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ priceId: z.string().min(1).max(80) }).parse(data))
   .handler(async ({ data, context }) => {
-    const { data: sub, error } = await context.supabase
-      .from("subscriptions")
-      .select("paddle_subscription_id, environment, status, price_id")
-      .eq("user_id", context.userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) throw new Error(error.message);
-    if (!sub || sub.status === "canceled") {
+    const sub = await loadTargetSubscription(context.supabase, context.userId);
+    if (!isManageable(sub)) {
       throw new Error("No active subscription to change. Start a new plan instead.");
     }
+    const target = sub!;
 
-    const env = sub.environment as "sandbox" | "live";
-    if (sub.price_id === data.priceId) {
+    const env = target.environment as "sandbox" | "live";
+    if (target.price_id === data.priceId) {
       throw new Error("You're already on that plan.");
     }
     const { getPaddleClient, gatewayFetch } = await import("@/lib/paddle.server");
@@ -109,37 +127,65 @@ export const changePlan = createServerFn({ method: "POST" })
     if (!paddlePriceId) throw new Error("That plan is not available right now.");
 
     const paddle = getPaddleClient(env);
-    await paddle.subscriptions.update(sub.paddle_subscription_id, {
+    await paddle.subscriptions.update(target.paddle_subscription_id, {
       items: [{ priceId: paddlePriceId, quantity: 1 }],
       prorationBillingMode: "full_next_billing_period",
     });
 
-    return { ok: true };
+    return { ok: true, effectiveAt: target.current_period_end ?? null };
   });
 
 /** Cancels the active subscription at the end of the current billing period. */
 export const cancelSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: sub, error } = await context.supabase
-      .from("subscriptions")
-      .select("paddle_subscription_id, environment, status")
-      .eq("user_id", context.userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) throw new Error(error.message);
-    if (!sub || sub.status === "canceled") throw new Error("No active subscription to cancel.");
+    const sub = await loadTargetSubscription(context.supabase, context.userId);
+    if (!isManageable(sub)) throw new Error("No active subscription to cancel.");
+    const target = sub!;
+    if (target.cancel_at_period_end) {
+      throw new Error("This subscription is already scheduled to end.");
+    }
 
     const { getPaddleClient } = await import("@/lib/paddle.server");
-    const paddle = getPaddleClient(sub.environment as "sandbox" | "live");
-    await paddle.subscriptions.cancel(sub.paddle_subscription_id, {
+    const paddle = getPaddleClient(target.environment as "sandbox" | "live");
+    await paddle.subscriptions.cancel(target.paddle_subscription_id, {
       effectiveFrom: "next_billing_period",
     });
 
+    return { ok: true, accessUntil: target.current_period_end ?? null };
+  });
+
+/**
+ * Reverses a scheduled cancellation (or resumes a paused subscription) without
+ * sending the customer out to the payment provider's portal. Paddle confirms the
+ * change with a `subscription.updated` webhook, which is what actually rewrites
+ * the local row.
+ */
+export const resumeSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sub = await loadTargetSubscription(context.supabase, context.userId);
+    if (!isResumable(sub)) {
+      throw new Error("There's nothing to resume — this subscription isn't scheduled to end.");
+    }
+    const target = sub!;
+    const { getPaddleClient } = await import("@/lib/paddle.server");
+    const paddle = getPaddleClient(target.environment as "sandbox" | "live");
+
+    if (target.status === "paused") {
+      await paddle.subscriptions.resume(target.paddle_subscription_id, {
+        effectiveFrom: "immediately",
+      });
+    } else {
+      // Clearing the scheduled change is how Paddle un-cancels a subscription.
+      await paddle.subscriptions.update(target.paddle_subscription_id, {
+        scheduledChange: null,
+      });
+    }
+
     return { ok: true };
   });
+
 
 /**
  * Recovery path for a delayed or dropped webhook: pulls the caller's live
