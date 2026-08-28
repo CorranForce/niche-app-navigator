@@ -156,9 +156,16 @@ export const syncSubscription = createServerFn({ method: "POST" })
     const list = subsJson.data ?? [];
     if (!list.length) return { synced: false, reason: "no_subscription" as const };
 
-    const rank: Record<string, number> = { active: 4, trialing: 4, past_due: 3, paused: 2, canceled: 1 };
+    const rank: Record<string, number> = {
+      active: 4,
+      trialing: 4,
+      past_due: 3,
+      paused: 2,
+      canceled: 1,
+    };
     const best = [...list].sort(
-      (a, b) => (rank[b.status] ?? 0) - (rank[a.status] ?? 0) ||
+      (a, b) =>
+        (rank[b.status] ?? 0) - (rank[a.status] ?? 0) ||
         new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime(),
     )[0];
 

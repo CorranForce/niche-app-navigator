@@ -8,7 +8,13 @@
  * The `my_effective_subscription` database function encapsulates both, so the
  * teammate's own (non-existent) subscription never hides the inherited one.
  */
-import { entitledPlan, limitForPlan, planFeatures, type PlanFeatures, type PlanId } from "@/lib/plan-limits";
+import {
+  entitledPlan,
+  limitForPlan,
+  planFeatures,
+  type PlanFeatures,
+  type PlanId,
+} from "@/lib/plan-limits";
 import { paymentsEnv, type PaymentsEnv } from "@/lib/payments-env";
 
 export type EffectiveEntitlement = {
@@ -31,7 +37,10 @@ type Row = {
   owner_id?: string | null;
 };
 
-export function entitlementFromRow(row: Row | null, environment: PaymentsEnv): EffectiveEntitlement {
+export function entitlementFromRow(
+  row: Row | null,
+  environment: PaymentsEnv,
+): EffectiveEntitlement {
   const plan = entitledPlan(row ?? null);
   return {
     plan,

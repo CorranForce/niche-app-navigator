@@ -22,8 +22,7 @@ function formatDate(value: string | null | undefined) {
 /** Plan overview, plan switching, payment portal and cancellation. */
 export function BillingManager() {
   const { user } = useSession();
-  const { subscription, plan, isActive, loading, refetch, entitlementSource } =
-    useSubscription();
+  const { subscription, plan, isActive, loading, refetch, entitlementSource } = useSubscription();
   const { openCheckout } = usePaddleCheckout();
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [busy, setBusy] = useState<string | null>(null);
