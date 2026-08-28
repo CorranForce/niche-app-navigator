@@ -1,4 +1,5 @@
 import { resolvePaddlePrice } from "@/lib/payments.functions";
+import { paymentsEnv } from "@/lib/payments-env";
 
 const clientToken = import.meta.env["VITE_PAYMENTS_CLIENT_TOKEN"] as string | undefined;
 
@@ -10,7 +11,7 @@ declare global {
 }
 
 export function getPaddleEnvironment(): "sandbox" | "live" {
-  return clientToken?.startsWith("test_") ? "sandbox" : "live";
+  return paymentsEnv();
 }
 
 let paddleInitialized = false;

@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/site-header";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { BillingManager } from "@/components/billing-manager";
 import { TeamManager } from "@/components/team-manager";
+import { AccountDangerZone } from "@/components/account-danger-zone";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
@@ -174,6 +175,9 @@ function AccountPage() {
         <div className="mt-12 border-t border-border pt-10">
           <BillingManager />
           <TeamManager />
+          <div className="mt-12 border-t border-border pt-10">
+            <AccountDangerZone />
+          </div>
         </div>
       </main>
     </div>

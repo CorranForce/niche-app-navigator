@@ -341,6 +341,16 @@ export type Database = {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
+      my_effective_subscription: {
+        Args: { _env: string }
+        Returns: {
+          current_period_end: string
+          owner_id: string
+          product_id: string
+          source: string
+          status: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

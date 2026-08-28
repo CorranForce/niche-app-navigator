@@ -22,7 +22,7 @@ function formatDate(value: string | null | undefined) {
 /** Plan overview, plan switching, payment portal and cancellation. */
 export function BillingManager() {
   const { user } = useSession();
-  const { subscription, plan, isActive, loading, refetch } = useSubscription();
+  const { subscription, plan, isActive, loading, refetch, entitlementSource } = useSubscription();
   const { openCheckout } = usePaddleCheckout();
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [busy, setBusy] = useState<string | null>(null);
@@ -114,6 +114,13 @@ export function BillingManager() {
                 ) : null}
               </div>
             </div>
+
+            {entitlementSource === "team" ? (
+              <p className="rounded-sm border border-primary/40 bg-primary/5 p-3 text-sm">
+                Your Studio access comes from a workspace you were invited to — the workspace owner
+                handles billing. Starting your own plan below gives you a separate subscription.
+              </p>
+            ) : null}
 
             {subscription?.status === "past_due" ? (
               <p className="rounded-sm border border-destructive/40 bg-destructive/10 p-3 text-sm">

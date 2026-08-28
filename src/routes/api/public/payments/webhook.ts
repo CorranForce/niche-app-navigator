@@ -56,6 +56,21 @@ async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
     .eq("environment", env);
 }
 
+async function refreshPeriodFromTransaction(data: any, env: PaddleEnv) {
+  const subscriptionId = data?.subscriptionId;
+  const period = data?.billingPeriod;
+  if (!subscriptionId || !period?.endsAt) return;
+  await getSupabase()
+    .from("subscriptions")
+    .update({
+      current_period_start: period.startsAt ?? null,
+      current_period_end: period.endsAt,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("paddle_subscription_id", subscriptionId)
+    .eq("environment", env);
+}
+
 async function handleWebhook(req: Request, env: PaddleEnv) {
   const event = await verifyWebhook(req, env);
 
@@ -70,6 +85,9 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
       await handleSubscriptionCanceled(event.data, env);
       break;
     case EventName.TransactionCompleted: {
+      // A renewal payment also refreshes the billing period, so keep the row in
+      // step even if the matching subscription.updated event is delayed.
+      await refreshPeriodFromTransaction(event.data, env);
       const { sendInvoiceEmail } = await import("@/lib/billing-emails.server");
       await sendInvoiceEmail(event.data, env);
       break;
@@ -79,8 +97,22 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
       await sendPaymentFailedEmail(event.data, env);
       break;
     }
-    default:
+    default: {
+      // Lifecycle events that only change status/period reuse the update path.
+      const lifecycle = new Set([
+        "subscription.activated",
+        "subscription.trialing",
+        "subscription.past_due",
+        "subscription.paused",
+        "subscription.resumed",
+        "subscription.imported",
+      ]);
+      if (lifecycle.has(event.eventType as string)) {
+        await handleSubscriptionUpdated(event.data, env);
+        break;
+      }
       console.log("Unhandled event:", event.eventType);
+    }
   }
 }
 
