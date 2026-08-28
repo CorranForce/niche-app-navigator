@@ -9,6 +9,7 @@
  *   PAYMENTS_SANDBOX_WEBHOOK_SECRET  signing secret for the sandbox webhook
  *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   to read back the persisted row
  *   SMOKE_TEST_USER_ID               app user the synthetic subscription belongs to
+ *   CHECKOUT_SIGNING_SECRET          signing key for server-minted checkout intents
  */
 import { createHmac } from "node:crypto";
 
@@ -49,7 +50,24 @@ function entitlement(status, productId, periodEnd) {
   return { plan, limit: limits[plan] };
 }
 
-function trialEvent(tier, userId, subId) {
+/** Mirrors src/lib/checkout-token.server.ts — the only trusted source of ownership. */
+function signCheckoutToken(uid, secret, price) {
+  const iat = Math.floor(Date.now() / 1000);
+  const body = Buffer.from(JSON.stringify({ uid, price, env: "sandbox", iat, exp: iat + 3600 }))
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  const sig = createHmac("sha256", secret)
+    .update(body)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  return `${body}.${sig}`;
+}
+
+function trialEvent(tier, userId, subId, customData) {
   const now = new Date();
   const trialEnd = new Date(now.getTime() + 7 * 86400000);
   return {
@@ -60,7 +78,7 @@ function trialEvent(tier, userId, subId) {
       id: subId,
       customer_id: "ctm_smoke_test",
       status: "trialing",
-      custom_data: { userId },
+      custom_data: customData ?? { userId },
       currency_code: "USD",
       collection_mode: "automatic",
       billing_cycle: { interval: "month", frequency: 1 },
