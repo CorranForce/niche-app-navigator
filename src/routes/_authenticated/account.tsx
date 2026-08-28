@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { BillingManager } from "@/components/billing-manager";
+import { TeamManager } from "@/components/team-manager";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
@@ -172,6 +173,7 @@ function AccountPage() {
 
         <div className="mt-12 border-t border-border pt-10">
           <BillingManager />
+        <TeamManager />
         </div>
       </main>
     </div>
