@@ -125,7 +125,7 @@ export const changePlan = createServerFn({ method: "POST" })
     const currentIsYearly = (target.price_id ?? "").endsWith("_yearly");
     if (data.priceId.endsWith("_yearly") !== currentIsYearly) {
       throw new Error(
-        `Your subscription bills ${currentIsYearly ? "yearly" : "monthly"}. To switch billing periods, cancel your current plan and start a new one when it ends.`,
+        `Your subscription bills ${currentIsYearly ? "yearly" : "monthly"}. Use "Switch billing period" to move to ${currentIsYearly ? "monthly" : "yearly"} billing.`,
       );
     }
 
