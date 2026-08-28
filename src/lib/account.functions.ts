@@ -29,7 +29,7 @@ export const ensureAccount = createServerFn({ method: "POST" })
     const { effectiveEntitlement } = await import("@/lib/entitlement");
     const { supabase, userId, claims } = context;
 
-    const planFor = async () => (await effectiveEntitlement(supabase)).plan;
+    const planFor = async () => (await effectiveEntitlement(userId)).plan;
 
     const c = claims as { email?: string; user_metadata?: Record<string, unknown> } | undefined;
     const rawEmail = typeof c?.email === "string" ? c.email.trim() : "";
