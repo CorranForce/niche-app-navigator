@@ -11,7 +11,7 @@ export type OwnerOverview = {
   recentReports: Array<{ id: string; niche: string; createdAt: string | null }>;
 };
 
-const PLAN_PRICE_CENTS: Record<string, number> = { pro: 1900, studio: 4900 };
+const PLAN_PRICE_CENTS: Record<string, number> = { solo: 900, pro: 1900, studio: 4900 };
 
 /** Owner-only aggregate snapshot of accounts, revenue, usage and auth health. */
 export const getOwnerOverview = createServerFn({ method: "GET" })
@@ -67,7 +67,7 @@ export const getOwnerOverview = createServerFn({ method: "GET" })
       const sub = latest.get(p.id) ?? null;
       const plan = entitledPlan(sub);
       plans[plan] += 1;
-      if (plan !== "free") mrrCents += PLAN_PRICE_CENTS[plan] ?? 0;
+      if (plan !== "none") mrrCents += PLAN_PRICE_CENTS[plan] ?? 0;
       if (isPastDue(sub?.status)) pastDue += 1;
       if (sub?.cancel_at_period_end) cancelScheduled += 1;
     }

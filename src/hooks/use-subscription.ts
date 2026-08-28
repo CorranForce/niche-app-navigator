@@ -44,8 +44,8 @@ export function useSubscription() {
   return {
     subscription: sub,
     plan,
-    /** True when the account currently has paid entitlements (past_due is restricted to Free). */
-    isActive: plan !== "free",
+    /** True when the account currently has paid entitlements (past_due is restricted to no access). */
+    isActive: plan !== "none",
     /** True when the subscription exists in Paddle but is not currently granting access. */
     isPastDue: pastDue,
     monthlyLimit: limitForPlan(plan),
