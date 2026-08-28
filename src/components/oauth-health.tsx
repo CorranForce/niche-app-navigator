@@ -98,11 +98,15 @@ export function OAuthHealthSection() {
               key={r}
               size="sm"
               variant={r === days ? "default" : "outline"}
-              onClick={() => setDays(r)}
+              onClick={() => {
+                setDays(r);
+                setPage(0);
+              }}
             >
               {r}d
             </Button>
           ))}
+
         </div>
       </div>
 
