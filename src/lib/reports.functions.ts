@@ -16,7 +16,8 @@ export const generateReport = createServerFn({ method: "POST" })
     const { streamText, Output, NoObjectGeneratedError } = await import("ai");
     const { createLovableResponsesProvider } = await import("@/lib/ai-gateway.server");
     const { SYSTEM_PROMPT, buildUserPrompt } = await import("@/lib/report-prompt.server");
-    const { entitledPlan, limitForPlan, PLAN_LABELS } = await import("@/lib/plan-limits");
+    const { entitledPlan, limitForPlan, planFeatures, PLAN_LABELS, STANDARD_QUEUE_COOLDOWN_SECONDS } =
+      await import("@/lib/plan-limits");
 
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured for this project yet.");
@@ -42,15 +43,50 @@ export const generateReport = createServerFn({ method: "POST" })
 
     const plan = entitledPlan(sub);
     const limit = limitForPlan(plan);
+    const features = planFeatures(plan);
+
+    if (!features.generate) {
+      throw new Error(
+        sub?.status === "past_due"
+          ? "Your last payment failed, so report generation is paused. Update your payment method on the billing page to continue."
+          : "Start a plan to generate reports — every plan includes a 7-day free trial. Pick one on the billing page.",
+      );
+    }
 
     if (limit !== null && (count ?? 0) >= limit) {
       throw new Error(
-        sub?.status === "past_due"
-          ? `Your last payment failed, so you're limited to ${limit} reports this month. Update your payment method on the billing page to restore your plan.`
-          : plan === "free"
-            ? `You've used all ${limit} free reports this month. Upgrade to Pro for ${limitForPlan("pro")} reports a month, or Studio for unlimited.`
-            : `You've used all ${limit} reports on the ${PLAN_LABELS[plan]} plan this month. Upgrade to Studio for unlimited reports.`,
+        `You've used all ${limit} reports on the ${PLAN_LABELS[plan]} plan this month. ${
+          plan === "solo"
+            ? "Upgrade to Pro for 50 reports a month, or Studio for unlimited."
+            : "Upgrade to Studio for unlimited reports."
+        }`,
       );
+    }
+
+    // Priority queue: Pro and Studio skip the standard cooldown between generations.
+    let teamId: string | null = null;
+    if (!features.priorityQueue) {
+      const { data: last } = await context.supabase
+        .from("reports")
+        .select("created_at")
+        .eq("user_id", context.userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const lastAt = last?.created_at ? new Date(last.created_at as string).getTime() : 0;
+      const waited = (Date.now() - lastAt) / 1000;
+      if (lastAt && waited < STANDARD_QUEUE_COOLDOWN_SECONDS) {
+        throw new Error(
+          `You're in the standard generation queue — try again in ${Math.ceil(
+            STANDARD_QUEUE_COOLDOWN_SECONDS - waited,
+          )}s. Pro and Studio plans skip the queue.`,
+        );
+      }
+    }
+
+    if (features.team) {
+      const { ensureTeamForOwner } = await import("@/lib/teams.server");
+      teamId = await ensureTeamForOwner(context.supabase, context.userId);
     }
 
     const provider = createLovableResponsesProvider(apiKey);
@@ -65,7 +101,7 @@ export const generateReport = createServerFn({ method: "POST" })
         providerOptions: {
           openai: {
             forceReasoning: true,
-            reasoningEffort: "low",
+            reasoningEffort: features.priorityQueue ? "medium" : "low",
             reasoningSummary: "auto",
             store: false,
           },
@@ -94,6 +130,7 @@ export const generateReport = createServerFn({ method: "POST" })
         audience: data.audience,
         budget: data.budget,
         payload,
+        team_id: teamId,
       })
       .select("id")
       .single();

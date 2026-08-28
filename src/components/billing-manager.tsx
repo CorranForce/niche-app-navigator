@@ -198,8 +198,7 @@ You don't have an active plan yet. Every plan starts with a 7-day free trial —
                   </li>
                 ))}
               </ul>
-              {(
-                <Button
+              <Button
                   className="mt-2"
                   variant={isCurrent ? "outline" : "default"}
                   disabled={isCurrent || busy !== null}
@@ -211,8 +210,7 @@ You don't have an active plan yet. Every plan starts with a 7-day free trial —
                     : isActive
                       ? `Switch to ${p.name}`
                       : `Start ${p.name} — 7-day trial`}
-                </Button>
-              )}
+              </Button>
             </Card>
           );
         })}
