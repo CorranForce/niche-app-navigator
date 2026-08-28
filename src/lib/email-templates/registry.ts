@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 import { template as paymentFailedTemplate } from "./payment-failed";
 import { template as invoiceReceiptTemplate } from "./invoice-receipt";
 import { template as systemAlertTemplate } from "./system-alert";
+import { template as subscriptionChangedTemplate } from "./subscription-changed";
 
 export interface TemplateEntry {
   component: ComponentType<any>;
@@ -26,4 +27,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   "payment-failed": paymentFailedTemplate,
   "invoice-receipt": invoiceReceiptTemplate,
   "system-alert": systemAlertTemplate,
+  "subscription-changed": subscriptionChangedTemplate,
 };

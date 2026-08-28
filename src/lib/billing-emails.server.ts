@@ -93,3 +93,72 @@ export async function sendPaymentFailedEmail(data: any, env: PaddleEnv) {
     },
   });
 }
+
+export type SubscriptionChangeKind =
+  | "plan_changed"
+  | "cancellation_scheduled"
+  | "canceled"
+  | "resumed"
+  | "paused"
+  | "past_due";
+
+const CHANGE_COPY: Record<SubscriptionChangeKind, { headline: string; summary: string }> = {
+  plan_changed: {
+    headline: "Your plan change is confirmed",
+    summary:
+      "We updated your subscription. Plan changes take effect at your next renewal, and you keep your current limits until then.",
+  },
+  cancellation_scheduled: {
+    headline: "Your subscription is scheduled to end",
+    summary:
+      "You cancelled your plan. You keep full access until the end of the period you already paid for, and you can resume any time before then.",
+  },
+  canceled: {
+    headline: "Your subscription has ended",
+    summary: "Your plan is now cancelled and no further charges will be made.",
+  },
+  resumed: {
+    headline: "Your subscription is active again",
+    summary: "We resumed your plan — it will keep renewing on your normal billing date.",
+  },
+  paused: {
+    headline: "Your subscription is paused",
+    summary: "Billing is paused, so report generation is unavailable until you resume.",
+  },
+  past_due: {
+    headline: "Your subscription is past due",
+    summary:
+      "We couldn't take your latest payment, so access is restricted until the payment succeeds.",
+  },
+};
+
+/**
+ * Confirmation email for any change to a subscription that isn't a charge —
+ * plan switches, cancellations, pauses and resumes. Charges themselves are
+ * covered by the invoice receipt.
+ */
+export async function sendSubscriptionChangeEmail(
+  data: any,
+  env: PaddleEnv,
+  kind: SubscriptionChangeKind,
+  occurredAt: string,
+) {
+  const customer = await resolveCustomer(data?.customerId, env);
+  if (!customer) return;
+  const copy = CHANGE_COPY[kind];
+
+  await sendTemplateEmail("subscription-changed", customer.email, {
+    idempotencyKey: `subscription-${kind}-${data?.id}-${occurredAt}`,
+    templateData: {
+      headline: copy.headline,
+      summary: copy.summary,
+      planName: customer.planName,
+      status: data?.status ?? undefined,
+      effectiveAt:
+        day(data?.scheduledChange?.effectiveAt) ??
+        day(data?.currentBillingPeriod?.endsAt) ??
+        customer.nextRenewalAt,
+      billingUrl: `${APP_URL}/account#billing`,
+    },
+  });
+}
