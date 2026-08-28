@@ -14,7 +14,16 @@ import {
   createCheckoutIntent,
   createPortalSession,
   resumeSubscription,
+  switchBillingPeriod,
 } from "@/lib/payments.functions";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { PLAN_RANK, type PlanId } from "@/lib/plan-limits";
 
 function formatDate(value: string | null | undefined) {
@@ -33,23 +42,26 @@ export function BillingManager() {
   const { openCheckout } = usePaddleCheckout();
   const [intervalPref, setInterval] = useState<"monthly" | "yearly" | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [pendingSwitch, setPendingSwitch] = useState<{
+    planId: string;
+    planName: string;
+    priceId: string;
+  } | null>(null);
 
   const doChangePlan = useServerFn(changePlan);
   const doCancel = useServerFn(cancelSubscription);
   const doResume = useServerFn(resumeSubscription);
   const doPortal = useServerFn(createPortalSession);
+  const doSwitchPeriod = useServerFn(switchBillingPeriod);
   const doCheckoutIntent = useServerFn(createCheckoutIntent);
 
   const currentPlan = PLANS.find((p) => p.id === plan) ?? null;
   const activeInterval: "monthly" | "yearly" = subscription?.price_id?.endsWith("_yearly")
     ? "yearly"
     : "monthly";
-  // A live subscription can only move between plans on its own billing cycle,
-  // so lock the toggle to the cycle the customer is actually billed on.
-  const intervalLocked = Boolean(isActive && subscription);
-  const interval: "monthly" | "yearly" = intervalLocked
-    ? activeInterval
-    : (intervalPref ?? "monthly");
+  // The toggle stays usable on a live subscription: picking the other cycle
+  // routes through the switch flow instead of an in-place plan change.
+  const interval: "monthly" | "yearly" = intervalPref ?? (subscription ? activeInterval : "monthly");
   const endsSoon = Boolean(
     subscription?.cancel_at_period_end && subscription.status !== "canceled",
   );
@@ -65,6 +77,10 @@ export function BillingManager() {
         )}, then the new price applies. No partial refund is issued for the current period.`,
       );
       if (!ok) return;
+    }
+    if (isActive && subscription && interval !== activeInterval) {
+      setPendingSwitch({ planId, planName: planId, priceId });
+      return;
     }
     setBusy(planId);
     try {
@@ -235,12 +251,6 @@ export function BillingManager() {
             <button
               key={i}
               type="button"
-              disabled={intervalLocked && i !== activeInterval}
-              title={
-                intervalLocked && i !== activeInterval
-                  ? "Cancel your current plan to switch billing periods."
-                  : undefined
-              }
               onClick={() => setInterval(i)}
               className={`label-mono rounded-sm px-3 py-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                 interval === i ? "bg-primary text-primary-foreground" : "text-muted-foreground"
@@ -251,10 +261,11 @@ export function BillingManager() {
           ))}
         </div>
       </div>
-      {intervalLocked && (
+      {isActive && subscription && interval !== activeInterval && (
         <p className="mt-2 text-sm text-muted-foreground">
-          You&apos;re billed {activeInterval === "yearly" ? "yearly" : "monthly"}. Plan changes stay
-          on this billing period — to switch, cancel and start a new plan when this one ends.
+          You&apos;re billed {activeInterval === "yearly" ? "yearly" : "monthly"} today. Choosing a
+          plan here switches you to {interval} billing — we&apos;ll ask whether to switch now or when
+          your current period ends.
         </p>
       )}
 
