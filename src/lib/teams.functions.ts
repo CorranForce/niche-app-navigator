@@ -20,12 +20,9 @@ export type TeamState = {
   members: TeamMemberRow[];
 };
 
-async function entitlementFor(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
-) {
+async function entitlementFor(userId: string) {
   const { effectiveEntitlement } = await import("@/lib/entitlement");
-  return effectiveEntitlement(supabase);
+  return effectiveEntitlement(userId);
 }
 
 /** Studio workspace state: seats, members and whether the caller owns it. */
@@ -34,7 +31,7 @@ export const getTeam = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<TeamState> => {
     const { STUDIO_SEATS } = await import("@/lib/plan-limits");
     const { ensureTeamForOwner, teamIdsForUser } = await import("@/lib/teams.server");
-    const entitlement = await entitlementFor(context.supabase);
+    const entitlement = await entitlementFor(context.userId);
     const features = entitlement.features;
     // Only the paying owner gets a workspace created for them; invited members
     // inherit Studio access but must not spawn a second workspace.
@@ -91,7 +88,7 @@ export const inviteTeammate = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { STUDIO_SEATS } = await import("@/lib/plan-limits");
     const { ensureTeamForOwner } = await import("@/lib/teams.server");
-    const entitlement = await entitlementFor(context.supabase);
+    const entitlement = await entitlementFor(context.userId);
     if (!entitlement.features.team || entitlement.source !== "own") {
       throw new Error("Team seats are part of the Studio plan. Upgrade to invite teammates.");
     }
