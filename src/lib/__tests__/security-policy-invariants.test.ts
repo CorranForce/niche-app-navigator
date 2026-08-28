@@ -129,8 +129,11 @@ describe("paddle_customdata_trust", () => {
   });
 
   it("does not trust raw custom_data for user attribution", () => {
+    // strip comments: prose may mention the untrusted field, code may not use it
+    const stripComments = (s: string) =>
+      s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
     for (const src of [webhook, apply]) {
-      expect(src).not.toMatch(/custom_?[Dd]ata\??\.\s*user_?[Ii]d/);
+      expect(stripComments(src)).not.toMatch(/custom_?[Dd]ata\??\.\s*user_?[Ii]d/);
     }
   });
 });
