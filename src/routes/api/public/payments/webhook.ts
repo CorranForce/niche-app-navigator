@@ -16,7 +16,26 @@ function getSupabase() {
 
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const { subscriptionRowFromEvent } = await import("@/lib/webhook-entitlement");
-  const mapped = subscriptionRowFromEvent(data, env);
+  const { verifyCheckoutIntent } = await import("@/lib/checkout-token.server");
+
+  // The account a subscription belongs to comes from the server-signed checkout
+  // intent only. `customData.userId` is attacker-controllable and is ignored,
+  // otherwise anyone could pay while tagging the purchase to another account.
+  const verified = verifyCheckoutIntent(data?.customData?.checkoutToken);
+  if (!verified.ok) {
+    const { recordSystemEvent } = await import("@/lib/monitoring.server");
+    await recordSystemEvent({
+      source: "webhook",
+      severity: "critical",
+      event: "paddle.checkout_intent_rejected",
+      message: `Subscription webhook without a valid checkout intent (${verified.reason}).`,
+      context: { env, subscriptionId: data?.id ?? null, customerId: data?.customerId ?? null },
+    });
+    console.warn("Skipping subscription webhook: unverified checkout intent");
+    return;
+  }
+
+  const mapped = subscriptionRowFromEvent(data, env, { userId: verified.intent.uid });
   if (!mapped.ok) {
     console.warn("Skipping subscription webhook:", mapped.reason);
     return;

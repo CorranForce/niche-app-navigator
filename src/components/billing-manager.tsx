@@ -8,7 +8,12 @@ import { useSession } from "@/hooks/use-session";
 import { useSubscription } from "@/hooks/use-subscription";
 import { usePaddleCheckout } from "@/hooks/use-paddle-checkout";
 import { PLANS } from "@/lib/paddle";
-import { cancelSubscription, changePlan, createPortalSession } from "@/lib/payments.functions";
+import {
+  cancelSubscription,
+  changePlan,
+  createCheckoutIntent,
+  createPortalSession,
+} from "@/lib/payments.functions";
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "—";
@@ -30,6 +35,7 @@ export function BillingManager() {
   const doChangePlan = useServerFn(changePlan);
   const doCancel = useServerFn(cancelSubscription);
   const doPortal = useServerFn(createPortalSession);
+  const doCheckoutIntent = useServerFn(createCheckoutIntent);
 
   const currentPlan = PLANS.find((p) => p.id === plan) ?? null;
   const activeInterval = subscription?.price_id?.endsWith("_yearly") ? "yearly" : "monthly";
@@ -43,10 +49,13 @@ export function BillingManager() {
         toast.success("Plan change scheduled — it takes effect at your next renewal.");
         await refetch();
       } else {
+        // The account a purchase belongs to is decided server-side: we send an
+        // opaque signed token, never a client-chosen user id.
+        const { checkoutToken } = await doCheckoutIntent({ data: { priceId } });
         await openCheckout({
           priceId,
           ...(user?.email ? { customerEmail: user.email } : {}),
-          customData: { userId: user?.id ?? "" },
+          customData: { checkoutToken },
         });
       }
     } catch (error) {
