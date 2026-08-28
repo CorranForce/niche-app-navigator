@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 
@@ -135,6 +136,7 @@ function FaqPage() {
           </Link>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }
