@@ -53,7 +53,9 @@ function entitlement(status, productId, periodEnd) {
 /** Mirrors src/lib/checkout-token.server.ts — the only trusted source of ownership. */
 function signCheckoutToken(uid, secret, price, { ttlSeconds = 3600 } = {}) {
   const iat = Math.floor(Date.now() / 1000);
-  const body = Buffer.from(JSON.stringify({ uid, price, env: "sandbox", iat, exp: iat + ttlSeconds }))
+  const body = Buffer.from(
+    JSON.stringify({ uid, price, env: "sandbox", iat, exp: iat + ttlSeconds }),
+  )
     .toString("base64")
     .replace(/\+/g, "-")
     .replace(/\//g, "_")

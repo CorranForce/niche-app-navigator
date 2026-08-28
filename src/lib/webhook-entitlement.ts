@@ -13,7 +13,6 @@ import {
   type PlanId,
 } from "@/lib/plan-limits";
 
-
 export type SubscriptionEventItem = {
   price?: { id?: string; importMeta?: { externalId?: string | null } | null } | null;
   product?: { id?: string; importMeta?: { externalId?: string | null } | null } | null;
@@ -59,8 +58,7 @@ export type MappingFailureReason =
   | "unknown_product";
 
 export type MappingResult =
-  | { ok: true; row: SubscriptionRowInput }
-  | { ok: false; reason: MappingFailureReason };
+  { ok: true; row: SubscriptionRowInput } | { ok: false; reason: MappingFailureReason };
 
 /** Statuses Paddle can send for a subscription. Anything else is not mapped. */
 export const KNOWN_SUBSCRIPTION_STATUSES = [
@@ -169,7 +167,6 @@ export function shouldApplyEvent(
   if (Number.isNaN(existing)) return true;
   return incoming > existing;
 }
-
 
 export type Entitlement = {
   plan: PlanId;

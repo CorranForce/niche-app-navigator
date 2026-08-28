@@ -85,9 +85,8 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv, occurredAt: 
     return;
   }
 
-  const { shouldApplyEvent, KNOWN_SUBSCRIPTION_STATUSES } = await import(
-    "@/lib/webhook-entitlement"
-  );
+  const { shouldApplyEvent, KNOWN_SUBSCRIPTION_STATUSES } =
+    await import("@/lib/webhook-entitlement");
   if (typeof status !== "string" || !KNOWN_SUBSCRIPTION_STATUSES.includes(status as never)) {
     console.warn("Skipping subscription update with unknown status:", status);
     return;
@@ -150,7 +149,9 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
   // Paddle stamps every event; fall back to arrival time if it is ever absent.
   const rawOccurredAt = (event as any)?.occurredAt ?? (event as any)?.occurred_at;
   const parsed = rawOccurredAt ? Date.parse(rawOccurredAt) : Number.NaN;
-  const occurredAt = Number.isNaN(parsed) ? new Date().toISOString() : new Date(parsed).toISOString();
+  const occurredAt = Number.isNaN(parsed)
+    ? new Date().toISOString()
+    : new Date(parsed).toISOString();
 
   if (!event?.data || typeof event.data !== "object") {
     throw new Error("Webhook payload is missing an event data object");

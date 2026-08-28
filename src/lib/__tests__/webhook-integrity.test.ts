@@ -40,7 +40,8 @@ describe("checkout intent token integrity", () => {
   });
 
   it("rejects a token past its expiry", async () => {
-    const { signCheckoutIntent, verifyCheckoutIntent, CHECKOUT_INTENT_TTL_SECONDS } = await tokens();
+    const { signCheckoutIntent, verifyCheckoutIntent, CHECKOUT_INTENT_TTL_SECONDS } =
+      await tokens();
     const issuedAt = new Date();
     const token = signCheckoutIntent(
       { uid: "user-1", price: "pro_monthly", env: "sandbox" },
@@ -51,7 +52,8 @@ describe("checkout intent token integrity", () => {
   });
 
   it("still accepts a token one second before expiry", async () => {
-    const { signCheckoutIntent, verifyCheckoutIntent, CHECKOUT_INTENT_TTL_SECONDS } = await tokens();
+    const { signCheckoutIntent, verifyCheckoutIntent, CHECKOUT_INTENT_TTL_SECONDS } =
+      await tokens();
     const issuedAt = new Date();
     const token = signCheckoutIntent({ uid: "u", price: "pro_monthly", env: "sandbox" }, issuedAt);
     const justBefore = new Date(issuedAt.getTime() + (CHECKOUT_INTENT_TTL_SECONDS - 1) * 1000);
