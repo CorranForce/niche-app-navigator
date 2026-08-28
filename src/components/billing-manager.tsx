@@ -13,7 +13,9 @@ import {
   changePlan,
   createCheckoutIntent,
   createPortalSession,
+  resumeSubscription,
 } from "@/lib/payments.functions";
+import { PLAN_RANK, type PlanId } from "@/lib/plan-limits";
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "—";
