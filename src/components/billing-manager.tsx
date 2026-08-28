@@ -178,7 +178,14 @@ export function BillingManager() {
               </p>
             ) : null}
 
-            {isActive ? (
+            {endsSoon ? (
+              <p className="rounded-sm border border-border bg-muted/30 p-3 text-sm">
+                Your plan is scheduled to end on {formatDate(subscription?.current_period_end)}. You
+                keep full access until then — resume any time to keep it running.
+              </p>
+            ) : null}
+
+            {isActive || canResume ? (
               <div className="flex flex-wrap gap-2 border-t border-border pt-4">
                 <Button variant="outline" onClick={handlePortal} disabled={busy !== null}>
                   {busy === "portal" ? (
@@ -188,8 +195,16 @@ export function BillingManager() {
                   )}
                   Payment details & invoices
                 </Button>
-                {subscription?.cancel_at_period_end ||
-                subscription?.status === "canceled" ? null : (
+                {canResume ? (
+                  <Button onClick={handleResume} disabled={busy !== null}>
+                    {busy === "resume" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RotateCcw className="h-4 w-4" />
+                    )}
+                    Resume subscription
+                  </Button>
+                ) : subscription?.status === "canceled" ? null : (
                   <Button variant="ghost" onClick={handleCancel} disabled={busy !== null}>
                     {busy === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                     Cancel subscription
@@ -197,6 +212,7 @@ export function BillingManager() {
                 )}
               </div>
             ) : (
+
               <p className="border-t border-border pt-4 text-sm text-muted-foreground">
                 You don't have an active plan yet. Every plan starts with a 7-day free trial — pick
                 one below to start generating reports.
