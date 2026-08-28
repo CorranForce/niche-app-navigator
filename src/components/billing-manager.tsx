@@ -109,6 +109,35 @@ export function BillingManager() {
     }
   }
 
+  async function runSwitch(when: "immediately" | "period_end") {
+    if (!pendingSwitch) return;
+    const { planId, priceId } = pendingSwitch;
+    setBusy(planId);
+    try {
+      const result = await doSwitchPeriod({ data: { priceId, when } });
+      if (result.switched && result.checkoutToken) {
+        setPendingSwitch(null);
+        await openCheckout({
+          priceId,
+          ...(user?.email ? { customerEmail: user.email } : {}),
+          customData: { checkoutToken: result.checkoutToken },
+        });
+      } else {
+        setPendingSwitch(null);
+        toast.success(
+          `Your current plan ends ${formatDate(result.accessUntil)} — come back then to start the ${interval} plan.`,
+        );
+      }
+      await refetch();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not switch your billing period.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function handleCancel() {
     const ok = window.confirm(
       `Cancel your subscription? You keep full access until ${formatDate(
@@ -316,6 +345,44 @@ export function BillingManager() {
           );
         })}
       </div>
+
+      <AlertDialog
+        open={pendingSwitch !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingSwitch(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Switch to {interval} billing?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your subscription bills {activeInterval} and can&apos;t be moved onto a different
+              billing period in place, so we end the current one and start a fresh {interval} plan.
+              Switching now forfeits the remaining time you&apos;ve already paid for
+              {subscription?.current_period_end
+                ? ` (through ${formatDate(subscription.current_period_end)})`
+                : ""}
+              .
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button variant="ghost" onClick={() => setPendingSwitch(null)} disabled={busy !== null}>
+              Keep current plan
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => runSwitch("period_end")}
+              disabled={busy !== null}
+            >
+              Switch when this period ends
+            </Button>
+            <Button onClick={() => runSwitch("immediately")} disabled={busy !== null}>
+              {busy !== null ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Switch now
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
