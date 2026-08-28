@@ -279,6 +279,42 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_replays: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          detail: Json
+          environment: string
+          event_id: string
+          event_type: string | null
+          id: string
+          outcome: string
+          updated_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          detail?: Json
+          environment: string
+          event_id: string
+          event_type?: string | null
+          id?: string
+          outcome?: string
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          detail?: Json
+          environment?: string
+          event_id?: string
+          event_type?: string | null
+          id?: string
+          outcome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

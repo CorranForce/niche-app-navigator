@@ -12,6 +12,7 @@ import { AdminCustomersSection } from "@/components/admin-customers";
 import { AdminEmailLogSection } from "@/components/admin-email-log";
 import { McpStatusSection } from "@/components/mcp-status";
 import { SystemHealthSection } from "@/components/system-health";
+import { WebhookReplaySection } from "@/components/webhook-replay";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -217,6 +218,8 @@ function OwnerDashboardPage() {
         <McpStatusSection />
 
         <SystemHealthSection />
+
+        <WebhookReplaySection />
 
         <AdminEmailLogSection />
       </main>
