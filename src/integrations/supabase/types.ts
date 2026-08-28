@@ -358,6 +358,16 @@ export type Database = {
         Args: { _email: string; _user_id: string }
         Returns: number
       }
+      effective_subscription_for: {
+        Args: { _env: string; _user_id: string }
+        Returns: {
+          current_period_end: string
+          owner_id: string
+          product_id: string
+          source: string
+          status: string
+        }[]
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
@@ -376,16 +386,6 @@ export type Database = {
       is_team_owner: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
-      }
-      my_effective_subscription: {
-        Args: { _env: string }
-        Returns: {
-          current_period_end: string
-          owner_id: string
-          product_id: string
-          source: string
-          status: string
-        }[]
       }
     }
     Enums: {
