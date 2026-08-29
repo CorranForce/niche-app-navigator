@@ -78,15 +78,19 @@ function BillingHistory({ userId }: { userId: string }) {
   );
 }
 
-export function AdminCustomersSection() {
+export function AdminCustomersSection({
+  environment = "sandbox",
+}: {
+  environment?: "sandbox" | "live";
+}) {
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
   const [openUser, setOpenUser] = useState<string | null>(null);
   const search = useServerFn(searchBillingUsers);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["admin-users", query],
-    queryFn: () => search({ data: { query } }),
+    queryKey: ["admin-users", query, environment],
+    queryFn: () => search({ data: { query, environment } }),
     retry: false,
   });
 

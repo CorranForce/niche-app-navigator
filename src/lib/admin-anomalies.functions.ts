@@ -25,9 +25,7 @@ const PLAN_PRICE_CENTS: Record<string, number> = { solo: 900, pro: 1900, studio:
 export const getBillingAnomalies = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) =>
-    z
-      .object({ environment: z.enum(["sandbox", "live"]).default("sandbox") })
-      .parse(raw ?? {}),
+    z.object({ environment: z.enum(["sandbox", "live"]).default("sandbox") }).parse(raw ?? {}),
   )
   .handler(async ({ data, context }): Promise<BillingAnomalies> => {
     const { supabaseAdmin: adminForRole } = await import("@/integrations/supabase/client.server");

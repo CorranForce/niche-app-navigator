@@ -18,9 +18,7 @@ const PLAN_PRICE_CENTS: Record<string, number> = { solo: 900, pro: 1900, studio:
 export const getOwnerOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) =>
-    z
-      .object({ environment: z.enum(["sandbox", "live"]).default("sandbox") })
-      .parse(raw ?? {}),
+    z.object({ environment: z.enum(["sandbox", "live"]).default("sandbox") }).parse(raw ?? {}),
   )
   .handler(async ({ data, context }): Promise<OwnerOverview> => {
     const { supabaseAdmin: adminForRole } = await import("@/integrations/supabase/client.server");
@@ -46,7 +44,9 @@ export const getOwnerOverview = createServerFn({ method: "POST" })
         .order("created_at", { ascending: false }),
       supabaseAdmin
         .from("subscriptions")
-        .select("user_id, product_id, status, current_period_end, cancel_at_period_end, created_at, environment")
+        .select(
+          "user_id, product_id, status, current_period_end, cancel_at_period_end, created_at, environment",
+        )
         .order("created_at", { ascending: false }),
       supabaseAdmin
         .from("reports")
@@ -57,7 +57,9 @@ export const getOwnerOverview = createServerFn({ method: "POST" })
     ]);
 
     const profiles = profilesRes.data ?? [];
-    const subs = (subsRes.data ?? []).filter((s) => (s.environment ?? "sandbox") === data.environment);
+    const subs = (subsRes.data ?? []).filter(
+      (s) => (s.environment ?? "sandbox") === data.environment,
+    );
     const reports = reportsRes.data ?? [];
     const authEvents = authRes.data ?? [];
 

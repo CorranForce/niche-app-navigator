@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -5,6 +6,8 @@ import { Loader2, RefreshCw, ShieldAlert } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
 import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
@@ -53,10 +56,11 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 }
 
 function OwnerDashboardPage() {
+  const [environment, setEnvironment] = useState<"sandbox" | "live">("sandbox");
   const fetchOverview = useServerFn(getOwnerOverview);
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ["owner-overview"],
-    queryFn: () => fetchOverview(),
+    queryKey: ["owner-overview", environment],
+    queryFn: () => fetchOverview({ data: { environment } }),
     retry: false,
   });
 
@@ -71,12 +75,31 @@ function OwnerDashboardPage() {
               Business health across accounts, revenue, usage and sign-in reliability.
             </p>
           </div>
-          <Button
-            variant="ghost"
-            className="ml-auto"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
+          <div className="ml-auto flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-2">
+            <Label
+              htmlFor="data-environment"
+              className={`label-mono cursor-pointer ${
+                environment === "sandbox" ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              Test data
+            </Label>
+            <Switch
+              id="data-environment"
+              checked={environment === "live"}
+              onCheckedChange={(checked) => setEnvironment(checked ? "live" : "sandbox")}
+              aria-label="Toggle between test and live data"
+            />
+            <Label
+              htmlFor="data-environment"
+              className={`label-mono cursor-pointer ${
+                environment === "live" ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              Live data
+            </Label>
+          </div>
+          <Button variant="ghost" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
           </Button>
         </div>
@@ -212,9 +235,9 @@ function OwnerDashboardPage() {
           </>
         ) : null}
 
-        <BillingAnomalies />
+        <BillingAnomalies environment={environment} />
 
-        <AdminCustomersSection />
+        <AdminCustomersSection environment={environment} />
 
         <OAuthHealthSection />
 
