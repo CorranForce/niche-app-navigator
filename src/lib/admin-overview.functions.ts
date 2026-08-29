@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
 
 export type OwnerOverview = {
   users: { total: number; new7d: number; new30d: number; onboarded: number };
@@ -14,9 +15,12 @@ export type OwnerOverview = {
 const PLAN_PRICE_CENTS: Record<string, number> = { solo: 900, pro: 1900, studio: 4900 };
 
 /** Owner-only aggregate snapshot of accounts, revenue, usage and auth health. */
-export const getOwnerOverview = createServerFn({ method: "GET" })
+export const getOwnerOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<OwnerOverview> => {
+  .inputValidator((raw: unknown) =>
+    z.object({ environment: z.enum(["sandbox", "live"]).default("sandbox") }).parse(raw ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<OwnerOverview> => {
     const { supabaseAdmin: adminForRole } = await import("@/integrations/supabase/client.server");
     const { data: isAdmin, error: roleError } = await adminForRole.rpc("has_role", {
       _user_id: context.userId,
@@ -40,7 +44,9 @@ export const getOwnerOverview = createServerFn({ method: "GET" })
         .order("created_at", { ascending: false }),
       supabaseAdmin
         .from("subscriptions")
-        .select("user_id, product_id, status, current_period_end, cancel_at_period_end, created_at")
+        .select(
+          "user_id, product_id, status, current_period_end, cancel_at_period_end, created_at, environment",
+        )
         .order("created_at", { ascending: false }),
       supabaseAdmin
         .from("reports")
@@ -51,7 +57,9 @@ export const getOwnerOverview = createServerFn({ method: "GET" })
     ]);
 
     const profiles = profilesRes.data ?? [];
-    const subs = subsRes.data ?? [];
+    const subs = (subsRes.data ?? []).filter(
+      (s) => (s.environment ?? "sandbox") === data.environment,
+    );
     const reports = reportsRes.data ?? [];
     const authEvents = authRes.data ?? [];
 

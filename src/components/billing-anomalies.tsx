@@ -19,11 +19,15 @@ function tone(severity: "critical" | "warning" | "info") {
 }
 
 /** Highlights unusual MRR movement, failed payments and repeat charge failures. */
-export function BillingAnomalies() {
+export function BillingAnomalies({
+  environment = "sandbox",
+}: {
+  environment?: "sandbox" | "live";
+}) {
   const fetchAnomalies = useServerFn(getBillingAnomalies);
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ["billing-anomalies"],
-    queryFn: () => fetchAnomalies(),
+    queryKey: ["billing-anomalies", environment],
+    queryFn: () => fetchAnomalies({ data: { environment } }),
     retry: false,
   });
 

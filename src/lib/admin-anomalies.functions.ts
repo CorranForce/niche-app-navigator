@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
 
 export type Anomaly = {
   id: string;
@@ -21,9 +22,12 @@ export type BillingAnomalies = {
 const PLAN_PRICE_CENTS: Record<string, number> = { solo: 900, pro: 1900, studio: 4900 };
 
 /** Owner-only billing anomaly detection: MRR swings, failed payments and repeat charge failures. */
-export const getBillingAnomalies = createServerFn({ method: "GET" })
+export const getBillingAnomalies = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<BillingAnomalies> => {
+  .inputValidator((raw: unknown) =>
+    z.object({ environment: z.enum(["sandbox", "live"]).default("sandbox") }).parse(raw ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<BillingAnomalies> => {
     const { supabaseAdmin: adminForRole } = await import("@/integrations/supabase/client.server");
     const { data: isAdmin, error: roleError } = await adminForRole.rpc("has_role", {
       _user_id: context.userId,
@@ -48,7 +52,9 @@ export const getBillingAnomalies = createServerFn({ method: "GET" })
       supabaseAdmin.from("profiles").select("id, email"),
     ]);
 
-    const subs = subsRes.data ?? [];
+    const subs = (subsRes.data ?? []).filter(
+      (s) => (s.environment ?? "sandbox") === data.environment,
+    );
     const emailById = new Map((profilesRes.data ?? []).map((p) => [p.id, p.email ?? null]));
 
     type SubRow = (typeof subs)[number];
@@ -94,8 +100,7 @@ export const getBillingAnomalies = createServerFn({ method: "GET" })
     const repeatFailures: BillingAnomalies["repeatFailures"] = [];
     let paddleError: string | null = null;
 
-    const environment =
-      (subs.find((s) => s.environment)?.environment as "sandbox" | "live" | undefined) ?? "sandbox";
+    const environment = data.environment;
 
     try {
       const { gatewayFetch } = await import("@/lib/paddle.server");
