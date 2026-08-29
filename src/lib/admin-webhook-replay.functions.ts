@@ -67,6 +67,33 @@ export const listWebhookReplays = createServerFn({ method: "POST" })
     }));
   });
 
+export type PaddleEventOption = {
+  eventId: string;
+  eventType: string | null;
+  occurredAt: string | null;
+};
+
+/** Recent Paddle events for the replay dropdown, newest first. */
+export const listRecentPaddleEvents = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z.object({ environment: z.enum(["sandbox", "live"]) }).parse(raw),
+  )
+  .handler(async ({ data, context }): Promise<PaddleEventOption[]> => {
+    await assertAdmin(context.userId);
+    const { gatewayFetch } = await import("@/lib/paddle.server");
+    const res = await gatewayFetch(data.environment, "/events?per_page=20");
+    if (!res.ok) throw new Error("Could not load recent events from the payment provider.");
+    const json = (await res.json()) as {
+      data?: Array<Record<string, unknown>>;
+    };
+    return (json.data ?? []).map((e) => ({
+      eventId: String(e["event_id"] ?? e["eventId"] ?? ""),
+      eventType: (e["event_type"] ?? e["eventType"] ?? null) as string | null,
+      occurredAt: (e["occurred_at"] ?? e["occurredAt"] ?? null) as string | null,
+    })).filter((e) => e.eventId);
+  });
+
 /**
  * Admin-only recovery for a single dropped webhook delivery.
  *
