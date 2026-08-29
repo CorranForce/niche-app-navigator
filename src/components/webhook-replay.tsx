@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -16,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  listRecentPaddleEvents,
   listWebhookReplays,
   reprocessWebhookEvent,
   type ReplayResult,
@@ -47,11 +47,22 @@ export function WebhookReplaySection() {
   const queryClient = useQueryClient();
 
   const fetchReplays = useServerFn(listWebhookReplays);
+  const fetchEvents = useServerFn(listRecentPaddleEvents);
   const runReplay = useServerFn(reprocessWebhookEvent);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-webhook-replays"],
     queryFn: () => fetchReplays(),
+    retry: false,
+  });
+
+  const {
+    data: recentEvents,
+    isLoading: eventsLoading,
+    error: eventsError,
+  } = useQuery({
+    queryKey: ["admin-paddle-events", environment],
+    queryFn: () => fetchEvents({ data: { environment } }),
     retry: false,
   });
 
@@ -91,7 +102,7 @@ export function WebhookReplaySection() {
             e.preventDefault();
             const trimmed = eventId.trim();
             if (!trimmed) {
-              toast.error("Enter the event id from the payment provider.");
+              toast.error("Pick an event from the list.");
               return;
             }
             mutation.mutate({ eventId: trimmed, environment });
@@ -99,20 +110,40 @@ export function WebhookReplaySection() {
         >
           <div className="flex-1 space-y-1.5">
             <Label htmlFor="replay-event-id">Event id</Label>
-            <Input
-              id="replay-event-id"
-              value={eventId}
-              onChange={(e) => setEventId(e.target.value)}
-              placeholder="evt_01h..."
-              autoComplete="off"
-              spellCheck={false}
-            />
+            <Select value={eventId} onValueChange={setEventId}>
+              <SelectTrigger id="replay-event-id">
+                <SelectValue
+                  placeholder={
+                    eventsLoading ? "Loading recent events…" : "Pick a recent event"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {recentEvents?.map((e) => (
+                  <SelectItem key={e.eventId} value={e.eventId}>
+                    <span className="font-mono text-xs">{e.eventId}</span>
+                    <span className="ml-2 text-muted-foreground">
+                      {e.eventType ?? "unknown"}
+                      {e.occurredAt ? ` · ${when(e.occurredAt)}` : ""}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {eventsError ? (
+              <p className="text-xs text-destructive">
+                {(eventsError as Error).message}
+              </p>
+            ) : null}
           </div>
           <div className="space-y-1.5 sm:w-40">
             <Label htmlFor="replay-env">Environment</Label>
             <Select
               value={environment}
-              onValueChange={(v) => setEnvironment(v as "sandbox" | "live")}
+              onValueChange={(v) => {
+                setEnvironment(v as "sandbox" | "live");
+                setEventId("");
+              }}
             >
               <SelectTrigger id="replay-env">
                 <SelectValue />
