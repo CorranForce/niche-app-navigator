@@ -39,7 +39,12 @@ async function assertAdmin(userId: string) {
 export const searchBillingUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ query: z.string().max(120).default("") }).parse(input ?? {}),
+    z
+      .object({
+        query: z.string().max(120).default(""),
+        environment: z.enum(["sandbox", "live"]).default("sandbox"),
+      })
+      .parse(input ?? {}),
   )
   .handler(async ({ data, context }): Promise<AdminUserRow[]> => {
     const supabaseAdmin = await assertAdmin(context.userId);
@@ -72,6 +77,7 @@ export const searchBillingUsers = createServerFn({ method: "POST" })
     type SubRow = NonNullable<typeof subs>[number];
     const latest = new Map<string, SubRow>();
     for (const s of subs ?? []) {
+      if ((s.environment ?? "sandbox") !== data.environment) continue;
       if (!latest.has(s.user_id)) latest.set(s.user_id, s);
     }
 
