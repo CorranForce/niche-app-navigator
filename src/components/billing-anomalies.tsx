@@ -26,7 +26,7 @@ export function BillingAnomalies({
   environment?: "sandbox" | "live";
 }) {
   const fetchAnomalies = useServerFn(getBillingAnomalies);
-  const { data, isLoading, isFetching, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, error, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["billing-anomalies", environment],
     queryFn: () => fetchAnomalies({ data: { environment } }),
     retry: false,
@@ -36,21 +36,21 @@ export function BillingAnomalies({
     <section id="billing-anomalies" className="mt-10 scroll-mt-24">
       <div className="flex items-center gap-3">
         <h2 className="text-lg font-semibold tracking-tight">Billing anomalies</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-auto"
-          onClick={() => refetch()}
-          disabled={isFetching}
-        >
+        <LastRefreshed at={dataUpdatedAt || null} isLoading={isFetching} className="ml-auto" />
+        <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
           <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
         </Button>
       </div>
 
       {error ? (
-        <Card className="mt-4 border-destructive/40 bg-destructive/10 p-4 text-sm">
-          {(error as Error).message}
-        </Card>
+        <div className="mt-4">
+          <AdminSectionError
+            title="Billing anomalies didn't load"
+            error={error}
+            onRetry={() => void refetch()}
+            isRetrying={isFetching}
+          />
+        </div>
       ) : isLoading ? (
         <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Checking revenue and charge health…
