@@ -43,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
     ],
   }),
   component: OwnerDashboardPage,
+  errorComponent: AdminErrorFallback,
 });
 
 function money(cents: number) {
