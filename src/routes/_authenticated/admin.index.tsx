@@ -218,10 +218,14 @@ function OwnerDashboardPage() {
 
 
         {error ? (
-          <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
-            <ShieldAlert className="h-4 w-4 text-destructive" />
-            {(error as Error).message}
-          </Card>
+          <div className="mt-6">
+            <AdminSectionError
+              title="Overview stats didn't load"
+              error={error}
+              onRetry={() => void refetch()}
+              isRetrying={isFetching}
+            />
+          </div>
         ) : null}
 
         {isLoading ? (
