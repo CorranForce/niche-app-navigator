@@ -149,10 +149,20 @@ function OwnerDashboardPage() {
               Live data
             </Label>
           </div>
-          <Button variant="ghost" onClick={() => void refreshEnvironmentData()} disabled={busy}>
-            <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} /> Refresh data
-          </Button>
+          <div className="flex items-center gap-2">
+            {busy ? (
+              <span className="label-mono flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Refreshing…
+              </span>
+            ) : (
+              <LastRefreshed at={lastRefreshedAt ?? dataUpdatedAt ?? null} />
+            )}
+            <Button variant="ghost" onClick={() => void refreshEnvironmentData()} disabled={busy}>
+              <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} /> Refresh data
+            </Button>
+          </div>
         </div>
+
 
         <Card
           className={`mt-4 flex-row items-center gap-3 p-4 ${
