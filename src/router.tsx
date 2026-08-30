@@ -1,6 +1,41 @@
 import { QueryClient } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
+import { createRouter, Link } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+
+// Last-resort fallback for any route whose lazy chunk fails to resolve (e.g. a
+// stale hashed asset after a deploy). The reload-once handler below usually
+// recovers first; this guarantees the route never renders a blank screen.
+function DefaultRouteError({ reset }: { error: unknown; reset: () => void }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center px-4 py-16">
+      <div className="w-full max-w-sm space-y-4 text-center">
+        <h1 className="text-xl font-semibold">This page failed to load</h1>
+        <p className="text-sm text-muted-foreground">
+          This usually happens right after an update. Reloading fixes it.
+        </p>
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            className="text-sm font-medium underline underline-offset-4"
+            onClick={() => reset()}
+          >
+            Try again
+          </button>
+          <button
+            type="button"
+            className="text-sm text-muted-foreground underline underline-offset-4"
+            onClick={() => window.location.reload()}
+          >
+            Reload page
+          </button>
+          <Link to="/" className="text-sm text-muted-foreground underline underline-offset-4">
+            Back to home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // After a new deploy, old hashed chunks disappear. A stale tab then fails to
 // lazy-load a route module and renders a blank screen. Reload once to pick up
