@@ -11,9 +11,14 @@ function isStaleChunkError(message: string) {
   return (
     /Failed to fetch dynamically imported module/i.test(message) ||
     /error loading dynamically imported module/i.test(message) ||
-    /Importing a module script failed/i.test(message)
+    /Importing a module script failed/i.test(message) ||
+    // A stale hashed chunk can also resolve to an empty module, so the router
+    // reads `.component` off undefined instead of throwing a fetch error.
+    /reading 'component'/i.test(message) ||
+    /undefined is not an object \(evaluating '.*\.component'\)/i.test(message)
   );
 }
+
 
 function reloadOnce() {
   const last = Number(sessionStorage.getItem(RELOAD_KEY) ?? 0);
