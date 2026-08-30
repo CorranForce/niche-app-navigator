@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FlaskConical, Loader2, RefreshCw, ShieldAlert, Zap } from "lucide-react";
+import { FlaskConical, Loader2, RefreshCw, Zap } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AdminErrorFallback } from "@/components/admin-error-fallback";
+import { AdminSectionError, LastRefreshed } from "@/components/admin-section-error";
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
 import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
@@ -79,9 +80,10 @@ function OwnerDashboardPage() {
   const [environment, setEnvironment] = useState<"sandbox" | "live">("sandbox");
   const [pendingEnvironment, setPendingEnvironment] = useState<"sandbox" | "live" | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const fetchOverview = useServerFn(getOwnerOverview);
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, isFetching, error, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["owner-overview", environment],
     queryFn: () => fetchOverview({ data: { environment } }),
     retry: false,
@@ -97,6 +99,7 @@ function OwnerDashboardPage() {
           queryClient.refetchQueries({ queryKey: [key], type: "active" }),
         ),
       );
+      setLastRefreshedAt(Date.now());
     } finally {
       setIsRefreshing(false);
     }
@@ -146,10 +149,20 @@ function OwnerDashboardPage() {
               Live data
             </Label>
           </div>
-          <Button variant="ghost" onClick={() => void refreshEnvironmentData()} disabled={busy}>
-            <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} /> Refresh data
-          </Button>
+          <div className="flex items-center gap-2">
+            {busy ? (
+              <span className="label-mono flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Refreshing…
+              </span>
+            ) : (
+              <LastRefreshed at={lastRefreshedAt ?? dataUpdatedAt ?? null} />
+            )}
+            <Button variant="ghost" onClick={() => void refreshEnvironmentData()} disabled={busy}>
+              <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} /> Refresh data
+            </Button>
+          </div>
         </div>
+
 
         <Card
           className={`mt-4 flex-row items-center gap-3 p-4 ${
@@ -205,10 +218,14 @@ function OwnerDashboardPage() {
 
 
         {error ? (
-          <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
-            <ShieldAlert className="h-4 w-4 text-destructive" />
-            {(error as Error).message}
-          </Card>
+          <div className="mt-6">
+            <AdminSectionError
+              title="Overview stats didn't load"
+              error={error}
+              onRetry={() => void refetch()}
+              isRetrying={isFetching}
+            />
+          </div>
         ) : null}
 
         {isLoading ? (
