@@ -80,9 +80,10 @@ function OwnerDashboardPage() {
   const [environment, setEnvironment] = useState<"sandbox" | "live">("sandbox");
   const [pendingEnvironment, setPendingEnvironment] = useState<"sandbox" | "live" | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const fetchOverview = useServerFn(getOwnerOverview);
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, isFetching, error, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["owner-overview", environment],
     queryFn: () => fetchOverview({ data: { environment } }),
     retry: false,
@@ -98,6 +99,7 @@ function OwnerDashboardPage() {
           queryClient.refetchQueries({ queryKey: [key], type: "active" }),
         ),
       );
+      setLastRefreshedAt(Date.now());
     } finally {
       setIsRefreshing(false);
     }
