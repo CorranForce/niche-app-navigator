@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AdminSectionError, LastRefreshed } from "@/components/admin-section-error";
 import { getBillingAnomalies } from "@/lib/admin-anomalies.functions";
 
 function fmtWhen(value: string | null) {
