@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminErrorFallback } from "@/components/admin-error-fallback";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Loader2, RefreshCw, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/admin/security")({
     ],
   }),
   component: SecurityStatusPage,
+  errorComponent: AdminErrorFallback,
 });
 
 function SecurityStatusPage() {
