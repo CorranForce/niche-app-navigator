@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2, RefreshCw, ShieldAlert } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { FlaskConical, Loader2, RefreshCw, ShieldAlert, Zap } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AdminErrorFallback } from "@/components/admin-error-fallback";
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
 import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
@@ -32,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
     ],
   }),
   component: OwnerDashboardPage,
+  errorComponent: AdminErrorFallback,
 });
 
 function money(cents: number) {
@@ -55,14 +67,49 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
   );
 }
 
+const ENVIRONMENT_QUERY_KEYS = [
+  "owner-overview",
+  "billing-anomalies",
+  "admin-users",
+  "admin-paddle-events",
+  "admin-webhook-replays",
+];
+
 function OwnerDashboardPage() {
   const [environment, setEnvironment] = useState<"sandbox" | "live">("sandbox");
+  const [pendingEnvironment, setPendingEnvironment] = useState<"sandbox" | "live" | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
   const fetchOverview = useServerFn(getOwnerOverview);
-  const { data, isLoading, isFetching, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["owner-overview", environment],
     queryFn: () => fetchOverview({ data: { environment } }),
     retry: false,
   });
+
+  const isLive = environment === "live";
+
+  async function refreshEnvironmentData() {
+    setIsRefreshing(true);
+    try {
+      await Promise.all(
+        ENVIRONMENT_QUERY_KEYS.map((key) =>
+          queryClient.refetchQueries({ queryKey: [key], type: "active" }),
+        ),
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
+
+  function applyEnvironment(next: "sandbox" | "live") {
+    setEnvironment(next);
+    setPendingEnvironment(null);
+    // Re-fetch after React commits the new environment so keys are current.
+    setTimeout(() => void refreshEnvironmentData(), 0);
+  }
+
+  const busy = isFetching || isRefreshing;
 
   return (
     <div className="min-h-screen">
@@ -87,7 +134,7 @@ function OwnerDashboardPage() {
             <Switch
               id="data-environment"
               checked={environment === "live"}
-              onCheckedChange={(checked) => setEnvironment(checked ? "live" : "sandbox")}
+              onCheckedChange={(checked) => setPendingEnvironment(checked ? "live" : "sandbox")}
               aria-label="Toggle between test and live data"
             />
             <Label
@@ -99,10 +146,63 @@ function OwnerDashboardPage() {
               Live data
             </Label>
           </div>
-          <Button variant="ghost" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+          <Button variant="ghost" onClick={() => void refreshEnvironmentData()} disabled={busy}>
+            <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} /> Refresh data
           </Button>
         </div>
+
+        <Card
+          className={`mt-4 flex-row items-center gap-3 p-4 ${
+            isLive
+              ? "border-destructive/40 bg-destructive/10"
+              : "border-primary/40 bg-primary/10"
+          }`}
+        >
+          {isLive ? (
+            <Zap className="h-4 w-4 shrink-0 text-destructive" />
+          ) : (
+            <FlaskConical className="h-4 w-4 shrink-0 text-primary" />
+          )}
+          <div className="text-sm">
+            <p className="font-medium">
+              {isLive ? "Live payment environment" : "Test payment environment"}
+            </p>
+            <p className="text-muted-foreground">
+              {isLive
+                ? "Showing real customers, real charges and live subscription data."
+                : "Showing sandbox customers and test-mode payments only — no real money involved."}
+            </p>
+          </div>
+        </Card>
+
+        <AlertDialog
+          open={pendingEnvironment !== null}
+          onOpenChange={(open) => {
+            if (!open) setPendingEnvironment(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {pendingEnvironment === "live" ? "Switch to live data?" : "Switch to test data?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {pendingEnvironment === "live"
+                  ? "You'll see real customers, real revenue and live subscriptions. Any action taken here affects paying customers."
+                  : "You'll see sandbox customers and test-mode payments only. Live revenue and customers will be hidden."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Stay on {isLive ? "live" : "test"}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => applyEnvironment(pendingEnvironment ?? environment)}
+              >
+                Switch and refresh
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
 
         {error ? (
           <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
