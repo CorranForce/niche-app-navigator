@@ -146,10 +146,63 @@ function OwnerDashboardPage() {
               Live data
             </Label>
           </div>
-          <Button variant="ghost" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+          <Button variant="ghost" onClick={() => void refreshEnvironmentData()} disabled={busy}>
+            <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} /> Refresh data
           </Button>
         </div>
+
+        <Card
+          className={`mt-4 flex-row items-center gap-3 p-4 ${
+            isLive
+              ? "border-destructive/40 bg-destructive/10"
+              : "border-primary/40 bg-primary/10"
+          }`}
+        >
+          {isLive ? (
+            <Zap className="h-4 w-4 shrink-0 text-destructive" />
+          ) : (
+            <FlaskConical className="h-4 w-4 shrink-0 text-primary" />
+          )}
+          <div className="text-sm">
+            <p className="font-medium">
+              {isLive ? "Live payment environment" : "Test payment environment"}
+            </p>
+            <p className="text-muted-foreground">
+              {isLive
+                ? "Showing real customers, real charges and live subscription data."
+                : "Showing sandbox customers and test-mode payments only — no real money involved."}
+            </p>
+          </div>
+        </Card>
+
+        <AlertDialog
+          open={pendingEnvironment !== null}
+          onOpenChange={(open) => {
+            if (!open) setPendingEnvironment(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {pendingEnvironment === "live" ? "Switch to live data?" : "Switch to test data?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {pendingEnvironment === "live"
+                  ? "You'll see real customers, real revenue and live subscriptions. Any action taken here affects paying customers."
+                  : "You'll see sandbox customers and test-mode payments only. Live revenue and customers will be hidden."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Stay on {isLive ? "live" : "test"}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => applyEnvironment(pendingEnvironment ?? environment)}
+              >
+                Switch and refresh
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
 
         {error ? (
           <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
