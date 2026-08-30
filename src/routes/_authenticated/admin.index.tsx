@@ -67,14 +67,49 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
   );
 }
 
+const ENVIRONMENT_QUERY_KEYS = [
+  "owner-overview",
+  "billing-anomalies",
+  "admin-users",
+  "admin-paddle-events",
+  "admin-webhook-replays",
+];
+
 function OwnerDashboardPage() {
   const [environment, setEnvironment] = useState<"sandbox" | "live">("sandbox");
+  const [pendingEnvironment, setPendingEnvironment] = useState<"sandbox" | "live" | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
   const fetchOverview = useServerFn(getOwnerOverview);
-  const { data, isLoading, isFetching, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["owner-overview", environment],
     queryFn: () => fetchOverview({ data: { environment } }),
     retry: false,
   });
+
+  const isLive = environment === "live";
+
+  async function refreshEnvironmentData() {
+    setIsRefreshing(true);
+    try {
+      await Promise.all(
+        ENVIRONMENT_QUERY_KEYS.map((key) =>
+          queryClient.refetchQueries({ queryKey: [key], type: "active" }),
+        ),
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
+
+  function applyEnvironment(next: "sandbox" | "live") {
+    setEnvironment(next);
+    setPendingEnvironment(null);
+    // Re-fetch after React commits the new environment so keys are current.
+    setTimeout(() => void refreshEnvironmentData(), 0);
+  }
+
+  const busy = isFetching || isRefreshing;
 
   return (
     <div className="min-h-screen">
