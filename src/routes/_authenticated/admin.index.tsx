@@ -134,7 +134,7 @@ function OwnerDashboardPage() {
             <Switch
               id="data-environment"
               checked={environment === "live"}
-              onCheckedChange={(checked) => setEnvironment(checked ? "live" : "sandbox")}
+              onCheckedChange={(checked) => setPendingEnvironment(checked ? "live" : "sandbox")}
               aria-label="Toggle between test and live data"
             />
             <Label
