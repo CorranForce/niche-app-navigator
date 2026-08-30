@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FlaskConical, Loader2, RefreshCw, ShieldAlert, Zap } from "lucide-react";
+import { FlaskConical, Loader2, RefreshCw, Zap } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
