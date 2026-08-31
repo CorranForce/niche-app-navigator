@@ -29,6 +29,20 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
         const url = new URL(request.url);
         const env = (url.searchParams.get("env") || "sandbox") as PaddleEnv;
         try {
+          // Defence in depth: only Paddle's published IP ranges may post here.
+          const { checkPaddleSourceIp } = await import("@/lib/paddle-ips.server");
+          const ipCheck = await checkPaddleSourceIp(request);
+          if (!ipCheck.allowed) {
+            const { recordSystemEvent } = await import("@/lib/monitoring.server");
+            await recordSystemEvent({
+              source: "webhook",
+              severity: "warning",
+              event: "paddle.webhook_ip_rejected",
+              message: `Rejected webhook from non-Paddle IP ${ipCheck.ip}.`,
+              context: { env, ip: ipCheck.ip },
+            });
+            return new Response("Forbidden", { status: 403 });
+          }
           await handleWebhook(request, env);
           return Response.json({ received: true });
         } catch (e) {
