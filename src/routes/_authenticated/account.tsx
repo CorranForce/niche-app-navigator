@@ -7,6 +7,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { SiteHeader } from "@/components/site-header";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { BillingManager } from "@/components/billing-manager";
