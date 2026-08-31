@@ -23,6 +23,7 @@ import { AdminSectionError, LastRefreshed } from "@/components/admin-section-err
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
 import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
+import { BillingCatalogSection } from "@/components/billing-catalog";
 import { AdminCustomersSection } from "@/components/admin-customers";
 import { AdminEmailLogSection } from "@/components/admin-email-log";
 import { McpStatusSection } from "@/components/mcp-status";
@@ -74,10 +75,15 @@ const ENVIRONMENT_QUERY_KEYS = [
   "admin-users",
   "admin-paddle-events",
   "admin-webhook-replays",
+  "admin-billing-catalog",
 ];
 
 function OwnerDashboardPage() {
-  const [environment, setEnvironment] = useState<"sandbox" | "live">("sandbox");
+  const [environment, setEnvironment] = useState<"sandbox" | "live">(() => {
+    if (typeof window === "undefined") return "live";
+    const stored = window.localStorage.getItem("admin-data-environment");
+    return stored === "sandbox" ? "sandbox" : "live";
+  });
   const [pendingEnvironment, setPendingEnvironment] = useState<"sandbox" | "live" | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<number | null>(null);
@@ -107,6 +113,9 @@ function OwnerDashboardPage() {
 
   function applyEnvironment(next: "sandbox" | "live") {
     setEnvironment(next);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("admin-data-environment", next);
+    }
     setPendingEnvironment(null);
     // Re-fetch after React commits the new environment so keys are current.
     setTimeout(() => void refreshEnvironmentData(), 0);
@@ -353,6 +362,8 @@ function OwnerDashboardPage() {
         ) : null}
 
         <BillingAnomalies environment={environment} />
+
+        <BillingCatalogSection environment={environment} />
 
         <AdminCustomersSection environment={environment} />
 

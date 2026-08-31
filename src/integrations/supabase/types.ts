@@ -44,6 +44,60 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_catalog: {
+        Row: {
+          billing_interval: string
+          created_at: string
+          currency_code: string
+          environment: string
+          id: string
+          paddle_price_id: string
+          paddle_product_id: string
+          plan_external_id: string
+          plan_name: string
+          price_external_id: string
+          status: string
+          synced_at: string
+          trial_days: number
+          unit_amount_cents: number
+          updated_at: string
+        }
+        Insert: {
+          billing_interval: string
+          created_at?: string
+          currency_code?: string
+          environment: string
+          id?: string
+          paddle_price_id: string
+          paddle_product_id: string
+          plan_external_id: string
+          plan_name: string
+          price_external_id: string
+          status?: string
+          synced_at?: string
+          trial_days?: number
+          unit_amount_cents: number
+          updated_at?: string
+        }
+        Update: {
+          billing_interval?: string
+          created_at?: string
+          currency_code?: string
+          environment?: string
+          id?: string
+          paddle_price_id?: string
+          paddle_product_id?: string
+          plan_external_id?: string
+          plan_name?: string
+          price_external_id?: string
+          status?: string
+          synced_at?: string
+          trial_days?: number
+          unit_amount_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
