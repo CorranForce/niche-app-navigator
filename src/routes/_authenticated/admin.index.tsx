@@ -361,6 +361,8 @@ function OwnerDashboardPage() {
 
         <BillingAnomalies environment={environment} />
 
+        <BillingCatalogSection environment={environment} />
+
         <AdminCustomersSection environment={environment} />
 
         <OAuthHealthSection />
