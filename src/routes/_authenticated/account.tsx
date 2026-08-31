@@ -167,16 +167,59 @@ function AccountPage() {
         <Card className="mt-8 max-w-2xl gap-4 border-border bg-surface p-6">
           <h2 className="label-mono text-muted-foreground">Sign-in methods</h2>
 
-          <div className="flex items-center justify-between gap-4 rounded-md border border-border/70 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium">Email &amp; password</p>
-              <p className="text-xs text-muted-foreground">
-                {hasPassword ? (user?.email ?? "Enabled") : "Not set up"}
-              </p>
+          <div className="rounded-md border border-border/70 px-4 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium">Email &amp; password</p>
+                <p className="text-xs text-muted-foreground">
+                  {hasPassword ? (user?.email ?? "Enabled") : "Not set up"}
+                </p>
+              </div>
+              <Button
+                variant={hasPassword ? "outline" : "default"}
+                size="sm"
+                onClick={() => setPwOpen((v) => !v)}
+                disabled={pwBusy}
+              >
+                {pwOpen ? "Cancel" : hasPassword ? "Update password" : "Set password"}
+              </Button>
             </div>
-            <span className="label-mono text-muted-foreground">
-              {hasPassword ? "linked" : "unlinked"}
-            </span>
+            {pwOpen && (
+              <form onSubmit={savePassword} className="mt-4 flex flex-col gap-3">
+                <Input
+                  type="password"
+                  placeholder="New password (min 8 characters)"
+                  value={pw}
+                  onChange={(e) => setPw(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                />
+                <Input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={pwConfirm}
+                  onChange={(e) => setPwConfirm(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                />
+                <div className="flex items-center gap-3">
+                  <Button type="submit" size="sm" disabled={pwBusy}>
+                    {pwBusy ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : hasPassword ? (
+                      "Save new password"
+                    ) : (
+                      "Set password"
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Use at least 8 characters.
+                  </p>
+                </div>
+              </form>
+            )}
           </div>
 
           <div className="flex items-center justify-between gap-4 rounded-md border border-border/70 px-4 py-3">
