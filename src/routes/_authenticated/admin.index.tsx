@@ -77,7 +77,11 @@ const ENVIRONMENT_QUERY_KEYS = [
 ];
 
 function OwnerDashboardPage() {
-  const [environment, setEnvironment] = useState<"sandbox" | "live">("sandbox");
+  const [environment, setEnvironment] = useState<"sandbox" | "live">(() => {
+    if (typeof window === "undefined") return "live";
+    const stored = window.localStorage.getItem("admin-data-environment");
+    return stored === "sandbox" ? "sandbox" : "live";
+  });
   const [pendingEnvironment, setPendingEnvironment] = useState<"sandbox" | "live" | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<number | null>(null);
