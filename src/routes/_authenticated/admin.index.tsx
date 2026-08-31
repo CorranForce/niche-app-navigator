@@ -111,6 +111,9 @@ function OwnerDashboardPage() {
 
   function applyEnvironment(next: "sandbox" | "live") {
     setEnvironment(next);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("admin-data-environment", next);
+    }
     setPendingEnvironment(null);
     // Re-fetch after React commits the new environment so keys are current.
     setTimeout(() => void refreshEnvironmentData(), 0);
