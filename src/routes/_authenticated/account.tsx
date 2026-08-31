@@ -41,6 +41,10 @@ function AccountPage() {
   const { user } = useSession();
   const [identities, setIdentities] = useState<Identity[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pw, setPw] = useState("");
+  const [pwConfirm, setPwConfirm] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
 
   async function refresh() {
     const { data, error } = await supabase.auth.getUserIdentities();
