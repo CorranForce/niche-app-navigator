@@ -75,6 +75,7 @@ const ENVIRONMENT_QUERY_KEYS = [
   "admin-users",
   "admin-paddle-events",
   "admin-webhook-replays",
+  "admin-billing-catalog",
 ];
 
 function OwnerDashboardPage() {
