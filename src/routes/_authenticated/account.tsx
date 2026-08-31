@@ -68,6 +68,32 @@ function AccountPage() {
   const google = identities?.find((i) => i.provider === "google");
   const hasPassword = Boolean(identities?.some((i) => i.provider === "email"));
 
+  async function savePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (pw.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
+    if (pw !== pwConfirm) {
+      toast.error("Passwords don't match.");
+      return;
+    }
+    setPwBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: pw });
+      if (error) throw error;
+      setPw("");
+      setPwConfirm("");
+      setPwOpen(false);
+      await refresh();
+      toast.success(hasPassword ? "Password updated." : "Password set — you can now sign in with email too.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update your password");
+    } finally {
+      setPwBusy(false);
+    }
+  }
+
   async function connectGoogle() {
     setBusy(true);
     try {
