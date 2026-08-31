@@ -23,6 +23,7 @@ import { AdminSectionError, LastRefreshed } from "@/components/admin-section-err
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
 import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
+import { BillingCatalogSection } from "@/components/billing-catalog";
 import { AdminCustomersSection } from "@/components/admin-customers";
 import { AdminEmailLogSection } from "@/components/admin-email-log";
 import { McpStatusSection } from "@/components/mcp-status";
