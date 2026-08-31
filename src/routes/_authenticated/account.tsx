@@ -7,6 +7,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { SiteHeader } from "@/components/site-header";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
 import { BillingManager } from "@/components/billing-manager";
@@ -40,6 +41,10 @@ function AccountPage() {
   const { user } = useSession();
   const [identities, setIdentities] = useState<Identity[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pw, setPw] = useState("");
+  const [pwConfirm, setPwConfirm] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
 
   async function refresh() {
     const { data, error } = await supabase.auth.getUserIdentities();
@@ -62,6 +67,32 @@ function AccountPage() {
 
   const google = identities?.find((i) => i.provider === "google");
   const hasPassword = Boolean(identities?.some((i) => i.provider === "email"));
+
+  async function savePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (pw.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
+    if (pw !== pwConfirm) {
+      toast.error("Passwords don't match.");
+      return;
+    }
+    setPwBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: pw });
+      if (error) throw error;
+      setPw("");
+      setPwConfirm("");
+      setPwOpen(false);
+      await refresh();
+      toast.success(hasPassword ? "Password updated." : "Password set — you can now sign in with email too.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update your password");
+    } finally {
+      setPwBusy(false);
+    }
+  }
 
   async function connectGoogle() {
     setBusy(true);
@@ -136,16 +167,59 @@ function AccountPage() {
         <Card className="mt-8 max-w-2xl gap-4 border-border bg-surface p-6">
           <h2 className="label-mono text-muted-foreground">Sign-in methods</h2>
 
-          <div className="flex items-center justify-between gap-4 rounded-md border border-border/70 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium">Email &amp; password</p>
-              <p className="text-xs text-muted-foreground">
-                {hasPassword ? (user?.email ?? "Enabled") : "Not set up"}
-              </p>
+          <div className="rounded-md border border-border/70 px-4 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium">Email &amp; password</p>
+                <p className="text-xs text-muted-foreground">
+                  {hasPassword ? (user?.email ?? "Enabled") : "Not set up"}
+                </p>
+              </div>
+              <Button
+                variant={hasPassword ? "outline" : "default"}
+                size="sm"
+                onClick={() => setPwOpen((v) => !v)}
+                disabled={pwBusy}
+              >
+                {pwOpen ? "Cancel" : hasPassword ? "Update password" : "Set password"}
+              </Button>
             </div>
-            <span className="label-mono text-muted-foreground">
-              {hasPassword ? "linked" : "unlinked"}
-            </span>
+            {pwOpen && (
+              <form onSubmit={savePassword} className="mt-4 flex flex-col gap-3">
+                <Input
+                  type="password"
+                  placeholder="New password (min 8 characters)"
+                  value={pw}
+                  onChange={(e) => setPw(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                />
+                <Input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={pwConfirm}
+                  onChange={(e) => setPwConfirm(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                />
+                <div className="flex items-center gap-3">
+                  <Button type="submit" size="sm" disabled={pwBusy}>
+                    {pwBusy ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : hasPassword ? (
+                      "Save new password"
+                    ) : (
+                      "Set password"
+                    )}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Use at least 8 characters.
+                  </p>
+                </div>
+              </form>
+            )}
           </div>
 
           <div className="flex items-center justify-between gap-4 rounded-md border border-border/70 px-4 py-3">
