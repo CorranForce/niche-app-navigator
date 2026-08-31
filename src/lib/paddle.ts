@@ -15,18 +15,40 @@ export function getPaddleEnvironment(): "sandbox" | "live" {
 }
 
 let paddleInitialized = false;
+let retainCustomerId: string | null = null;
 
-export async function initializePaddle() {
-  if (paddleInitialized) return;
+/**
+ * Loads Paddle.js. `paddleCustomerId` is the Paddle customer ID (`ctm_...`) of
+ * the signed-in user and enables Paddle Retain — it must never be an internal
+ * user id or an email address. Passing it later calls `Paddle.Update` so an
+ * already-initialised instance picks the customer up.
+ */
+export async function initializePaddle(paddleCustomerId?: string | null) {
   if (!clientToken) throw new Error("Payments are not configured yet.");
+  const pwCustomer =
+    paddleCustomerId && paddleCustomerId.startsWith("ctm_") ? { id: paddleCustomerId } : undefined;
+
+  if (paddleInitialized) {
+    if (pwCustomer && pwCustomer.id !== retainCustomerId) {
+      retainCustomerId = pwCustomer.id;
+      window.Paddle.Update?.({ pwCustomer });
+    }
+    return;
+  }
 
   return new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
     script.onload = () => {
-      const paddleJsEnvironment = getPaddleEnvironment() === "sandbox" ? "sandbox" : "production";
-      window.Paddle.Environment.set(paddleJsEnvironment);
-      window.Paddle.Initialize({ token: clientToken });
+      // Live is Paddle.js's default; only the sandbox needs an explicit switch.
+      if (getPaddleEnvironment() === "sandbox") {
+        window.Paddle.Environment.set("sandbox");
+      }
+      window.Paddle.Initialize({
+        token: clientToken,
+        ...(pwCustomer ? { pwCustomer } : {}),
+      });
+      retainCustomerId = pwCustomer?.id ?? null;
       paddleInitialized = true;
       resolve();
     };

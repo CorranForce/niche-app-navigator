@@ -100,6 +100,7 @@ export function BillingManager() {
         await openCheckout({
           priceId,
           ...(user?.email ? { customerEmail: user.email } : {}),
+          paddleCustomerId: subscription?.paddle_customer_id ?? null,
           customData: { checkoutToken },
         });
       }
@@ -121,6 +122,7 @@ export function BillingManager() {
         await openCheckout({
           priceId,
           ...(user?.email ? { customerEmail: user.email } : {}),
+          paddleCustomerId: subscription?.paddle_customer_id ?? null,
           customData: { checkoutToken: result.checkoutToken },
         });
       } else {
