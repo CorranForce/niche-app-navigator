@@ -89,8 +89,37 @@ export function BillingCatalogSection({ environment }: { environment: "sandbox" 
             )}
             Sync from Paddle
           </Button>
+          <Button size="sm" onClick={() => verify.mutate()} disabled={verify.isPending}>
+            {verify.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+            Verify IDs match
+          </Button>
         </div>
       </div>
+
+      {verify.data ? (
+        <div
+          className={`rounded-md border p-3 text-sm ${
+            verify.data.allMatch
+              ? "border-primary/40 bg-primary/5"
+              : "border-destructive/40 bg-destructive/10"
+          }`}
+        >
+          {verify.data.allMatch ? (
+            <p>
+              All {verify.data.checks.length} stored prices match the {environment} Paddle catalog
+              (product IDs, price IDs and amounts).
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {mismatches.map((c) => (
+                <li key={c.priceExternalId} className="font-mono text-xs">
+                  {c.priceExternalId}: {c.problem}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
 
       {error ? (
         <AdminSectionError
