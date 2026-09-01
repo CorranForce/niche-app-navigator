@@ -6,7 +6,11 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AdminSectionError, LastRefreshed } from "@/components/admin-section-error";
-import { getBillingCatalog, syncBillingCatalog } from "@/lib/admin-catalog.functions";
+import {
+  getBillingCatalog,
+  syncBillingCatalog,
+  verifyBillingCatalog,
+} from "@/lib/admin-catalog.functions";
 
 function money(cents: number, currency: string) {
   return `${currency === "USD" ? "$" : ""}${(cents / 100).toLocaleString(undefined, {
