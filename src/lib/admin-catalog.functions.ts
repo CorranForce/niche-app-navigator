@@ -132,3 +132,84 @@ export const syncBillingCatalog = createServerFn({ method: "POST" })
     const rows = await getBillingCatalog({ data: { environment: data.environment } });
     return { synced: upserts.length, rows };
   });
+
+export type CatalogCheck = {
+  priceExternalId: string;
+  planExternalId: string;
+  storedPriceId: string;
+  gatewayPriceId: string | null;
+  storedAmountCents: number;
+  gatewayAmountCents: number | null;
+  ok: boolean;
+  problem: string | null;
+};
+
+/**
+ * Confirms every stored catalog row still resolves to the same Paddle product
+ * and price in the target environment — the check to run after "Sync from
+ * Paddle" before pointing real checkout at it.
+ */
+export const verifyBillingCatalog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => inputSchema.parse(raw ?? {}))
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ allMatch: boolean; checks: CatalogCheck[]; checkedAt: string }> => {
+      await assertAdmin(context.userId);
+      const { gatewayFetch } = await import("@/lib/paddle.server");
+      const stored = await getBillingCatalog({ data: { environment: data.environment } });
+
+      const res = await gatewayFetch(data.environment, "/prices?per_page=100&include=product");
+      if (!res.ok) throw new Error(`Paddle returned ${res.status}`);
+      const body = (await res.json()) as {
+        data?: Array<{
+          id?: string;
+          product_id?: string;
+          status?: string;
+          unit_price?: { amount?: string };
+          import_meta?: { external_id?: string } | null;
+          product?: { import_meta?: { external_id?: string } | null } | null;
+        }>;
+      };
+
+      const gatewayByExternal = new Map(
+        (body.data ?? [])
+          .filter((p) => p.import_meta?.external_id)
+          .map((p) => [p.import_meta!.external_id!, p]),
+      );
+
+      const checks: CatalogCheck[] = stored.map((row) => {
+        const remote = gatewayByExternal.get(row.priceExternalId) ?? null;
+        const gatewayAmount = remote?.unit_price?.amount
+          ? Number(remote.unit_price.amount)
+          : null;
+        let problem: string | null = null;
+        if (!remote) problem = "Not found in Paddle for this environment.";
+        else if (remote.id !== row.paddlePriceId) problem = `Paddle price ID is now ${remote.id}.`;
+        else if (remote.product_id !== row.paddleProductId)
+          problem = `Paddle product ID is now ${remote.product_id}.`;
+        else if (gatewayAmount !== row.amountCents)
+          problem = `Paddle charges ${gatewayAmount} cents, catalog says ${row.amountCents}.`;
+        else if (remote.status !== "active") problem = `Price is ${remote.status} in Paddle.`;
+
+        return {
+          priceExternalId: row.priceExternalId,
+          planExternalId: row.planExternalId,
+          storedPriceId: row.paddlePriceId,
+          gatewayPriceId: remote?.id ?? null,
+          storedAmountCents: row.amountCents,
+          gatewayAmountCents: gatewayAmount,
+          ok: problem === null,
+          problem,
+        };
+      });
+
+      return {
+        allMatch: checks.length > 0 && checks.every((c) => c.ok),
+        checks,
+        checkedAt: new Date().toISOString(),
+      };
+    },
+  );
