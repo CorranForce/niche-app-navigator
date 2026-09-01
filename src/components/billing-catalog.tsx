@@ -6,7 +6,11 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AdminSectionError, LastRefreshed } from "@/components/admin-section-error";
-import { getBillingCatalog, syncBillingCatalog } from "@/lib/admin-catalog.functions";
+import {
+  getBillingCatalog,
+  syncBillingCatalog,
+  verifyBillingCatalog,
+} from "@/lib/admin-catalog.functions";
 
 function money(cents: number, currency: string) {
   return `${currency === "USD" ? "$" : ""}${(cents / 100).toLocaleString(undefined, {
@@ -42,7 +46,23 @@ export function BillingCatalogSection({ environment }: { environment: "sandbox" 
     },
   });
 
+  const runVerify = useServerFn(verifyBillingCatalog);
+  const verify = useMutation({
+    mutationFn: () => runVerify({ data: { environment } }),
+    onSuccess: (result) => {
+      if (result.allMatch) {
+        toast.success("Every stored price matches Paddle — checkout is safe to run.");
+      } else {
+        toast.error("Some prices don't match Paddle. See the details below.");
+      }
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof Error ? err.message : "Could not verify the catalog.");
+    },
+  });
+
   const rows = data ?? [];
+  const mismatches = (verify.data?.checks ?? []).filter((c) => !c.ok);
 
   return (
     <Card className="mt-6 gap-4 border-border bg-surface p-5">
@@ -69,8 +89,37 @@ export function BillingCatalogSection({ environment }: { environment: "sandbox" 
             )}
             Sync from Paddle
           </Button>
+          <Button size="sm" onClick={() => verify.mutate()} disabled={verify.isPending}>
+            {verify.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+            Verify IDs match
+          </Button>
         </div>
       </div>
+
+      {verify.data ? (
+        <div
+          className={`rounded-md border p-3 text-sm ${
+            verify.data.allMatch
+              ? "border-primary/40 bg-primary/5"
+              : "border-destructive/40 bg-destructive/10"
+          }`}
+        >
+          {verify.data.allMatch ? (
+            <p>
+              All {verify.data.checks.length} stored prices match the {environment} Paddle catalog
+              (product IDs, price IDs and amounts).
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {mismatches.map((c) => (
+                <li key={c.priceExternalId} className="font-mono text-xs">
+                  {c.priceExternalId}: {c.problem}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
 
       {error ? (
         <AdminSectionError

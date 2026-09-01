@@ -25,6 +25,7 @@ import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
 import { BillingCatalogSection } from "@/components/billing-catalog";
 import { AdminCustomersSection } from "@/components/admin-customers";
+import { LivePaymentsSection } from "@/components/live-payments";
 import { AdminEmailLogSection } from "@/components/admin-email-log";
 import { McpStatusSection } from "@/components/mcp-status";
 import { SystemHealthSection } from "@/components/system-health";
@@ -76,6 +77,8 @@ const ENVIRONMENT_QUERY_KEYS = [
   "admin-paddle-events",
   "admin-webhook-replays",
   "admin-billing-catalog",
+  "admin-payments-feed",
+  "admin-catalog-verify",
 ];
 
 function OwnerDashboardPage() {
@@ -364,6 +367,8 @@ function OwnerDashboardPage() {
         <BillingAnomalies environment={environment} />
 
         <BillingCatalogSection environment={environment} />
+
+        <LivePaymentsSection environment={environment} />
 
         <AdminCustomersSection environment={environment} />
 

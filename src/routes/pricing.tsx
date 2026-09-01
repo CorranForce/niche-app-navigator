@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { PaymentTestModeBanner } from "@/components/payment-test-mode-banner";
@@ -9,6 +12,10 @@ import { Button } from "@/components/ui/button";
 import { PLANS } from "@/lib/paddle";
 import { USE_CASES } from "@/lib/use-cases";
 import { useSession } from "@/hooks/use-session";
+import { useSubscription } from "@/hooks/use-subscription";
+import { usePaddleCheckout } from "@/hooks/use-paddle-checkout";
+import { getPublicCatalog } from "@/lib/catalog.functions";
+import { createCheckoutIntent } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
