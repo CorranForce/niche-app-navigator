@@ -46,7 +46,23 @@ export function BillingCatalogSection({ environment }: { environment: "sandbox" 
     },
   });
 
+  const runVerify = useServerFn(verifyBillingCatalog);
+  const verify = useMutation({
+    mutationFn: () => runVerify({ data: { environment } }),
+    onSuccess: (result) => {
+      if (result.allMatch) {
+        toast.success("Every stored price matches Paddle — checkout is safe to run.");
+      } else {
+        toast.error("Some prices don't match Paddle. See the details below.");
+      }
+    },
+    onError: (err: unknown) => {
+      toast.error(err instanceof Error ? err.message : "Could not verify the catalog.");
+    },
+  });
+
   const rows = data ?? [];
+  const mismatches = (verify.data?.checks ?? []).filter((c) => !c.ok);
 
   return (
     <Card className="mt-6 gap-4 border-border bg-surface p-5">
