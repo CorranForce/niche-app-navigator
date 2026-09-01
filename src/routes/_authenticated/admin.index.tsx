@@ -25,6 +25,7 @@ import { OAuthHealthSection } from "@/components/oauth-health";
 import { BillingAnomalies } from "@/components/billing-anomalies";
 import { BillingCatalogSection } from "@/components/billing-catalog";
 import { AdminCustomersSection } from "@/components/admin-customers";
+import { LivePaymentsSection } from "@/components/live-payments";
 import { AdminEmailLogSection } from "@/components/admin-email-log";
 import { McpStatusSection } from "@/components/mcp-status";
 import { SystemHealthSection } from "@/components/system-health";
