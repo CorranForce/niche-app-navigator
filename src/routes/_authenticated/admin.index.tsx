@@ -366,6 +366,8 @@ function OwnerDashboardPage() {
 
         <BillingCatalogSection environment={environment} />
 
+        <LivePaymentsSection environment={environment} />
+
         <AdminCustomersSection environment={environment} />
 
         <OAuthHealthSection />
