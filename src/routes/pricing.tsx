@@ -98,7 +98,7 @@ function PricingPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const { user } = useSession();
   const navigate = useNavigate();
-  const { subscription, entitlement } = useSubscription();
+  const { subscription, isActive } = useSubscription();
   const { openCheckout } = usePaddleCheckout();
   const fetchCatalog = useServerFn(getPublicCatalog);
   const doCheckoutIntent = useServerFn(createCheckoutIntent);
@@ -116,7 +116,7 @@ function PricingPage() {
     return catalog.data?.find((r) => r.priceExternalId === priceExternalId) ?? null;
   }
 
-  const hasActivePlan = Boolean(entitlement?.active);
+  const hasActivePlan = isActive;
 
   async function handleCta(planId: string, priceId: string | null) {
     if (!user) {
@@ -142,7 +142,6 @@ function PricingPage() {
       setBusy(null);
     }
   }
-
 
   return (
     <div className="min-h-screen">
@@ -223,7 +222,6 @@ function PricingPage() {
                   )}
                 </Button>
               </Card>
-
             );
           })}
         </div>
