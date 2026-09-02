@@ -85,19 +85,64 @@ export const Route = createFileRoute("/pricing")({
   component: PricingPage,
 });
 
+function formatAmount(cents: number, currency: string) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: cents % 100 === 0 ? 0 : 2,
+  }).format(cents / 100);
+}
+
 function PricingPage() {
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
+  const [busy, setBusy] = useState<string | null>(null);
   const { user } = useSession();
   const navigate = useNavigate();
+  const { subscription, entitlement } = useSubscription();
+  const { openCheckout } = usePaddleCheckout();
+  const fetchCatalog = useServerFn(getPublicCatalog);
+  const doCheckoutIntent = useServerFn(createCheckoutIntent);
 
-  function handleCta(planId: string) {
+  // Amounts come from the stored Paddle catalog so the page can never advertise
+  // a price the gateway would not actually charge.
+  const catalog = useQuery({
+    queryKey: ["public-catalog"],
+    queryFn: () => fetchCatalog({ data: {} }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  function priceFor(priceExternalId: string | null) {
+    if (!priceExternalId) return null;
+    return catalog.data?.find((r) => r.priceExternalId === priceExternalId) ?? null;
+  }
+
+  const hasActivePlan = Boolean(entitlement?.active);
+
+  async function handleCta(planId: string, priceId: string | null) {
     if (!user) {
-      navigate({ to: "/auth", search: { redirect: "/account" } });
+      navigate({ to: "/auth", search: { redirect: "/pricing" } });
       return;
     }
-    navigate({ to: "/account", hash: "billing" });
-    void planId;
+    if (hasActivePlan || !priceId) {
+      navigate({ to: "/account", hash: "billing" });
+      return;
+    }
+    setBusy(planId);
+    try {
+      const { checkoutToken } = await doCheckoutIntent({ data: { priceId } });
+      await openCheckout({
+        priceId,
+        ...(user.email ? { customerEmail: user.email } : {}),
+        paddleCustomerId: subscription?.paddle_customer_id ?? null,
+        customData: { checkoutToken },
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Checkout could not be opened.");
+    } finally {
+      setBusy(null);
+    }
   }
+
 
   return (
     <div className="min-h-screen">
