@@ -85,18 +85,62 @@ export const Route = createFileRoute("/pricing")({
   component: PricingPage,
 });
 
+function formatAmount(cents: number, currency: string) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: cents % 100 === 0 ? 0 : 2,
+  }).format(cents / 100);
+}
+
 function PricingPage() {
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
+  const [busy, setBusy] = useState<string | null>(null);
   const { user } = useSession();
   const navigate = useNavigate();
+  const { subscription, isActive } = useSubscription();
+  const { openCheckout } = usePaddleCheckout();
+  const fetchCatalog = useServerFn(getPublicCatalog);
+  const doCheckoutIntent = useServerFn(createCheckoutIntent);
 
-  function handleCta(planId: string) {
+  // Amounts come from the stored Paddle catalog so the page can never advertise
+  // a price the gateway would not actually charge.
+  const catalog = useQuery({
+    queryKey: ["public-catalog"],
+    queryFn: () => fetchCatalog({ data: {} }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  function priceFor(priceExternalId: string | null) {
+    if (!priceExternalId) return null;
+    return catalog.data?.find((r) => r.priceExternalId === priceExternalId) ?? null;
+  }
+
+  const hasActivePlan = isActive;
+
+  async function handleCta(planId: string, priceId: string | null) {
     if (!user) {
-      navigate({ to: "/auth", search: { redirect: "/account" } });
+      navigate({ to: "/auth", search: { redirect: "/pricing" } });
       return;
     }
-    navigate({ to: "/account", hash: "billing" });
-    void planId;
+    if (hasActivePlan || !priceId) {
+      navigate({ to: "/account", hash: "billing" });
+      return;
+    }
+    setBusy(planId);
+    try {
+      const { checkoutToken } = await doCheckoutIntent({ data: { priceId } });
+      await openCheckout({
+        priceId,
+        ...(user.email ? { customerEmail: user.email } : {}),
+        paddleCustomerId: subscription?.paddle_customer_id ?? null,
+        customData: { checkoutToken },
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Checkout could not be opened.");
+    } finally {
+      setBusy(null);
+    }
   }
 
   return (
@@ -131,6 +175,9 @@ function PricingPage() {
         <div className="mt-10 grid gap-4 lg:grid-cols-3">
           {PLANS.map((t) => {
             const price = t[interval];
+            const live = priceFor(price.priceId);
+            const amount = live ? formatAmount(live.amountCents, live.currency) : price.amount;
+            const trialDays = live?.trialDays ?? 7;
             const highlighted = t.id === "pro";
             return (
               <Card
@@ -146,7 +193,7 @@ function PricingPage() {
                   ) : null}
                 </div>
                 <p className="font-mono text-4xl font-semibold">
-                  {price.amount}
+                  {amount}
                   <span className="text-sm font-normal text-muted-foreground">
                     /{interval === "monthly" ? "mo" : "yr"}
                   </span>
@@ -163,9 +210,16 @@ function PricingPage() {
                 <Button
                   variant={highlighted ? "default" : "outline"}
                   className="mt-2"
-                  onClick={() => handleCta(t.id)}
+                  disabled={busy === t.id}
+                  onClick={() => handleCta(t.id, price.priceId)}
                 >
-                  {`Start ${t.name} — 7-day free trial`}
+                  {busy === t.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : hasActivePlan ? (
+                    `Manage plan`
+                  ) : (
+                    `Start ${t.name} — ${trialDays}-day free trial`
+                  )}
                 </Button>
               </Card>
             );
