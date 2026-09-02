@@ -176,6 +176,9 @@ function PricingPage() {
         <div className="mt-10 grid gap-4 lg:grid-cols-3">
           {PLANS.map((t) => {
             const price = t[interval];
+            const live = priceFor(price.priceId);
+            const amount = live ? formatAmount(live.amountCents, live.currency) : price.amount;
+            const trialDays = live?.trialDays ?? 7;
             const highlighted = t.id === "pro";
             return (
               <Card
@@ -191,7 +194,7 @@ function PricingPage() {
                   ) : null}
                 </div>
                 <p className="font-mono text-4xl font-semibold">
-                  {price.amount}
+                  {amount}
                   <span className="text-sm font-normal text-muted-foreground">
                     /{interval === "monthly" ? "mo" : "yr"}
                   </span>
@@ -208,11 +211,19 @@ function PricingPage() {
                 <Button
                   variant={highlighted ? "default" : "outline"}
                   className="mt-2"
-                  onClick={() => handleCta(t.id)}
+                  disabled={busy === t.id}
+                  onClick={() => handleCta(t.id, price.priceId)}
                 >
-                  {`Start ${t.name} — 7-day free trial`}
+                  {busy === t.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : hasActivePlan ? (
+                    `Manage plan`
+                  ) : (
+                    `Start ${t.name} — ${trialDays}-day free trial`
+                  )}
                 </Button>
               </Card>
+
             );
           })}
         </div>
