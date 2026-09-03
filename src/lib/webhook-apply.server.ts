@@ -141,7 +141,6 @@ async function handleSubscriptionUpdated(
     .eq("paddle_subscription_id", id)
     .eq("environment", env);
 
-
   if (sendEmails && previous) {
     const before = previous as {
       status?: string;

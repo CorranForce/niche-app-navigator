@@ -104,7 +104,6 @@ export const createCheckoutIntent = createServerFn({ method: "POST" })
     };
   });
 
-
 /**
  * Loads the subscription row a management action should target. Ranked by how
  * live the subscription is, so a newer canceled row can never shadow the one
