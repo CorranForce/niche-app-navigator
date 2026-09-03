@@ -129,13 +129,17 @@ function PricingPage() {
     }
     setBusy(planId);
     try {
-      const { checkoutToken } = await doCheckoutIntent({ data: { priceId } });
+      const { checkoutToken, paddleCustomerId, customerEmail } = await doCheckoutIntent({
+        data: { priceId },
+      });
+      const email = user.email ?? customerEmail ?? null;
       await openCheckout({
         priceId,
-        ...(user.email ? { customerEmail: user.email } : {}),
-        paddleCustomerId: subscription?.paddle_customer_id ?? null,
+        ...(email ? { customerEmail: email } : {}),
+        paddleCustomerId: paddleCustomerId ?? subscription?.paddle_customer_id ?? null,
         customData: { checkoutToken },
       });
+
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Checkout could not be opened.");
     } finally {

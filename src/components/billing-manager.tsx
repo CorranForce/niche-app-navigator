@@ -96,11 +96,14 @@ export function BillingManager() {
       } else {
         // The account a purchase belongs to is decided server-side: we send an
         // opaque signed token, never a client-chosen user id.
-        const { checkoutToken } = await doCheckoutIntent({ data: { priceId } });
+        const { checkoutToken, paddleCustomerId, customerEmail } = await doCheckoutIntent({
+          data: { priceId },
+        });
+        const email = user?.email ?? customerEmail ?? null;
         await openCheckout({
           priceId,
-          ...(user?.email ? { customerEmail: user.email } : {}),
-          paddleCustomerId: subscription?.paddle_customer_id ?? null,
+          ...(email ? { customerEmail: email } : {}),
+          paddleCustomerId: paddleCustomerId ?? subscription?.paddle_customer_id ?? null,
           customData: { checkoutToken },
         });
       }

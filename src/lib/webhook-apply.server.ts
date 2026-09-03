@@ -128,6 +128,11 @@ async function handleSubscriptionUpdated(
       status,
       ...(priceId ? { price_id: priceId } : {}),
       ...(productId ? { product_id: productId } : {}),
+      // Keeps the Paddle customer id in step so Paddle Retain can always map
+      // this account to its subscription on the next checkout/portal visit.
+      ...(typeof data?.customerId === "string" && data.customerId
+        ? { paddle_customer_id: data.customerId }
+        : {}),
       current_period_start: currentBillingPeriod?.startsAt,
       current_period_end: currentBillingPeriod?.endsAt,
       cancel_at_period_end: cancelScheduled,
@@ -135,6 +140,7 @@ async function handleSubscriptionUpdated(
     })
     .eq("paddle_subscription_id", id)
     .eq("environment", env);
+
 
   if (sendEmails && previous) {
     const before = previous as {
