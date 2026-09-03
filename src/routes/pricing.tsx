@@ -139,7 +139,6 @@ function PricingPage() {
         paddleCustomerId: paddleCustomerId ?? subscription?.paddle_customer_id ?? null,
         customData: { checkoutToken },
       });
-
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Checkout could not be opened.");
     } finally {
