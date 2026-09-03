@@ -33,10 +33,52 @@ export const resolvePaddlePrice = createServerFn({ method: "GET" })
   });
 
 /**
+ * Finds (or creates) the Paddle customer for an email address so a first-time
+ * buyer already has a `ctm_` id before checkout opens. Returns null instead of
+ * throwing — Retain mapping is a nice-to-have and must never block a purchase.
+ */
+async function resolvePaddleCustomerId(
+  env: "sandbox" | "live",
+  email: string | null,
+): Promise<string | null> {
+  if (!email) return null;
+  const { gatewayFetch } = await import("@/lib/paddle.server");
+  try {
+    const found = await gatewayFetch(env, `/customers?email=${encodeURIComponent(email)}`);
+    const foundJson = (await found.json()) as { data?: Array<{ id: string }> };
+    if (foundJson.data?.length) return foundJson.data[0]!.id ?? null;
+
+    const created = await gatewayFetch(env, "/customers", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    const createdJson = (await created.json()) as {
+      data?: { id?: string };
+      error?: { code?: string };
+    };
+    if (createdJson.data?.id) return createdJson.data.id;
+
+    // A concurrent checkout may have created it first.
+    if (createdJson.error?.code === "customer_already_exists") {
+      const retry = await gatewayFetch(env, `/customers?email=${encodeURIComponent(email)}`);
+      const retryJson = (await retry.json()) as { data?: Array<{ id: string }> };
+      return retryJson.data?.[0]?.id ?? null;
+    }
+    return null;
+  } catch (error) {
+    console.warn("Could not resolve Paddle customer:", error);
+    return null;
+  }
+}
+
+/**
  * Mints a signed checkout intent that binds this checkout to the signed-in
  * user. The browser passes it to Paddle as opaque custom data; the webhook
  * verifies the signature to decide which account the subscription belongs to,
  * so a client can never attribute a purchase to somebody else's account.
+ *
+ * Also returns the buyer's Paddle customer id so the very first checkout can
+ * pass `pwCustomer` to Paddle Retain.
  */
 export const createCheckoutIntent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -44,14 +86,24 @@ export const createCheckoutIntent = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { signCheckoutIntent } = await import("@/lib/checkout-token.server");
     const { paymentsEnv } = await import("@/lib/payments-env");
+    const env = paymentsEnv();
+
+    const email = ((context as any).claims?.email as string | undefined) ?? null;
+    const existing = await loadTargetSubscription(context.supabase, context.userId);
+    const paddleCustomerId =
+      existing?.paddle_customer_id ?? (await resolvePaddleCustomerId(env, email));
+
     return {
       checkoutToken: signCheckoutIntent({
         uid: context.userId,
         price: data.priceId,
-        env: paymentsEnv(),
+        env,
       }),
+      paddleCustomerId,
+      customerEmail: email,
     };
   });
+
 
 /**
  * Loads the subscription row a management action should target. Ranked by how
