@@ -63,10 +63,10 @@ async function canExecute(role, sig) {
 try {
   await client.connect();
 
-  for (const { fn, roles } of REQUIRED) {
-    const sigs = await signatures(fn);
+  for (const { fn, schema, roles } of REQUIRED) {
+    const sigs = await signatures(fn, schema);
     if (sigs.length === 0) {
-      record(false, `public.${fn}`, "function is missing");
+      record(false, `${schema}.${fn}`, "function is missing");
       continue;
     }
     for (const sig of sigs) {
