@@ -17,9 +17,13 @@ describe("RLS function grant contract", () => {
     }
   });
 
-  it("never lists a service-role-only function as authenticated-executable", () => {
+  it("keeps the policy helpers out of the exposed API schema", () => {
+    for (const entry of RLS_FUNCTION_GRANTS) expect(entry.schema).toBe("private");
+  });
+
+  it("never lists a service-role-only public function as authenticated-executable", () => {
     for (const fn of SERVICE_ROLE_ONLY_FUNCTIONS) {
-      expect(RLS_FUNCTION_GRANTS.some((e) => e.fn === fn)).toBe(false);
+      expect(RLS_FUNCTION_GRANTS.some((e) => e.fn === fn && e.schema === "public")).toBe(false);
     }
   });
 
@@ -33,6 +37,7 @@ describe("RLS function grant contract", () => {
     expect(docs).toContain("Policy → required function grants");
   });
 });
+
 
 describe("reports endpoint regression: permission denied for function is_team_member", () => {
   it("routes team-scoped reads through is_team_member-backed policies as the signed-in user", () => {
