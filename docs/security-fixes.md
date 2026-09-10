@@ -25,20 +25,30 @@ Every function referenced in a `USING` / `WITH CHECK` clause must keep `EXECUTE`
 for that role. Revoking one of these does not fail the migration — it fails every
 protected read at runtime with `permission denied for function ...`.
 
-| Table                    | Policy (intent)                                       | Function called in the policy     | Roles that MUST keep EXECUTE    |
-| ------------------------ | ----------------------------------------------------- | --------------------------------- | ------------------------------- |
-| `public.reports`         | Team members read reports shared into their workspace | `is_team_member(uuid, uuid)`      | `authenticated`, `service_role` |
-| `public.team_members`    | Members read the roster of their own team             | `is_team_member(uuid, uuid)`      | `authenticated`, `service_role` |
-| `public.team_members`    | Owners add/remove teammates                           | `is_team_owner(uuid, uuid)`       | `authenticated`, `service_role` |
-| `public.teams`           | Members read their team; owners update it             | `is_team_member`, `is_team_owner` | `authenticated`, `service_role` |
-| `public.auth_events`     | Admins read sign-in telemetry                         | `has_role(uuid, app_role)`        | `authenticated`, `service_role` |
-| `public.system_events`   | Admins read monitoring events                         | `has_role(uuid, app_role)`        | `authenticated`, `service_role` |
-| `public.webhook_replays` | Admins read/replay webhook events                     | `has_role(uuid, app_role)`        | `authenticated`, `service_role` |
-| `public.subscriptions`   | Admins read all subscriptions                         | `has_role(uuid, app_role)`        | `authenticated`, `service_role` |
+The three policy helpers now live in the **`private` schema**, which is not part of
+the exposed API schema, so signed-in users cannot call them as RPCs even though
+they retain `EXECUTE`. Identical `public` copies remain for `service_role` RPC calls
+from server functions and have `EXECUTE` revoked from `anon` and `authenticated`.
+The pricing catalog (`public.billing_catalog`) no longer has an anon/authenticated
+read policy or grant; prices are served by `getPublicCatalog`, a server function
+that reads through the service-role client.
 
-Service-role-only functions (must stay **non**-executable by `anon` / `authenticated`):
-`effective_subscription_for`, `has_active_subscription`, `claim_team_invites`,
-`admin_mcp_clients`, `admin_mcp_consents`, `admin_mcp_authorization_stats`.
+| Table                    | Policy (intent)                                       | Function called in the policy                     | Roles that MUST keep EXECUTE    |
+| ------------------------ | ----------------------------------------------------- | ------------------------------------------------- | ------------------------------- |
+| `public.reports`         | Team members read reports shared into their workspace | `private.is_team_member(uuid, uuid)`              | `authenticated`, `service_role` |
+| `public.team_members`    | Members read the roster of their own team             | `private.is_team_member(uuid, uuid)`              | `authenticated`, `service_role` |
+| `public.team_members`    | Owners add/remove teammates                           | `private.is_team_owner(uuid, uuid)`               | `authenticated`, `service_role` |
+| `public.teams`           | Members read their team; owners update it             | `private.is_team_member`, `private.is_team_owner` | `authenticated`, `service_role` |
+| `public.auth_events`     | Admins read sign-in telemetry — `has_role(auth.uid(), 'admin')` | `private.has_role(uuid, app_role)`      | `authenticated`, `service_role` |
+| `public.system_events`   | Admins read monitoring events                         | `private.has_role(uuid, app_role)`                | `authenticated`, `service_role` |
+| `public.webhook_replays` | Admins read/replay webhook events                     | `private.has_role(uuid, app_role)`                | `authenticated`, `service_role` |
+
+Service-role-only functions in `public` (must stay **non**-executable by `anon` /
+`authenticated`): `effective_subscription_for`, `has_active_subscription`,
+`claim_team_invites`, `admin_mcp_clients`, `admin_mcp_consents`,
+`admin_mcp_authorization_stats`, `function_grant_audit`, `has_role`,
+`is_team_member`, `is_team_owner`.
+
 
 Enforcement:
 
