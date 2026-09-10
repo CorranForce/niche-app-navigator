@@ -42,12 +42,12 @@ function record(ok, name, detail) {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name} — ${detail}`);
 }
 
-async function signatures(fn) {
+async function signatures(fn, schema = "public") {
   const { rows } = await client.query(
     `select p.oid::regprocedure::text as sig
        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-      where n.nspname = 'public' and p.proname = $1`,
-    [fn],
+      where n.nspname = $2 and p.proname = $1`,
+    [fn, schema],
   );
   return rows.map((r) => r.sig);
 }
