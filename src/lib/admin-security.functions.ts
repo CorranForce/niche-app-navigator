@@ -74,7 +74,8 @@ export const getGrantCheck = createServerFn({ method: "POST" })
 
 
     for (const fn of SERVICE_ROLE_ONLY_FUNCTIONS) {
-      const sigs = [...new Set(audit.filter((r) => r.fn === fn).map((r) => r.signature))];
+      const qualified = `public.${fn}`;
+      const sigs = [...new Set(audit.filter((r) => r.fn === qualified).map((r) => r.signature))];
       for (const sig of sigs) {
         for (const role of ["anon", "authenticated"]) {
           const executable =
