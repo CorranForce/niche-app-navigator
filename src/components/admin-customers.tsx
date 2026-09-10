@@ -86,6 +86,7 @@ export function AdminCustomersSection({
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
   const [openUser, setOpenUser] = useState<string | null>(null);
+  const [paidOnly, setPaidOnly] = useState(false);
   const search = useServerFn(searchBillingUsers);
 
   const { data, isLoading, error } = useQuery({
@@ -94,15 +95,19 @@ export function AdminCustomersSection({
     retry: false,
   });
 
+  const rows = (data ?? []).filter((u) => (paidOnly ? u.hasAccess : true));
+  const paidCount = (data ?? []).filter((u) => u.hasAccess).length;
+
   return (
     <section id="customers" className="mt-10 scroll-mt-24">
       <h2 className="text-lg font-semibold tracking-tight">Customer billing</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Search a customer to see their plan, subscription status, renewal date and invoices.
+        Every signed-in account with its plan, payment customer ID, access status and invoices.
+        {data?.length ? ` ${paidCount} of ${data.length} shown are paying.` : ""}
       </p>
 
       <form
-        className="mt-6 flex gap-2"
+        className="mt-6 flex flex-wrap items-center gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           setQuery(input);
@@ -117,7 +122,15 @@ export function AdminCustomersSection({
         <Button type="submit">
           <Search className="h-4 w-4" /> Search
         </Button>
+        <Button
+          type="button"
+          variant={paidOnly ? "default" : "outline"}
+          onClick={() => setPaidOnly((v) => !v)}
+        >
+          {paidOnly ? "Showing paying only" : "Show paying only"}
+        </Button>
       </form>
+
 
       {error ? (
         <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
@@ -131,56 +144,73 @@ export function AdminCustomersSection({
           <p className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Loading customers…
           </p>
-        ) : !data?.length ? (
+        ) : !rows.length ? (
           <p className="p-4 text-sm text-muted-foreground">No matching customers.</p>
         ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="label-mono border-b border-border text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-normal">Customer</th>
-                <th className="px-4 py-3 font-normal">Plan</th>
-                <th className="px-4 py-3 font-normal">Status</th>
-                <th className="px-4 py-3 font-normal">Renews</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((u) => (
-                <Fragment key={u.userId}>
-                  <tr className="border-t border-border/60">
-                    <td className="px-4 py-3">
-                      <span className="font-mono text-xs">{u.email ?? u.userId}</span>
-                      <span className="block text-[11px] text-muted-foreground">
-                        joined {fmtDate(u.createdAt)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs">{u.plan}</td>
-                    <td className={`px-4 py-3 font-mono text-xs ${statusTone(u.status)}`}>
-                      {u.status ?? "no subscription"}
-                      {u.cancelAtPeriodEnd ? " (cancels)" : ""}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs">{fmtDate(u.currentPeriodEnd)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setOpenUser(openUser === u.userId ? null : u.userId)}
-                      >
-                        {openUser === u.userId ? "Hide invoices" : "Invoices"}
-                      </Button>
-                    </td>
-                  </tr>
-                  {openUser === u.userId ? (
-                    <tr className="border-t border-border/60 bg-background/40">
-                      <td colSpan={5} className="p-0">
-                        <BillingHistory userId={u.userId} />
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[820px] text-left text-sm">
+              <thead className="label-mono border-b border-border text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3 font-normal">Customer</th>
+                  <th className="px-4 py-3 font-normal">Plan</th>
+                  <th className="px-4 py-3 font-normal">Access</th>
+                  <th className="px-4 py-3 font-normal">Status</th>
+                  <th className="px-4 py-3 font-normal">Payment customer ID</th>
+                  <th className="px-4 py-3 font-normal">Renews</th>
+                  <th className="px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((u) => (
+                  <Fragment key={u.userId}>
+                    <tr className="border-t border-border/60">
+                      <td className="px-4 py-3">
+                        <span className="font-mono text-xs">{u.email ?? u.userId}</span>
+                        <span className="block text-[11px] text-muted-foreground">
+                          joined {fmtDate(u.createdAt)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">{u.plan}</td>
+                      <td className="px-4 py-3 font-mono text-xs">
+                        <span className={u.hasAccess ? "text-primary" : "text-muted-foreground"}>
+                          {u.hasAccess ? "granted" : "no access"}
+                        </span>
+                      </td>
+                      <td className={`px-4 py-3 font-mono text-xs ${statusTone(u.status)}`}>
+                        {u.status ?? "no subscription"}
+                        {u.cancelAtPeriodEnd ? " (cancels)" : ""}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-[11px]">
+                        {u.paddleCustomerId ?? "—"}
+                        {u.paddleSubscriptionId ? (
+                          <span className="block text-muted-foreground">
+                            {u.paddleSubscriptionId}
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">{fmtDate(u.currentPeriodEnd)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setOpenUser(openUser === u.userId ? null : u.userId)}
+                        >
+                          {openUser === u.userId ? "Hide invoices" : "Invoices"}
+                        </Button>
                       </td>
                     </tr>
-                  ) : null}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
+                    {openUser === u.userId ? (
+                      <tr className="border-t border-border/60 bg-background/40">
+                        <td colSpan={7} className="p-0">
+                          <BillingHistory userId={u.userId} />
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </Card>
     </section>

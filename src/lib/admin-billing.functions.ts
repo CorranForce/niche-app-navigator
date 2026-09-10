@@ -13,6 +13,9 @@ export type AdminUserRow = {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   environment: string | null;
+  paddleCustomerId: string | null;
+  paddleSubscriptionId: string | null;
+  hasAccess: boolean;
 };
 
 export type AdminInvoiceRow = {
@@ -66,7 +69,7 @@ export const searchBillingUsers = createServerFn({ method: "POST" })
     const { data: subs } = await supabaseAdmin
       .from("subscriptions")
       .select(
-        "user_id, product_id, price_id, status, current_period_end, cancel_at_period_end, environment, created_at",
+        "user_id, product_id, price_id, status, current_period_end, cancel_at_period_end, environment, created_at, paddle_customer_id, paddle_subscription_id",
       )
       .in(
         "user_id",
@@ -95,6 +98,9 @@ export const searchBillingUsers = createServerFn({ method: "POST" })
         currentPeriodEnd: sub?.current_period_end ?? null,
         cancelAtPeriodEnd: Boolean(sub?.cancel_at_period_end),
         environment: sub?.environment ?? null,
+        paddleCustomerId: (sub?.paddle_customer_id as string | null) ?? null,
+        paddleSubscriptionId: (sub?.paddle_subscription_id as string | null) ?? null,
+        hasAccess: plan !== "none",
       };
     });
   });

@@ -299,7 +299,7 @@ function OwnerDashboardPage() {
                     <a href="#billing-anomalies">Billing anomalies</a>
                   </Button>
                   <Button asChild size="sm" variant="outline">
-                    <a href="#customers">Customers</a>
+                    <Link to="/admin/customers">Customers</Link>
                   </Button>
                   <Button asChild size="sm" variant="outline">
                     <a href="#oauth-health">OAuth health</a>
