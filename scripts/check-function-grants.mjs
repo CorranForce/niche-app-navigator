@@ -9,11 +9,12 @@
 import pg from "pg";
 
 const REQUIRED = [
-  { fn: "has_role", roles: ["authenticated", "service_role"] },
-  { fn: "is_team_member", roles: ["authenticated", "service_role"] },
-  { fn: "is_team_owner", roles: ["authenticated", "service_role"] },
+  { fn: "has_role", schema: "private", roles: ["authenticated", "service_role"] },
+  { fn: "is_team_member", schema: "private", roles: ["authenticated", "service_role"] },
+  { fn: "is_team_owner", schema: "private", roles: ["authenticated", "service_role"] },
 ];
 
+// public-schema functions that must stay non-executable by anon/authenticated
 const SERVICE_ROLE_ONLY = [
   "effective_subscription_for",
   "has_active_subscription",
@@ -21,6 +22,10 @@ const SERVICE_ROLE_ONLY = [
   "admin_mcp_clients",
   "admin_mcp_consents",
   "admin_mcp_authorization_stats",
+  "function_grant_audit",
+  "has_role",
+  "is_team_member",
+  "is_team_owner",
 ];
 
 const url = process.env.SUPABASE_DB_URL;
@@ -37,12 +42,12 @@ function record(ok, name, detail) {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name} — ${detail}`);
 }
 
-async function signatures(fn) {
+async function signatures(fn, schema = "public") {
   const { rows } = await client.query(
     `select p.oid::regprocedure::text as sig
        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-      where n.nspname = 'public' and p.proname = $1`,
-    [fn],
+      where n.nspname = $2 and p.proname = $1`,
+    [fn, schema],
   );
   return rows.map((r) => r.sig);
 }
@@ -58,10 +63,10 @@ async function canExecute(role, sig) {
 try {
   await client.connect();
 
-  for (const { fn, roles } of REQUIRED) {
-    const sigs = await signatures(fn);
+  for (const { fn, schema, roles } of REQUIRED) {
+    const sigs = await signatures(fn, schema);
     if (sigs.length === 0) {
-      record(false, `public.${fn}`, "function is missing");
+      record(false, `${schema}.${fn}`, "function is missing");
       continue;
     }
     for (const sig of sigs) {
