@@ -13,6 +13,9 @@ export type AdminUserRow = {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   environment: string | null;
+  paddleCustomerId: string | null;
+  paddleSubscriptionId: string | null;
+  hasAccess: boolean;
 };
 
 export type AdminInvoiceRow = {
