@@ -86,6 +86,7 @@ export function AdminCustomersSection({
   const [input, setInput] = useState("");
   const [query, setQuery] = useState("");
   const [openUser, setOpenUser] = useState<string | null>(null);
+  const [paidOnly, setPaidOnly] = useState(false);
   const search = useServerFn(searchBillingUsers);
 
   const { data, isLoading, error } = useQuery({
@@ -94,15 +95,19 @@ export function AdminCustomersSection({
     retry: false,
   });
 
+  const rows = (data ?? []).filter((u) => (paidOnly ? u.hasAccess : true));
+  const paidCount = (data ?? []).filter((u) => u.hasAccess).length;
+
   return (
     <section id="customers" className="mt-10 scroll-mt-24">
       <h2 className="text-lg font-semibold tracking-tight">Customer billing</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Search a customer to see their plan, subscription status, renewal date and invoices.
+        Every signed-in account with its plan, payment customer ID, access status and invoices.
+        {data?.length ? ` ${paidCount} of ${data.length} shown are paying.` : ""}
       </p>
 
       <form
-        className="mt-6 flex gap-2"
+        className="mt-6 flex flex-wrap items-center gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           setQuery(input);
@@ -117,7 +122,15 @@ export function AdminCustomersSection({
         <Button type="submit">
           <Search className="h-4 w-4" /> Search
         </Button>
+        <Button
+          type="button"
+          variant={paidOnly ? "default" : "outline"}
+          onClick={() => setPaidOnly((v) => !v)}
+        >
+          {paidOnly ? "Showing paying only" : "Show paying only"}
+        </Button>
       </form>
+
 
       {error ? (
         <Card className="mt-6 flex items-center gap-2 border-destructive/40 bg-destructive/10 p-4 text-sm">
