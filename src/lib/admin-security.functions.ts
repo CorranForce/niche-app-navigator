@@ -31,7 +31,10 @@ export const getGrantCheck = createServerFn({ method: "POST" })
     if (roleError) throw new Error("Could not verify access.");
     if (!isAdmin) throw new Error("Admins only.");
 
-    const functions = [...RLS_FUNCTION_GRANTS.map((e) => e.fn), ...SERVICE_ROLE_ONLY_FUNCTIONS];
+    const functions = [
+      ...RLS_FUNCTION_GRANTS.map((e) => `${e.schema}.${e.fn}`),
+      ...SERVICE_ROLE_ONLY_FUNCTIONS.map((fn) => `public.${fn}`),
+    ];
     const { data, error } = await supabaseAdmin.rpc(
       "function_grant_audit" as never,
       { _functions: functions, _roles: ["anon", "authenticated", "service_role"] } as never,
@@ -42,10 +45,11 @@ export const getGrantCheck = createServerFn({ method: "POST" })
     const rows: GrantCheckRow[] = [];
 
     for (const entry of RLS_FUNCTION_GRANTS) {
-      const sigs = [...new Set(audit.filter((r) => r.fn === entry.fn).map((r) => r.signature))];
+      const qualified = `${entry.schema}.${entry.fn}`;
+      const sigs = [...new Set(audit.filter((r) => r.fn === qualified).map((r) => r.signature))];
       if (sigs.length === 0) {
         rows.push({
-          name: `public.${entry.fn}`,
+          name: qualified,
           detail: "function is missing",
           ok: false,
           kind: "required",
@@ -67,6 +71,7 @@ export const getGrantCheck = createServerFn({ method: "POST" })
         }
       }
     }
+
 
     for (const fn of SERVICE_ROLE_ONLY_FUNCTIONS) {
       const sigs = [...new Set(audit.filter((r) => r.fn === fn).map((r) => r.signature))];
