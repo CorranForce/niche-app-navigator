@@ -9,6 +9,9 @@
  */
 export type GrantContractEntry = {
   fn: string;
+  /** Schema the policy helper lives in. Helpers live in `private` so they are
+   * not reachable as RPCs through the exposed API schema. */
+  schema: string;
   roles: string[];
   usedBy: string[];
 };
@@ -16,27 +19,30 @@ export type GrantContractEntry = {
 export const RLS_FUNCTION_GRANTS: GrantContractEntry[] = [
   {
     fn: "has_role",
+    schema: "private",
     roles: ["authenticated", "service_role"],
     usedBy: [
       "auth_events: Admins read auth events",
       "system_events: Admins read system events",
       "webhook_replays: Admins read replays",
-      "subscriptions: Admins read all subscriptions",
     ],
   },
   {
     fn: "is_team_member",
+    schema: "private",
     roles: ["authenticated", "service_role"],
     usedBy: ["reports: team read", "team_members: members read roster", "teams: members read team"],
   },
   {
     fn: "is_team_owner",
+    schema: "private",
     roles: ["authenticated", "service_role"],
     usedBy: ["team_members: owners manage roster", "teams: owners update team"],
   },
 ];
 
-/** Functions that must NOT be executable by anon/authenticated (service-role only). */
+/** Functions in the exposed `public` schema that must NOT be executable by
+ * anon/authenticated (service-role only). */
 export const SERVICE_ROLE_ONLY_FUNCTIONS = [
   "effective_subscription_for",
   "has_active_subscription",
@@ -44,4 +50,10 @@ export const SERVICE_ROLE_ONLY_FUNCTIONS = [
   "admin_mcp_clients",
   "admin_mcp_consents",
   "admin_mcp_authorization_stats",
+  "function_grant_audit",
+  // public copies kept only for service-role RPC calls from server functions
+  "has_role",
+  "is_team_member",
+  "is_team_owner",
 ];
+
