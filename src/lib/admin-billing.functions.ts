@@ -69,7 +69,7 @@ export const searchBillingUsers = createServerFn({ method: "POST" })
     const { data: subs } = await supabaseAdmin
       .from("subscriptions")
       .select(
-        "user_id, product_id, price_id, status, current_period_end, cancel_at_period_end, environment, created_at",
+        "user_id, product_id, price_id, status, current_period_end, cancel_at_period_end, environment, created_at, paddle_customer_id, paddle_subscription_id",
       )
       .in(
         "user_id",
