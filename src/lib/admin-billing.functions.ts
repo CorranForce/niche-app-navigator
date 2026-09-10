@@ -98,6 +98,9 @@ export const searchBillingUsers = createServerFn({ method: "POST" })
         currentPeriodEnd: sub?.current_period_end ?? null,
         cancelAtPeriodEnd: Boolean(sub?.cancel_at_period_end),
         environment: sub?.environment ?? null,
+        paddleCustomerId: (sub?.paddle_customer_id as string | null) ?? null,
+        paddleSubscriptionId: (sub?.paddle_subscription_id as string | null) ?? null,
+        hasAccess: plan !== "none",
       };
     });
   });
