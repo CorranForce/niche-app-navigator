@@ -9,11 +9,12 @@
 import pg from "pg";
 
 const REQUIRED = [
-  { fn: "has_role", roles: ["authenticated", "service_role"] },
-  { fn: "is_team_member", roles: ["authenticated", "service_role"] },
-  { fn: "is_team_owner", roles: ["authenticated", "service_role"] },
+  { fn: "has_role", schema: "private", roles: ["authenticated", "service_role"] },
+  { fn: "is_team_member", schema: "private", roles: ["authenticated", "service_role"] },
+  { fn: "is_team_owner", schema: "private", roles: ["authenticated", "service_role"] },
 ];
 
+// public-schema functions that must stay non-executable by anon/authenticated
 const SERVICE_ROLE_ONLY = [
   "effective_subscription_for",
   "has_active_subscription",
@@ -21,6 +22,10 @@ const SERVICE_ROLE_ONLY = [
   "admin_mcp_clients",
   "admin_mcp_consents",
   "admin_mcp_authorization_stats",
+  "function_grant_audit",
+  "has_role",
+  "is_team_member",
+  "is_team_owner",
 ];
 
 const url = process.env.SUPABASE_DB_URL;
