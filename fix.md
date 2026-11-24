@@ -9,7 +9,7 @@ Critical
   - .env is tracked and contains live-looking Supabase project id, URL, and publishable key values (types only, values not repeated here).
   - .env.development and .env.production each contain VITE_PAYMENTS_CLIENT_TOKEN.
   - .gitignore does not list those env files, so new secrets will keep being committed.
-  - Fix: ignore .env and every .env variant except .env.example. Remove the three env files from git. Rotate the Supabase publishable key and the payments client tokens, and review the Supabase project as public. Then purge the files from git history (git filter-repo or BFG) because the repo is public.
+  - Fix: ignore .env and every .env variant except .env.example. Remove the three env files from git in a new commit. Rotate the Supabase publishable key and the payments client tokens, and review the Supabase project as public. Leave published history unchanged.
 
 - TanStack Start reflected XSS and other npm audit findings
   - File: package-lock.json (for example @tanstack/react-start 1.168.38 and @tanstack/start-server-core 1.169.21)
